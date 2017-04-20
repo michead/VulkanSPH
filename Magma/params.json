@@ -1,0 +1,9 @@
+{
+  "particleCount":  10000,
+  "adhesion": 0.01,
+  "buoyancy": 1,
+  "cohesion": 0.01,
+  "radius": 0.005,
+  "viscosity": 0,
+  "vorticityConfinement": 40
+}
