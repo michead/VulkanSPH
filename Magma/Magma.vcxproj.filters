@@ -33,6 +33,12 @@
     <ClCompile Include="sph.cpp">
       <Filter>Source Files\sph</Filter>
     </ClCompile>
+    <ClCompile Include="vk_context.cpp">
+      <Filter>Source Files\vk</Filter>
+    </ClCompile>
+    <ClCompile Include="vk_log.cpp">
+      <Filter>Source Files\vk</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="sph.h">
@@ -43,6 +49,12 @@
     </ClInclude>
     <ClInclude Include="magma.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="vk_log.h">
+      <Filter>Header Files\vk</Filter>
+    </ClInclude>
+    <ClInclude Include="vk_context.h">
+      <Filter>Header Files\vk</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

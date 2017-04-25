@@ -85,8 +85,8 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Third-Party\Include;$(FLEX_PATH)\include;$(SolutionDir)ext\glm;$(SolutionDir)ext\json</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;MAGMA_ROOT_DIR="$(ProjectDir)";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Third-Party\Include;$(FLEX_PATH)\include;$(SolutionDir)ext\glm;$(SolutionDir)ext\json;$(SolutionDir)ext\spdlog;$(SolutionDir)ext</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -158,10 +158,14 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="sph.cpp" />
+    <ClCompile Include="vk_context.cpp" />
+    <ClCompile Include="vk_log.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="magma.h" />
     <ClInclude Include="sph.h" />
+    <ClInclude Include="vk_context.h" />
+    <ClInclude Include="vk_log.h" />
     <ClInclude Include="vk_wrap.h" />
   </ItemGroup>
   <ItemGroup>

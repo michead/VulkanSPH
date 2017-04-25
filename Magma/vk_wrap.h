@@ -4,9 +4,45 @@
 #include <iostream>
 #include <vector>
 #include "magma.h"
+#include "vk_log.h"
+
+#define VK_VER_MAJOR(X)   ((((uint32_t)(X)) >> 22) & 0x3FF)
+#define VK_VER_MINOR(X)   ((((uint32_t)(X)) >> 12) & 0x3FF)
+#define VK_VER_PATCH(X)   (((uint32_t) (X))        & 0xFFF)
+#define VK_CHECK(result)  {if (result != VK_SUCCESS) return result;}
 
 namespace VkWrap {
+  inline std::vector<const char*> getAvailableWSIExtensions()
+  {
+    std::vector<const char*> extensions;
+    extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
+
+#if defined(VK_USE_PLATFORM_ANDROID_KHR)
+    extensions.push_back(VK_KHR_ANDROID_SURFACE_EXTENSION_NAME);
+#endif
+#if defined(VK_USE_PLATFORM_MIR_KHR)
+    extensions.push_back(VK_KHR_MIR_SURFACE_EXTENSION_NAME);
+#endif
+#if defined(VK_USE_PLATFORM_WAYLAND_KHR)
+    extensions.push_back(VK_KHR_WAYLAND_SURFACE_EXTENSION_NAME);
+#endif
+#if defined(VK_USE_PLATFORM_WIN32_KHR)
+    extensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
+#endif
+#if defined(VK_USE_PLATFORM_XLIB_KHR)
+    extensions.push_back(VK_KHR_XLIB_SURFACE_EXTENSION_NAME);
+#endif
+
+    return extensions;
+  }
   inline VkResult createInstance(VkInstance& instance) {
+    // Use validation layers if this is a debug build, and use WSI extensions regardless
+    std::vector<const char*> extensions = getAvailableWSIExtensions();
+    std::vector<const char*> layers;
+#if defined(_DEBUG)
+    layers.push_back("VK_LAYER_LUNARG_standard_validation");
+#endif
+
     VkApplicationInfo appInfo = {};
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
     appInfo.pNext = nullptr;
@@ -19,10 +55,10 @@ namespace VkWrap {
     instanceInfo.pNext = nullptr;
     instanceInfo.flags = 0;
     instanceInfo.pApplicationInfo = &appInfo;
-    instanceInfo.enabledExtensionCount = 0;
-    instanceInfo.ppEnabledExtensionNames = nullptr;
-    instanceInfo.enabledLayerCount = 0;
-    instanceInfo.ppEnabledLayerNames = nullptr;
+    instanceInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
+    instanceInfo.ppEnabledExtensionNames = extensions.data();
+    instanceInfo.enabledLayerCount = static_cast<uint32_t>(layers.size());
+    instanceInfo.ppEnabledLayerNames = layers.data();
     
     return vkCreateInstance(&instanceInfo, nullptr, &instance);
   }
@@ -51,7 +87,7 @@ namespace VkWrap {
     getQueueFamilyProperties(physicalDevice, queueFamilyPropsVec);
     int32_t queueFamilyIndex = getQueueFamilyIndex(queueFamilyPropsVec, VK_QUEUE_GRAPHICS_BIT);
     if (queueFamilyIndex < 0) {
-      std::cout << "No suitable device for performing graphics operations has been found." << std::endl;
+      logger->error("No suitable device for performing graphics operations has been found.");
       return (VkResult)-1;
     }
     
@@ -75,5 +111,15 @@ namespace VkWrap {
     deviceCreateInfo.pEnabledFeatures = nullptr;
 
     return vkCreateDevice(physicalDevice, &deviceCreateInfo, nullptr, &device);
+  }
+  inline void printPhysicalDevice(const VkPhysicalDevice& physicalDevice) {
+    VkPhysicalDeviceProperties physicalDeviceProperties;
+    vkGetPhysicalDeviceProperties(physicalDevice, &physicalDeviceProperties);
+    logger->info("Driver version {0}", physicalDeviceProperties.driverVersion);
+    logger->info("Device name {0}", physicalDeviceProperties.deviceName);
+    logger->info("Device type {0}", physicalDeviceProperties.deviceType);
+    logger->info("API version {0:d}{0:d}{0:d}", VK_VER_MAJOR(physicalDeviceProperties.apiVersion),
+                                                VK_VER_MINOR(physicalDeviceProperties.apiVersion),
+                                                VK_VER_PATCH(physicalDeviceProperties.apiVersion));
   }
 }
