@@ -6,6 +6,9 @@
 // Magma version number
 #define MAGMA_VERSION       1
 
+// Success code
+#define MAGMA_SUCCESS       0
+
 // Fatal error code
 #define MAGMA_FATAL         1
 

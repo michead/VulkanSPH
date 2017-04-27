@@ -12,7 +12,12 @@ public:
   }
 
   // Initialize context
-  VkResult init();
+  VkResult init(HWND windowHandle);
+
+  // Instance is publicly accessible
+  VkInstance instance;
+  // Surface is publicly accessible
+  VkSurfaceKHR surface;
 
 private:
   VkContext() {}
@@ -27,5 +32,4 @@ private:
   // Actors of Vulkan context
   VkPhysicalDevice physicalDevice;
   VkDevice device;
-  VkInstance instance;
 };

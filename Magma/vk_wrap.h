@@ -12,27 +12,12 @@
 #define VK_CHECK(result)  {if (result != VK_SUCCESS) return result;}
 
 namespace VkWrap {
-  inline std::vector<const char*> getAvailableWSIExtensions()
-  {
+  inline std::vector<const char*> getAvailableWSIExtensions() {
     std::vector<const char*> extensions;
     extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
-
-#if defined(VK_USE_PLATFORM_ANDROID_KHR)
-    extensions.push_back(VK_KHR_ANDROID_SURFACE_EXTENSION_NAME);
-#endif
-#if defined(VK_USE_PLATFORM_MIR_KHR)
-    extensions.push_back(VK_KHR_MIR_SURFACE_EXTENSION_NAME);
-#endif
-#if defined(VK_USE_PLATFORM_WAYLAND_KHR)
-    extensions.push_back(VK_KHR_WAYLAND_SURFACE_EXTENSION_NAME);
-#endif
 #if defined(VK_USE_PLATFORM_WIN32_KHR)
     extensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
 #endif
-#if defined(VK_USE_PLATFORM_XLIB_KHR)
-    extensions.push_back(VK_KHR_XLIB_SURFACE_EXTENSION_NAME);
-#endif
-
     return extensions;
   }
   inline VkResult createInstance(VkInstance& instance) {
@@ -121,5 +106,15 @@ namespace VkWrap {
     logger->info("API version {0:d}{0:d}{0:d}", VK_VER_MAJOR(physicalDeviceProperties.apiVersion),
                                                 VK_VER_MINOR(physicalDeviceProperties.apiVersion),
                                                 VK_VER_PATCH(physicalDeviceProperties.apiVersion));
+  }
+  inline VkResult createSurface(VkInstance& instance, HWND hwnd, VkSurfaceKHR& surface) {
+#if defined(SDL_VIDEO_DRIVER_WINDOWS) && defined(VK_USE_PLATFORM_WIN32_KHR)
+    VkWin32SurfaceCreateInfoKHR surfaceInfo = {};
+    surfaceInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
+    surfaceInfo.hinstance = GetModuleHandle(NULL);
+    surfaceInfo.hwnd = hwnd;
+    return vkCreateWin32SurfaceKHR(instance, &surfaceInfo, NULL, &surface);
+#endif
+    return VK_SUCCESS;
   }
 }
