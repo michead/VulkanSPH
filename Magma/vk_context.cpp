@@ -1,4 +1,5 @@
 #include "vk_context.h"
+#include "vk_wrap.h"
 
 VkResult VkContext::init(HWND windowHandle) {
   // Create instance

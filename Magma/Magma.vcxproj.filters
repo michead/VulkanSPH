@@ -36,8 +36,11 @@
     <ClCompile Include="vk_context.cpp">
       <Filter>Source Files\vk</Filter>
     </ClCompile>
-    <ClCompile Include="vk_log.cpp">
-      <Filter>Source Files\vk</Filter>
+    <ClCompile Include="logger.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="magma.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -50,11 +53,14 @@
     <ClInclude Include="magma.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="vk_log.h">
-      <Filter>Header Files\vk</Filter>
-    </ClInclude>
     <ClInclude Include="vk_context.h">
       <Filter>Header Files\vk</Filter>
+    </ClInclude>
+    <ClInclude Include="logger.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="config.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

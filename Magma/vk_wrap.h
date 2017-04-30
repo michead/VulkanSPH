@@ -4,12 +4,12 @@
 #include <iostream>
 #include <vector>
 #include "magma.h"
-#include "vk_log.h"
+#include "logger.h"
 
 #define VK_VER_MAJOR(X)   ((((uint32_t)(X)) >> 22) & 0x3FF)
 #define VK_VER_MINOR(X)   ((((uint32_t)(X)) >> 12) & 0x3FF)
 #define VK_VER_PATCH(X)   (((uint32_t) (X))        & 0xFFF)
-#define VK_CHECK(result)  {if (result != VK_SUCCESS) return result;}
+#define VK_CHECK(result)  ; // nop
 
 namespace VkWrap {
   inline std::vector<const char*> getAvailableWSIExtensions() {
@@ -107,7 +107,24 @@ namespace VkWrap {
                                                 VK_VER_MINOR(physicalDeviceProperties.apiVersion),
                                                 VK_VER_PATCH(physicalDeviceProperties.apiVersion));
   }
-  inline VkResult createSurface(VkInstance& instance, HWND hwnd, VkSurfaceKHR& surface) {
+  inline VkResult createCommandPool(const VkDevice& device, int32_t queueFamilyIndex, VkCommandPool& commandPool) {
+    VkCommandPoolCreateInfo info = {};
+    info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+    info.pNext = nullptr;
+    info.queueFamilyIndex = queueFamilyIndex;
+    info.flags = 0;
+    return vkCreateCommandPool(device, &info, nullptr, &commandPool);
+  }
+  inline VkResult createCommandBuffer(const VkDevice& device, const VkCommandPool& commandPool, VkCommandBuffer& commandBuffer) {
+    VkCommandBufferAllocateInfo info = {};
+    info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    info.pNext = nullptr;
+    info.commandPool = commandPool;
+    info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    info.commandBufferCount = 1;
+    return vkAllocateCommandBuffers(device, &info, &commandBuffer);
+  }
+  inline VkResult createSurface(const VkInstance& instance, HWND hwnd, VkSurfaceKHR& surface) {
 #if defined(SDL_VIDEO_DRIVER_WINDOWS) && defined(VK_USE_PLATFORM_WIN32_KHR)
     VkWin32SurfaceCreateInfoKHR surfaceInfo = {};
     surfaceInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
@@ -116,5 +133,19 @@ namespace VkWrap {
     return vkCreateWin32SurfaceKHR(instance, &surfaceInfo, NULL, &surface);
 #endif
     return VK_SUCCESS;
+  }
+  inline VkResult createSwapchain(const VkPhysicalDevice& physicalDevice, const VkDevice& device, const VkSurfaceKHR& surface, VkFormat format, VkSwapchainKHR& swapchain) {
+    VkSwapchainCreateInfoKHR info = {};
+    info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+    info.pNext = nullptr;
+    info.surface = surface;
+    info.imageFormat = format;
+    VkSurfaceCapabilitiesKHR surfaceCapabilities;
+    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface, &surfaceCapabilities);
+    info.minImageCount = surfaceCapabilities.minImageCount;
+    info.imageExtent = surfaceCapabilities.currentExtent;
+    info.preTransform = surfaceCapabilities.currentTransform;
+    info.presentMode = VK_PRESENT_MODE_FIFO_KHR;
+    return vkCreateSwapchainKHR(device, &info, nullptr, &swapchain);
   }
 }

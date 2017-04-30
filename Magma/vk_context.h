@@ -1,14 +1,14 @@
 #pragma once
 
-#include "vk_wrap.h"
-
+#include <vulkan\vulkan.hpp>
+#include <Windows.h>
 
 class VkContext {
 public:
   // Get singleton instance of Vulkan context
-  static VkContext& getContext() {
+  static VkContext* getContext() {
     static VkContext context;
-    return context;
+    return &context;
   }
 
   // Initialize context
@@ -21,10 +21,6 @@ public:
 
 private:
   VkContext() {}
-
-  // Make sure not to have copies of the singleton instance
-  VkContext     (VkContext const&) = delete;
-  void operator=(VkContext const&) = delete;
 
   // Has context been initialized?
   bool bInit;
