@@ -55,7 +55,7 @@ void SPH::loadParamsFromJson() {
   velocities.resize(particleCount);
 }
 
-void SPH::render() {
+void SPH::draw() {
 
 }
 

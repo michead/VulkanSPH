@@ -2,6 +2,7 @@
 
 #include <SDL2\SDL_syswm.h>
 #include "config.h"
+#include "scene.h"
 #include "vk_context.h"
 
 // Magma display name
@@ -39,7 +40,15 @@ public:
   // SDL window handle
   SDL_Window* window;
 
+  // Frame delta time
+  double deltaTime;
+
+  // Scene graph and camera
+  Scene scene;
+
 private:
   void init();
+  void update(double deltaTime);
+  void render(double deltaTime);
   void cleanup();
 };

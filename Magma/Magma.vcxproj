@@ -86,7 +86,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;MAGMA_ROOT_DIR="$(ProjectDir)";%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Third-Party\Include;$(FLEX_PATH)\include;$(SolutionDir)ext\glm;$(SolutionDir)ext\json;$(SolutionDir)ext\spdlog;$(SolutionDir)ext</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Third-Party\Include;$(FLEX_PATH)\include;$(SolutionDir)ext\glm;$(SolutionDir)ext\json;$(SolutionDir)ext\spdlog;$(SolutionDir)ext;$(BOOST_PATH)\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -166,8 +166,12 @@
     <ClCompile Include="logger.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="camera.h" />
     <ClInclude Include="config.h" />
     <ClInclude Include="magma.h" />
+    <ClInclude Include="scene.h" />
+    <ClInclude Include="scene_element.h" />
+    <ClInclude Include="scene_graph.h" />
     <ClInclude Include="sph.h" />
     <ClInclude Include="vk_context.h" />
     <ClInclude Include="logger.h" />

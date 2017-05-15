@@ -2,13 +2,14 @@
 #include <flex.h>
 #include <glm\glm.hpp>
 #include <vector>
+#include "scene_element.h"
 
-class SPH {
+class SPH : public SceneElement {
 public:
   SPH(const char* paramsFilename);
   ~SPH();
 
-  void render();
+  virtual void draw();
   void update(float dt);
 
 private:

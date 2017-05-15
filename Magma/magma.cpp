@@ -26,15 +26,13 @@ void Magma::init() {
 
   SDL_SysWMinfo windowInfo;
   SDL_VERSION(&windowInfo.version);
-  SDL_CHECK_NOT_NULL(SDL_GetWindowWMInfo(window, &windowInfo));
+  SDL_GetWindowWMInfo(window, &windowInfo);
 
   // Initialize graphics context
-  vkContext = VkContext::getContext();
-  VK_CHECK(vkContext->init(windowInfo.info.win.window));
+  vkContext = VkContext::getContext(windowInfo.info.win.window);
 
   // Create an SDL window that supports Vulkan and OpenGL rendering.
-  SDL_CHECK(SDL_Init(SDL_INIT_VIDEO));
-  SDL_CHECK_NOT_NULL(window);
+  SDL_Init(SDL_INIT_VIDEO);
 }
 
 void Magma::cleanup() {
@@ -45,11 +43,25 @@ void Magma::cleanup() {
   vkDestroyInstance(vkContext->instance, NULL);
 }
 
+void Magma::update(double deltaTime) {
+
+}
+
+void Magma::render(double deltaTime) {
+
+}
+
 void Magma::mainLoop() {
   bool stillRunning = true;
+  uint64_t timeNow = SDL_GetPerformanceCounter();
+  uint64_t timeOld = 0;
+  
   while (stillRunning) {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
+      timeOld = timeNow;
+      timeNow = SDL_GetPerformanceCounter();
+      deltaTime = (double)((timeNow - timeOld) * 1000 / SDL_GetPerformanceFrequency());
       switch (event.type) {
       case SDL_QUIT:
         stillRunning = false;
@@ -58,6 +70,12 @@ void Magma::mainLoop() {
         break;
       }
     }
+    
+    // Update simulation
+    update(deltaTime);
+    // Render scene
+    render(deltaTime);
+
     SDL_Delay(10);
   }
 }

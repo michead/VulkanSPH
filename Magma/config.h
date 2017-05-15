@@ -17,8 +17,8 @@ struct Config{
     CSimpleIniA ini(true, false, false);
     ini.LoadFile(iniConfig);
 
-    std::stringstream sx(ini.GetValue("resolution", "x", "1920"));
-    std::stringstream sy(ini.GetValue("resolution", "y", "1080"));
+    std::stringstream sx(ini.GetValue("resolution", "x", "1280"));
+    std::stringstream sy(ini.GetValue("resolution", "y", "720"));
     sx >> config.resolution.x;
     sy >> config.resolution.y;
 

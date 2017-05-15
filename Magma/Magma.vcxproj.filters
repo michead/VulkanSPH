@@ -5,25 +5,20 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
-    </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
     <Filter Include="Source Files\sph">
       <UniqueIdentifier>{018a84e6-b2ae-433c-bc64-8d7b92ead28b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\sph">
-      <UniqueIdentifier>{257d23df-6a6f-47c8-8a22-062d50c5d2e3}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\vk">
       <UniqueIdentifier>{4878bd2a-38e7-4812-a1ba-28e56a0395a4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\vk">
-      <UniqueIdentifier>{a2a2372f-16e0-4eeb-87ad-18a146944ea4}</UniqueIdentifier>
+    <Filter Include="Source Files\logger">
+      <UniqueIdentifier>{2fb08f88-4049-43aa-8be2-42aa741ea0d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\config">
+      <UniqueIdentifier>{aea1e630-e934-479f-9c23-682c19b11d73}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\scene">
+      <UniqueIdentifier>{218af58d-be82-427d-b873-779632a69873}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -36,31 +31,43 @@
     <ClCompile Include="vk_context.cpp">
       <Filter>Source Files\vk</Filter>
     </ClCompile>
-    <ClCompile Include="logger.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="magma.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="logger.cpp">
+      <Filter>Source Files\logger</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="sph.h">
-      <Filter>Header Files\sph</Filter>
+    <ClInclude Include="scene_graph.h">
+      <Filter>Source Files\scene</Filter>
     </ClInclude>
-    <ClInclude Include="vk_wrap.h">
-      <Filter>Header Files\vk</Filter>
+    <ClInclude Include="scene_element.h">
+      <Filter>Source Files\scene</Filter>
     </ClInclude>
-    <ClInclude Include="magma.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="scene.h">
+      <Filter>Source Files\scene</Filter>
     </ClInclude>
-    <ClInclude Include="vk_context.h">
-      <Filter>Header Files\vk</Filter>
+    <ClInclude Include="camera.h">
+      <Filter>Source Files\scene</Filter>
     </ClInclude>
     <ClInclude Include="logger.h">
-      <Filter>Header Files</Filter>
+      <Filter>Source Files\logger</Filter>
     </ClInclude>
     <ClInclude Include="config.h">
-      <Filter>Header Files</Filter>
+      <Filter>Source Files\config</Filter>
+    </ClInclude>
+    <ClInclude Include="magma.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sph.h">
+      <Filter>Source Files\sph</Filter>
+    </ClInclude>
+    <ClInclude Include="vk_context.h">
+      <Filter>Source Files\vk</Filter>
+    </ClInclude>
+    <ClInclude Include="vk_wrap.h">
+      <Filter>Source Files\vk</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -6,13 +6,14 @@
 class VkContext {
 public:
   // Get singleton instance of Vulkan context
-  static VkContext* getContext() {
+  static VkContext* getContext(HWND windowHandle) {
     static VkContext context;
+    if (!bInit) {
+      context.init(windowHandle);
+      bInit = true;
+    }
     return &context;
   }
-
-  // Initialize context
-  VkResult init(HWND windowHandle);
 
   // Instance is publicly accessible
   VkInstance instance;
@@ -22,8 +23,11 @@ public:
 private:
   VkContext() {}
 
+  // Initialize context
+  VkResult init(HWND windowHandle);
+
   // Has context been initialized?
-  bool bInit;
+  static bool bInit;
 
   // Actors of Vulkan context
   VkPhysicalDevice physicalDevice;
