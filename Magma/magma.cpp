@@ -33,6 +33,11 @@ void Magma::init() {
 
   // Create an SDL window that supports Vulkan and OpenGL rendering.
   SDL_Init(SDL_INIT_VIDEO);
+
+  // Initialize solver and emitter
+  sph = new SPH("params.json");
+  emitter = new Emitter();
+  emitter->setSolver(sph);
 }
 
 void Magma::cleanup() {
@@ -41,6 +46,8 @@ void Magma::cleanup() {
   SDL_DestroyWindow(window);
   SDL_Quit();
   vkDestroyInstance(vkContext->instance, NULL);
+  delete sph;
+  delete emitter;
 }
 
 void Magma::update(double deltaTime) {

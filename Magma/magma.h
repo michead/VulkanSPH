@@ -4,6 +4,8 @@
 #include "config.h"
 #include "scene.h"
 #include "vk_context.h"
+#include "emitter.h"
+#include "sph.h"
 
 // Magma display name
 #define MAGMA_DISPLAY_NAME "Magma"
@@ -45,6 +47,12 @@ public:
 
   // Scene graph and camera
   Scene scene;
+
+  // Particle emitter
+  Emitter* emitter;
+
+  // SPH solver
+  SPH* sph;
 
 private:
   void init();

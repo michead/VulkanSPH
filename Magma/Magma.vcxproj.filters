@@ -37,6 +37,9 @@
     <ClCompile Include="logger.cpp">
       <Filter>Source Files\logger</Filter>
     </ClCompile>
+    <ClCompile Include="emitter.cpp">
+      <Filter>Source Files\sph</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="scene_graph.h">
@@ -68,6 +71,9 @@
     </ClInclude>
     <ClInclude Include="vk_wrap.h">
       <Filter>Source Files\vk</Filter>
+    </ClInclude>
+    <ClInclude Include="emitter.h">
+      <Filter>Source Files\sph</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

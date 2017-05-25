@@ -39,12 +39,12 @@ void SPH::loadParamsFromJson() {
   i >> j;
 
   params = {};
-  params.mAdhesion              = j["adhesion"];
-  params.mBuoyancy              = j["buoyancy"];
-  params.mCohesion              = j["cohesion"];
-  params.mRadius                = j["radius"];
-  params.mViscosity             = j["viscosity"];
-  params.mVorticityConfinement  = j["vorticityConfinement"];
+  params.mAdhesion              = j["fluidProps"]["adhesion"];
+  params.mBuoyancy              = j["fluidProps"]["buoyancy"];
+  params.mCohesion              = j["fluidProps"]["cohesion"];
+  params.mRadius                = j["fluidProps"]["radius"];
+  params.mViscosity             = j["fluidProps"]["viscosity"];
+  params.mVorticityConfinement  = j["fluidProps"]["vorticityConfinement"];
 
   uint32_t particleCount = j["particleCount"];
 
