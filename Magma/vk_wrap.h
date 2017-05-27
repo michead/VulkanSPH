@@ -148,4 +148,38 @@ namespace VkWrap {
     info.presentMode = VK_PRESENT_MODE_FIFO_KHR;
     return vkCreateSwapchainKHR(device, &info, nullptr, &swapchain);
   }
+  inline VkResult getSwapchainImageViews(VkDevice& device, VkSwapchainKHR& swapchain, VkFormat format, std::vector<VkImageView>& swapchainImageViews) {
+    uint32_t imageCount;
+    std::vector<VkImage> images;
+    std::vector<VkImageView> imageViews;
+    vkGetSwapchainImagesKHR(device, swapchain, &imageCount, nullptr);
+    images.resize(imageCount);
+    imageViews.resize(imageCount);
+    if (vkGetSwapchainImagesKHR(device, swapchain, &imageCount, images.data()) != VK_SUCCESS) {
+      logger->error("Swapchain images creation failed.");
+      return (VkResult) -1;
+    }
+    for (uint8_t i = 0; i < imageCount; i++) {
+      VkImageViewCreateInfo imageViewInfo = {};
+      imageViewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+      imageViewInfo.pNext = NULL;
+      imageViewInfo.flags = 0;
+      imageViewInfo.image = images[i];
+      imageViewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+      imageViewInfo.format = format;
+      imageViewInfo.components.r = VK_COMPONENT_SWIZZLE_R;
+      imageViewInfo.components.g = VK_COMPONENT_SWIZZLE_G;
+      imageViewInfo.components.b = VK_COMPONENT_SWIZZLE_B;
+      imageViewInfo.components.a = VK_COMPONENT_SWIZZLE_A;
+      imageViewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+      imageViewInfo.subresourceRange.baseMipLevel = 0;
+      imageViewInfo.subresourceRange.levelCount = 1;
+      imageViewInfo.subresourceRange.baseArrayLayer = 0;
+      imageViewInfo.subresourceRange.layerCount = 1;
+      if (vkCreateImageView(device, &imageViewInfo, nullptr, &imageViews[i]) != VK_SUCCESS) {
+        logger->error("Swapchain image view creation failed.");
+      }
+    }
+    return VK_SUCCESS;
+  }
 }
