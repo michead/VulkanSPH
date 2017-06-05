@@ -20,6 +20,12 @@
     <Filter Include="Source Files\scene">
       <UniqueIdentifier>{218af58d-be82-427d-b873-779632a69873}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\shaders">
+      <UniqueIdentifier>{a38a0efc-1c86-44bf-bce4-b22ba850fa58}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ui">
+      <UniqueIdentifier>{f6d1411b-dd90-46c9-aeb9-42dfc2fc86d5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">

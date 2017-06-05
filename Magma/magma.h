@@ -3,7 +3,6 @@
 #include <SDL2\SDL_syswm.h>
 #include "config.h"
 #include "scene.h"
-#include "vk_context.h"
 #include "emitter.h"
 #include "sph.h"
 
@@ -24,6 +23,9 @@
 
 // Error code type
 #define MAGMA_RESULT int32_t
+
+// Forward declarations
+class VkContext;
 
 class Magma {
 public:

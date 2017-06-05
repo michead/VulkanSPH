@@ -10,7 +10,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_syswm.h>
 #include "magma.h"
-#include "vk_wrap.h"
+#include "vk_context.h"
 
 void Magma::init() {
   // Load configs from INI file
@@ -51,11 +51,11 @@ void Magma::cleanup() {
 }
 
 void Magma::update(double deltaTime) {
-
+  sph->update(deltaTime);
 }
 
 void Magma::render(double deltaTime) {
-
+  vkContext->render();
 }
 
 void Magma::mainLoop() {

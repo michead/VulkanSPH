@@ -15,6 +15,9 @@ public:
     return &context;
   }
 
+  // Render scene
+  void render();
+
   // Instance is publicly accessible
   VkInstance instance;
   // Surface is publicly accessible
@@ -32,4 +35,20 @@ private:
   // Actors of Vulkan context
   VkPhysicalDevice physicalDevice;
   VkDevice device;
+  VkSwapchainKHR swapchain;
+  VkSemaphore imageAcquiredSemaphore;
+  VkFence drawFence;
+  uint32_t currentBuffer;
+  uint32_t vertexCount;
+  VkCommandBuffer commandBuffer;
+  VkRenderPass renderPass;
+  VkExtent2D renderArea;
+  VkPipeline pipeline;
+  VkPipelineLayout pipelineLayout;
+  VkQueue graphicsQueue;
+  std::vector<VkDescriptorSet> descriptorSets;
+  std::vector<VkBuffer> vertexBuffers;
+  std::vector<VkFramebuffer> framebuffers;
+  std::vector<VkViewport> viewports;
+  std::vector<VkRect2D> scissors;
 };
