@@ -21,9 +21,9 @@ void SPH::init() {
   flexSetParams(solver, &params);
   
   // Set particles' initial attributes
-  flexSetParticles(solver, &particles[0].x, int(particles.size()), eFlexMemoryHost);
-  flexSetVelocities(solver, &velocities[0].x, int(particles.size()), eFlexMemoryHost);
-  flexSetPhases(solver, phases.data(), int(particles.size()), eFlexMemoryHost);
+  flexSetParticles( solver, (const float*)particles.positions.data(),  int(particles.size()), eFlexMemoryHost);
+  flexSetVelocities(solver, (const float*)particles.velocities.data(), int(particles.size()), eFlexMemoryHost);
+  flexSetPhases(    solver,               particles.phases.data(),     int(particles.size()), eFlexMemoryHost);
 
   // Set all particles as active
   std::vector<int> activeIndices(particles.size());
@@ -46,13 +46,16 @@ void SPH::loadParamsFromJson() {
   params.mViscosity             = j["fluidProps"]["viscosity"];
   params.mVorticityConfinement  = j["fluidProps"]["vorticityConfinement"];
 
-  uint32_t particleCount = j["particleCount"];
-
   particles.clear();
-  particles.resize(particleCount);
 
-  velocities.clear();
-  velocities.resize(particleCount);
+  if (j["fluidProps"]["particles"].is_object()) {
+    nlohmann::json jsonParticles = j["fluidProps"]["particles"];
+    assert(jsonParticles["positions"].size()  ==
+           jsonParticles["velocities"].size() ==
+           jsonParticles["phases"].size());
+    particles.resize(jsonParticles["positions"].size());
+    // TODO: Copy particle attributes
+  }
 }
 
 void SPH::draw() {
