@@ -46,6 +46,9 @@
     <ClCompile Include="emitter.cpp">
       <Filter>Source Files\sph</Filter>
     </ClCompile>
+    <ClCompile Include="vk_path.cpp">
+      <Filter>Source Files\vk</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="scene_graph.h">
@@ -81,10 +84,19 @@
     <ClInclude Include="emitter.h">
       <Filter>Source Files\sph</Filter>
     </ClInclude>
+    <ClInclude Include="vk_path.h">
+      <Filter>Source Files\vk</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="params.json">
       <Filter>Source Files\sph</Filter>
+    </None>
+    <None Include="particle.frag">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="particle.vert">
+      <Filter>Source Files\shaders</Filter>
     </None>
   </ItemGroup>
 </Project>

@@ -11,6 +11,7 @@
 #include <SDL2/SDL_syswm.h>
 #include "magma.h"
 #include "vk_context.h"
+#include "vk_wrap.h"
 
 void Magma::init() {
   // Load configs from INI file
@@ -29,7 +30,7 @@ void Magma::init() {
   SDL_GetWindowWMInfo(window, &windowInfo);
 
   // Initialize graphics context
-  vkContext = VkContext::getContext(windowInfo.info.win.window);
+  vkContext = VkContext::getContext(MAGMA_DISPLAY_NAME, MAGMA_VERSION, windowInfo.info.win.window);
 
   // Create an SDL window that supports Vulkan and OpenGL rendering.
   SDL_Init(SDL_INIT_VIDEO);
@@ -55,7 +56,20 @@ void Magma::update(double deltaTime) {
 }
 
 void Magma::render(double deltaTime) {
-  vkContext->render();
+  uint32_t imageIndex;
+  VkWrap::prepareFrame(*vkContext, vkContext->imageAcquiredSemaphore, &imageIndex);
+  VkWrap::submitCommandBuffer(*vkContext, 
+                               vkContext->commandBuffer,
+                               vkContext->imageAcquiredSemaphore,
+                               VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+                               vkContext->drawFence);
+
+  VkResult res;
+  do {
+    VK_CHECK((res = vkWaitForFences(vkContext->device, 1, &vkContext->drawFence, VK_TRUE, UINT64_MAX)));
+  } while (res == VK_TIMEOUT);
+
+  VkWrap::presentSwapchain(*vkContext, vkContext->currentSwapchainImageIndex);
 }
 
 void Magma::mainLoop() {

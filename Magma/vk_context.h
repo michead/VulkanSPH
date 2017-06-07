@@ -6,49 +6,47 @@
 class VkContext {
 public:
   // Get singleton instance of Vulkan context
-  static VkContext* getContext(HWND windowHandle) {
+  static VkContext* getContext(const char* appName, uint32_t appVersion, HWND windowHandle) {
     static VkContext context;
     if (!bInit) {
-      context.init(windowHandle);
+      context.init(appName, appVersion, windowHandle);
       bInit = true;
     }
     return &context;
   }
 
-  // Render scene
-  void render();
+  // Publicly-accessible members
+  VkInstance       instance;
+  VkSurfaceKHR     surface;
+  VkExtent2D       renderArea;
+  VkPhysicalDevice physicalDevice;
+  VkDevice         device;
+  VkSwapchainKHR   swapchain;
+  VkSemaphore      imageAcquiredSemaphore;
+  VkFence          drawFence;
+  uint32_t         queueFamilyIndex;
+  uint32_t         currentSwapchainImageIndex;
+  VkCommandPool    commandPool;
+  VkCommandBuffer  commandBuffer;
+  VkDescriptorPool descriptorPool;
+  VkRenderPass     renderPass;
+  VkQueue          graphicsQueue;
 
-  // Instance is publicly accessible
-  VkInstance instance;
-  // Surface is publicly accessible
-  VkSurfaceKHR surface;
+  std::vector<const char*>             extensions;
+  std::vector<VkImage>                 swapchainImages;
+  std::vector<VkImageView>             swapchainImageViews;
+  std::vector<VkViewport>              viewports;
+  std::vector<VkRect2D>                scissors;
+  std::vector<VkFramebuffer>           framebuffers;
+  std::vector<VkPhysicalDevice>        physicalDevices;
+  std::vector<VkQueueFamilyProperties> queueFamilyProps;
 
 private:
   VkContext() {}
 
   // Initialize context
-  VkResult init(HWND windowHandle);
+  void init(const char* appName, uint32_t appVersion, HWND windowHandle);
 
   // Has context been initialized?
   static bool bInit;
-
-  // Actors of Vulkan context
-  VkPhysicalDevice physicalDevice;
-  VkDevice device;
-  VkSwapchainKHR swapchain;
-  VkSemaphore imageAcquiredSemaphore;
-  VkFence drawFence;
-  uint32_t currentBuffer;
-  uint32_t vertexCount;
-  VkCommandBuffer commandBuffer;
-  VkRenderPass renderPass;
-  VkExtent2D renderArea;
-  VkPipeline pipeline;
-  VkPipelineLayout pipelineLayout;
-  VkQueue graphicsQueue;
-  std::vector<VkDescriptorSet> descriptorSets;
-  std::vector<VkBuffer> vertexBuffers;
-  std::vector<VkFramebuffer> framebuffers;
-  std::vector<VkViewport> viewports;
-  std::vector<VkRect2D> scissors;
 };
