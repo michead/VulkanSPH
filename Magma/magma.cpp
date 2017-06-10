@@ -57,19 +57,19 @@ void Magma::update(double deltaTime) {
 
 void Magma::render(double deltaTime) {
   uint32_t imageIndex;
-  VkWrap::prepareFrame(*vkContext, vkContext->imageAcquiredSemaphore, &imageIndex);
-  VkWrap::submitCommandBuffer(*vkContext, 
-                               vkContext->commandBuffer,
-                               vkContext->imageAcquiredSemaphore,
-                               VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
-                               vkContext->drawFence);
+  VkWrap::prepareFrame(vkContext, vkContext->imageAcquiredSemaphore, &imageIndex);
+  VkWrap::submitCommandBuffer(vkContext, 
+                              vkContext->commandBuffer,
+                              vkContext->imageAcquiredSemaphore,
+                              VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+                              vkContext->drawFence);
 
   VkResult res;
   do {
     VK_CHECK((res = vkWaitForFences(vkContext->device, 1, &vkContext->drawFence, VK_TRUE, UINT64_MAX)));
   } while (res == VK_TIMEOUT);
 
-  VkWrap::presentSwapchain(*vkContext, vkContext->currentSwapchainImageIndex);
+  VkWrap::presentSwapchain(vkContext, vkContext->currentSwapchainImageIndex);
 }
 
 void Magma::mainLoop() {

@@ -4,18 +4,21 @@
 bool VkContext::bInit = false;
 
 void VkContext::init(const char* appName, uint32_t appVersion, HWND windowHandle) {
-  VkWrap::createInstance(*this, appName, appVersion);
-  VkWrap::getDevices(*this);
+  VkWrap::createInstance(this, appName, appVersion);
+  VkWrap::getDevices(this);
 
   // Choose first available device
   physicalDevice = physicalDevices.at(0);
   VkWrap::printPhysicalDevice(physicalDevice);
 
-  VkWrap::createDevice(*this);
-  VkWrap::createSurface(*this, windowHandle);
+  VkWrap::createDevice(this);
+  VkWrap::createSurface(this, windowHandle);
 
-  VkWrap::createSemaphore(*this, imageAcquiredSemaphore);
-  VkWrap::createFence(*this, drawFence);
+  VkWrap::createSurface(this, windowHandle);
+  VkWrap::createSwapchain(this);
+
+  VkWrap::createSemaphore(this, imageAcquiredSemaphore);
+  VkWrap::createFence(this, drawFence);
 
   // Compile shaders
   VkWrap::compileShaders(L".");
