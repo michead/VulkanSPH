@@ -59,14 +59,40 @@ namespace VkWrap {
     context->queueFamilyProps.resize(familyCount);
     vkGetPhysicalDeviceQueueFamilyProperties(context->physicalDevice, &familyCount, context->queueFamilyProps.data());
   }
-  inline void getQueueFamilyIndex(VkContext* context, int32_t queueFamilyFlags) {
-    context->queueFamilyIndex = -1;
-    for (uint32_t i = 0; i < context->queueFamilyProps.size(); i++) {
-      if (context->queueFamilyProps[i].queueFlags & queueFamilyFlags) {
-        context->queueFamilyIndex = i;
+  inline void getQueueFamilyIndeices(VkContext* context) {
+    getQueueFamilyProperties(context);
+    context->graphicsQueueFamilyIndex = UINT32_MAX;
+    context->presentQueueFamilyIndex = UINT32_MAX;
+    uint32_t queueFamilyCount = context->queueFamilyProps.size();
+    VkBool32 *pSupportsPresent = (VkBool32 *)malloc(queueFamilyCount * sizeof(VkBool32));
+    for (uint32_t i = 0; i < queueFamilyCount; i++) {
+      vkGetPhysicalDeviceSurfaceSupportKHR(context->physicalDevice, i, context->surface, &pSupportsPresent[i]);
+    }
+    for (uint32_t i = 0; i < queueFamilyCount; i++) {
+      if ((context->queueFamilyProps[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) != 0) {
+        if (context->graphicsQueueFamilyIndex == UINT32_MAX) {
+          context->graphicsQueueFamilyIndex = i;
+        }
+        if (pSupportsPresent[i] == VK_TRUE) {
+          context->graphicsQueueFamilyIndex = i;
+          context->presentQueueFamilyIndex = i;
+          break;
+        }
       }
     }
-    assert(context->queueFamilyIndex != -1);
+    if (context->presentQueueFamilyIndex == UINT32_MAX) {
+      for (size_t i = 0; i < queueFamilyCount; i++) {
+        if (pSupportsPresent[i] == VK_TRUE) {
+          context->presentQueueFamilyIndex = i;
+          break;
+        }
+      }
+    }
+    if (context->graphicsQueueFamilyIndex < 0 ||
+        context->presentQueueFamilyIndex  < 0) {
+      logger->error("No suitable device for performing graphics operations has been found.");
+      assert(false);
+    }
   }
   inline void createSemaphore(VkContext* context, VkSemaphore& semaphore) {
     VkSemaphoreCreateInfo imageAcquiredSemaphoreCreateInfo;
@@ -83,21 +109,6 @@ namespace VkWrap {
     VK_CHECK(vkCreateFence(context->device, &fenceInfo, nullptr, &fence));
   }
   inline void createDevice(VkContext* context) {
-    std::vector<VkQueueFamilyProperties> queueFamilyPropsVec;
-    getQueueFamilyProperties(context);
-    getQueueFamilyIndex(context, VK_QUEUE_GRAPHICS_BIT);
-    if (context->queueFamilyIndex < 0) {
-      logger->error("No suitable device for performing graphics operations has been found.");
-      assert(false);
-    }
-    float queuePriorities[1] = { 0.f };
-    VkDeviceQueueCreateInfo queueCreateInfo = {};
-    queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-    queueCreateInfo.pNext = nullptr;
-    queueCreateInfo.queueFamilyIndex = context->queueFamilyIndex;
-    queueCreateInfo.queueCount = 1;
-    queueCreateInfo.pQueuePriorities = queuePriorities;
-
     uint32_t extensionCount;
     vkEnumerateDeviceExtensionProperties(context->physicalDevice, nullptr, &extensionCount, nullptr);
     std::vector<const char *> extensions;
@@ -107,18 +118,31 @@ namespace VkWrap {
       extensions.push_back(extensionProps[i].extensionName);
     }
     
+    VkDeviceQueueCreateInfo queueInfo = {};
+    float queue_priorities[1] = { 0.0 };
+    queueInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+    queueInfo.pNext = nullptr;
+    queueInfo.queueCount = 1;
+    queueInfo.pQueuePriorities = queue_priorities;
+    queueInfo.queueFamilyIndex = context->graphicsQueueFamilyIndex;
+
     VkDeviceCreateInfo deviceCreateInfo = {};
     deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
     deviceCreateInfo.pNext = nullptr;
     deviceCreateInfo.queueCreateInfoCount = 1;
-    deviceCreateInfo.pQueueCreateInfos = &queueCreateInfo;
+    deviceCreateInfo.pQueueCreateInfos = &queueInfo;
     deviceCreateInfo.enabledExtensionCount = extensions.size();
     deviceCreateInfo.ppEnabledExtensionNames = extensions.data();
-    deviceCreateInfo.enabledLayerCount = 0;
-    deviceCreateInfo.ppEnabledLayerNames = nullptr;
     deviceCreateInfo.pEnabledFeatures = nullptr;
 
     VK_CHECK(vkCreateDevice(context->physicalDevice, &deviceCreateInfo, nullptr, &context->device));
+
+    vkGetDeviceQueue(context->device, context->graphicsQueueFamilyIndex, 0, &context->graphicsQueue);
+    if (context->graphicsQueueFamilyIndex != context->presentQueueFamilyIndex) {
+      context->presentQueue = context->graphicsQueue;
+    } else {
+      vkGetDeviceQueue(context->device, context->presentQueueFamilyIndex, 0, &context->presentQueue);
+    }
   }
   inline void printPhysicalDevice(const VkPhysicalDevice& physicalDevice) {
     VkPhysicalDeviceProperties physicalDeviceProperties;
@@ -134,7 +158,7 @@ namespace VkWrap {
     VkCommandPoolCreateInfo info = {};
     info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
     info.pNext = nullptr;
-    info.queueFamilyIndex = context->queueFamilyIndex;
+    info.queueFamilyIndex = context->graphicsQueueFamilyIndex;
     info.flags = 0;
     VK_CHECK(vkCreateCommandPool(context->device, &info, nullptr, &context->commandPool));
   }
@@ -161,54 +185,131 @@ namespace VkWrap {
     vkGetPhysicalDeviceSurfaceFormatsKHR(context->physicalDevice, context->surface, &surfaceFormatCount, nullptr);
     std::vector<VkSurfaceFormatKHR> surfaceFormats(surfaceFormatCount);
     vkGetPhysicalDeviceSurfaceFormatsKHR(context->physicalDevice, context->surface, &surfaceFormatCount, surfaceFormats.data());
-    VkSwapchainCreateInfoKHR info = {};
-    info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-    info.pNext = nullptr;
-    info.surface = context->surface;
-    info.imageFormat = surfaceFormats[0].format;
-    info.imageUsage = VK_IMAGE_ASPECT_COLOR_BIT;
-    info.imageArrayLayers = 1;
-    info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
     VkSurfaceCapabilitiesKHR surfaceCapabilities;
     vkGetPhysicalDeviceSurfaceCapabilitiesKHR(context->physicalDevice, context->surface, &surfaceCapabilities);
-    info.minImageCount = surfaceCapabilities.minImageCount;
-    info.imageExtent = surfaceCapabilities.currentExtent;
-    info.preTransform = surfaceCapabilities.currentTransform;
-    info.imageFormat = surfaceFormats[0].format;
-    info.presentMode = VK_PRESENT_MODE_FIFO_KHR;
     VkBool32 surfaceSupported;
-    VK_CHECK(vkGetPhysicalDeviceSurfaceSupportKHR(context->physicalDevice, context->queueFamilyIndex, context->surface, &surfaceSupported));
-    if (!surfaceSupported) {
+    VK_CHECK(vkGetPhysicalDeviceSurfaceSupportKHR(context->physicalDevice,
+                                                  context->graphicsQueueFamilyIndex,
+                                                  context->surface, &surfaceSupported));
+    if (!surfaceSupported || surfaceFormatCount < 1) {
       logger->error("Surface is not supported. Cannot create swapchain.");
       assert(false);
     }
-    VK_CHECK(vkCreateSwapchainKHR(context->device, &info, nullptr, &context->swapchain));
-  }
-  inline void createSwapchainImageViews(VkContext* context, VkFormat format) {
-    uint32_t imageCount;
-    vkGetSwapchainImagesKHR(context->device, context->swapchain, &imageCount, nullptr);
-    context->swapchainImages.resize(imageCount);
-    context->swapchainImageViews.resize(imageCount);
-    VK_CHECK(vkGetSwapchainImagesKHR(context->device, context->swapchain, &imageCount, context->swapchainImages.data()));
-    for (uint8_t i = 0; i < imageCount; i++) {
-      VkImageViewCreateInfo imageViewInfo = {};
-      imageViewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-      imageViewInfo.pNext = NULL;
-      imageViewInfo.flags = 0;
-      imageViewInfo.image = context->swapchainImages[i];
-      imageViewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-      imageViewInfo.format = format;
-      imageViewInfo.components.r = VK_COMPONENT_SWIZZLE_R;
-      imageViewInfo.components.g = VK_COMPONENT_SWIZZLE_G;
-      imageViewInfo.components.b = VK_COMPONENT_SWIZZLE_B;
-      imageViewInfo.components.a = VK_COMPONENT_SWIZZLE_A;
-      imageViewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-      imageViewInfo.subresourceRange.baseMipLevel = 0;
-      imageViewInfo.subresourceRange.levelCount = 1;
-      imageViewInfo.subresourceRange.baseArrayLayer = 0;
-      imageViewInfo.subresourceRange.layerCount = 1;
-      VK_CHECK(vkCreateImageView(context->device, &imageViewInfo, nullptr, &context->swapchainImageViews[i]));
+    if (surfaceFormatCount == 1 && surfaceFormats[0].format == VK_FORMAT_UNDEFINED) {
+      context->format = VK_FORMAT_B8G8R8A8_UNORM;
+    } else {
+      context->format = surfaceFormats[0].format;
     }
+
+    uint32_t presentModeCount;
+    VK_CHECK(vkGetPhysicalDeviceSurfacePresentModesKHR(context->physicalDevice, context->surface, &presentModeCount, nullptr));
+    std::vector<VkPresentModeKHR> presentModes(presentModeCount);
+    VK_CHECK(vkGetPhysicalDeviceSurfacePresentModesKHR(context->physicalDevice, context->surface, &presentModeCount, presentModes.data()));
+
+    VkExtent2D swapchainExtent;
+    if (surfaceCapabilities.currentExtent.width == 0xFFFFFFFF) {
+      swapchainExtent.width  = 1920;
+      swapchainExtent.height = 1080;
+      if (swapchainExtent.width < surfaceCapabilities.minImageExtent.width) {
+        swapchainExtent.width = surfaceCapabilities.minImageExtent.width;
+      } else if (swapchainExtent.width > surfaceCapabilities.maxImageExtent.width) {
+        swapchainExtent.width = surfaceCapabilities.maxImageExtent.width;
+      }
+
+      if (swapchainExtent.height < surfaceCapabilities.minImageExtent.height) {
+        swapchainExtent.height = surfaceCapabilities.minImageExtent.height;
+      } else if (swapchainExtent.height > surfaceCapabilities.maxImageExtent.height) {
+        swapchainExtent.height = surfaceCapabilities.maxImageExtent.height;
+      }
+    } else {
+      swapchainExtent = surfaceCapabilities.currentExtent;
+    }
+
+    VkPresentModeKHR swapchainPresentMode = VK_PRESENT_MODE_FIFO_KHR;
+    uint32_t desiredNumberOfSwapChainImages = surfaceCapabilities.minImageCount;
+    VkSurfaceTransformFlagBitsKHR preTransform;
+    if (surfaceCapabilities.supportedTransforms & VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR) {
+      preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
+    } else {
+      preTransform = surfaceCapabilities.currentTransform;
+    }
+
+    VkCompositeAlphaFlagBitsKHR compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+    VkCompositeAlphaFlagBitsKHR compositeAlphaFlags[4] = {
+      VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
+      VK_COMPOSITE_ALPHA_PRE_MULTIPLIED_BIT_KHR,
+      VK_COMPOSITE_ALPHA_POST_MULTIPLIED_BIT_KHR,
+      VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR,
+    };
+    for (uint32_t i = 0; i < sizeof(compositeAlphaFlags); i++) {
+      if (surfaceCapabilities.supportedCompositeAlpha & compositeAlphaFlags[i]) {
+        compositeAlpha = compositeAlphaFlags[i];
+        break;
+      }
+    }
+
+    VkSwapchainCreateInfoKHR swapchainInfo = {};
+    swapchainInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+    swapchainInfo.pNext = nullptr;
+    swapchainInfo.surface = context->surface;
+    swapchainInfo.minImageCount = desiredNumberOfSwapChainImages;
+    swapchainInfo.imageFormat = context->format;
+    swapchainInfo.imageExtent.width = swapchainExtent.width;
+    swapchainInfo.imageExtent.height = swapchainExtent.height;
+    swapchainInfo.preTransform = preTransform;
+    swapchainInfo.compositeAlpha = compositeAlpha;
+    swapchainInfo.imageArrayLayers = 1;
+    swapchainInfo.presentMode = swapchainPresentMode;
+    swapchainInfo.oldSwapchain = VK_NULL_HANDLE;
+    swapchainInfo.clipped = true;
+    swapchainInfo.imageColorSpace = VK_COLORSPACE_SRGB_NONLINEAR_KHR;
+    swapchainInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
+                               VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+    swapchainInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    swapchainInfo.queueFamilyIndexCount = 0;
+    swapchainInfo.pQueueFamilyIndices = nullptr;
+    uint32_t queueFamilyIndices[2] = {
+      context->graphicsQueueFamilyIndex,
+      context->presentQueueFamilyIndex
+    };
+    if (context->graphicsQueueFamilyIndex != context->presentQueueFamilyIndex) {
+      swapchainInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
+      swapchainInfo.queueFamilyIndexCount = 2;
+      swapchainInfo.pQueueFamilyIndices = queueFamilyIndices;
+    }
+
+    VK_CHECK(vkCreateSwapchainKHR(context->device, &swapchainInfo, nullptr, &context->swapchain));
+    VK_CHECK(vkGetSwapchainImagesKHR(context->device, context->swapchain, &context->swapchainImageCount, nullptr));
+
+    std::vector<VkImage> swapchainImages(context->swapchainImageCount);
+    VK_CHECK(vkGetSwapchainImagesKHR(context->device, context->swapchain, &context->swapchainImageCount, swapchainImages.data()));
+
+    context->swapchainImages.resize(context->swapchainImageCount);
+    context->swapchainImageViews.resize(context->swapchainImageCount);
+
+    for (uint32_t i = 0; i < context->swapchainImageCount; i++) {
+      VkImageViewCreateInfo colorImageView = {};
+      colorImageView.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+      colorImageView.pNext = NULL;
+      colorImageView.format = context->format;
+      colorImageView.components.r = VK_COMPONENT_SWIZZLE_R;
+      colorImageView.components.g = VK_COMPONENT_SWIZZLE_G;
+      colorImageView.components.b = VK_COMPONENT_SWIZZLE_B;
+      colorImageView.components.a = VK_COMPONENT_SWIZZLE_A;
+      colorImageView.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+      colorImageView.subresourceRange.baseMipLevel = 0;
+      colorImageView.subresourceRange.levelCount = 1;
+      colorImageView.subresourceRange.baseArrayLayer = 0;
+      colorImageView.subresourceRange.layerCount = 1;
+      colorImageView.viewType = VK_IMAGE_VIEW_TYPE_2D;
+      colorImageView.flags = 0;
+
+      context->swapchainImages[i] = swapchainImages[i];
+      colorImageView.image = swapchainImages[i];
+
+      VK_CHECK(vkCreateImageView(context->device, &colorImageView, nullptr, &context->swapchainImageViews[i]));
+    }
+    context->currentSwapchainImageIndex = 0;
   }
   inline void getMemoryTypeFromProperties(VkContext* context, uint32_t typeBits, VkFlags reqMask, uint32_t* memoryTypeIndex) {
     VkPhysicalDeviceMemoryProperties memProps;
@@ -488,8 +589,7 @@ namespace VkWrap {
     framebufferInfo.width = width;
     framebufferInfo.height = height;
     framebufferInfo.layers = 1;
-    VkResult res;
-    for (int i = 0; i < colorAttachments.size(); i++) {
+    for (size_t i = 0; i < colorAttachments.size(); i++) {
       attachments[0] = colorAttachments[i];
       VK_CHECK(vkCreateFramebuffer(context->device, &framebufferInfo, NULL, &framebuffers[i]));
     }
@@ -575,13 +675,13 @@ namespace VkWrap {
     VK_CHECK(vkQueueSubmit(context->graphicsQueue, 1, &submitInfo, fence));
   }
 
-  inline void presentSwapchain(VkContext* context, uint32_t imageIndex) {
+  inline void presentSwapchain(VkContext* context) {
     VkPresentInfoKHR present;
     present.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
     present.pNext = nullptr;
     present.swapchainCount = 1;
     present.pSwapchains = &context->swapchain;
-    present.pImageIndices = &imageIndex;
+    present.pImageIndices = &context->currentSwapchainImageIndex;
     present.pWaitSemaphores = nullptr;
     present.waitSemaphoreCount = 0;
     present.pResults = nullptr;
@@ -594,17 +694,20 @@ namespace VkWrap {
     if (hFind != INVALID_HANDLE_VALUE) {
       do {
         char filename[128];
-        sprintf(filename, "%ws", data.cFileName);
+        sprintf_s(filename, "%ws", data.cFileName);
         logger->info("Compiling shader %s ...", filename);
         char command[64];
-        sprintf(command, "glslangValidator %s", filename);
+        sprintf_s(command, "glslangValidator %s", filename);
         system(command);
       } while (FindNextFile(hFind, &data));
       FindClose(hFind);
     }
     logger->info("Shader compilation complete.");
   }
-  inline void prepareFrame(VkContext* context, const VkSemaphore& semaphore, uint32_t* imageIndex) {
-    VK_CHECK(vkAcquireNextImageKHR(context->device, context->swapchain, UINT64_MAX, semaphore, VK_NULL_HANDLE, imageIndex));
+  inline void prepareFrame(VkContext* context) {
+    VK_CHECK(vkAcquireNextImageKHR(context->device,
+                                   context->swapchain, UINT64_MAX,
+                                   context->imageAcquiredSemaphore, VK_NULL_HANDLE,
+                                  &context->currentSwapchainImageIndex));
   }
 }

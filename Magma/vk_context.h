@@ -24,13 +24,17 @@ public:
   VkSwapchainKHR   swapchain;
   VkSemaphore      imageAcquiredSemaphore;
   VkFence          drawFence;
-  uint32_t         queueFamilyIndex;
   uint32_t         currentSwapchainImageIndex;
   VkCommandPool    commandPool;
   VkCommandBuffer  commandBuffer;
   VkDescriptorPool descriptorPool;
   VkRenderPass     renderPass;
+  uint32_t         graphicsQueueFamilyIndex;
+  uint32_t         presentQueueFamilyIndex;
+  uint32_t         swapchainImageCount;
+  VkFormat         format;
   VkQueue          graphicsQueue;
+  VkQueue          presentQueue;
 
   std::vector<const char*>             extensions;
   std::vector<VkImage>                 swapchainImages;

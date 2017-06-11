@@ -47,7 +47,7 @@ public:
   ~SPH();
 
   virtual void draw();
-  void update(float dt);
+  void update(double dt);
 
 private:
   void init();

@@ -62,6 +62,6 @@ void SPH::draw() {
 
 }
 
-void SPH::update(float dt) {
+void SPH::update(double dt) {
 
 }

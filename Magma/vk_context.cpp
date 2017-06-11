@@ -11,12 +11,9 @@ void VkContext::init(const char* appName, uint32_t appVersion, HWND windowHandle
   physicalDevice = physicalDevices.at(0);
   VkWrap::printPhysicalDevice(physicalDevice);
 
+  VkWrap::createSurface(this, windowHandle);
   VkWrap::createDevice(this);
-  VkWrap::createSurface(this, windowHandle);
-
-  VkWrap::createSurface(this, windowHandle);
   VkWrap::createSwapchain(this);
-
   VkWrap::createSemaphore(this, imageAcquiredSemaphore);
   VkWrap::createFence(this, drawFence);
 

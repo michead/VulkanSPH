@@ -1,6 +1,3 @@
-// Vulkan Win API
-#define VK_USE_PLATFORM_WIN32_KHR
-
 // Tell SDL not to mess with main()
 #define SDL_MAIN_HANDLED
 #define SDL_CHECK(a)          ; // nop
@@ -56,8 +53,7 @@ void Magma::update(double deltaTime) {
 }
 
 void Magma::render(double deltaTime) {
-  uint32_t imageIndex;
-  VkWrap::prepareFrame(vkContext, vkContext->imageAcquiredSemaphore, &imageIndex);
+  VkWrap::prepareFrame(vkContext);
   VkWrap::submitCommandBuffer(vkContext, 
                               vkContext->commandBuffer,
                               vkContext->imageAcquiredSemaphore,
@@ -69,7 +65,7 @@ void Magma::render(double deltaTime) {
     VK_CHECK((res = vkWaitForFences(vkContext->device, 1, &vkContext->drawFence, VK_TRUE, UINT64_MAX)));
   } while (res == VK_TIMEOUT);
 
-  VkWrap::presentSwapchain(vkContext, vkContext->currentSwapchainImageIndex);
+  VkWrap::presentSwapchain(vkContext);
 }
 
 void Magma::mainLoop() {
