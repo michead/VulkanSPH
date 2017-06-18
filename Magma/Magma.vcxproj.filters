@@ -34,9 +34,6 @@
     <ClCompile Include="sph.cpp">
       <Filter>Source Files\sph</Filter>
     </ClCompile>
-    <ClCompile Include="vk_context.cpp">
-      <Filter>Source Files\vk</Filter>
-    </ClCompile>
     <ClCompile Include="magma.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -46,7 +43,16 @@
     <ClCompile Include="emitter.cpp">
       <Filter>Source Files\sph</Filter>
     </ClCompile>
-    <ClCompile Include="vk_path.cpp">
+    <ClCompile Include="pipeline.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="mvk_context.cpp">
+      <Filter>Source Files\vk</Filter>
+    </ClCompile>
+    <ClCompile Include="mvk_pipeline.cpp">
+      <Filter>Source Files\vk</Filter>
+    </ClCompile>
+    <ClCompile Include="mvk_structs.cpp">
       <Filter>Source Files\vk</Filter>
     </ClCompile>
   </ItemGroup>
@@ -75,16 +81,22 @@
     <ClInclude Include="sph.h">
       <Filter>Source Files\sph</Filter>
     </ClInclude>
-    <ClInclude Include="vk_context.h">
-      <Filter>Source Files\vk</Filter>
-    </ClInclude>
-    <ClInclude Include="vk_wrap.h">
-      <Filter>Source Files\vk</Filter>
-    </ClInclude>
     <ClInclude Include="emitter.h">
       <Filter>Source Files\sph</Filter>
     </ClInclude>
-    <ClInclude Include="vk_path.h">
+    <ClInclude Include="pipeline.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mvk_context.h">
+      <Filter>Source Files\vk</Filter>
+    </ClInclude>
+    <ClInclude Include="mvk_pipeline.h">
+      <Filter>Source Files\vk</Filter>
+    </ClInclude>
+    <ClInclude Include="mvk_structs.h">
+      <Filter>Source Files\vk</Filter>
+    </ClInclude>
+    <ClInclude Include="mvk_wrap.h">
       <Filter>Source Files\vk</Filter>
     </ClInclude>
   </ItemGroup>

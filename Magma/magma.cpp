@@ -7,14 +7,14 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_syswm.h>
 #include "magma.h"
-#include "vk_context.h"
-#include "vk_wrap.h"
 
 void Magma::init() {
   // Load configs from INI file
   config = Config::load(MAGMA_CONFIG_FILENAME);
 
-  // Create SDL window
+  // Create an SDL window that supports Vulkan and OpenGL rendering.
+  SDL_Init(SDL_INIT_VIDEO);
+
   window = SDL_CreateWindow(
     MAGMA_DISPLAY_NAME,
     SDL_WINDOWPOS_CENTERED,
@@ -27,23 +27,25 @@ void Magma::init() {
   SDL_GetWindowWMInfo(window, &windowInfo);
 
   // Initialize graphics context
-  vkContext = VkContext::getContext(MAGMA_DISPLAY_NAME, MAGMA_VERSION, windowInfo.info.win.window);
-
-  // Create an SDL window that supports Vulkan and OpenGL rendering.
-  SDL_Init(SDL_INIT_VIDEO);
+  mvkContext = MVkContext::getContext(
+    MAGMA_DISPLAY_NAME,
+    MAGMA_VERSION, 
+    windowInfo.info.win.window);
 
   // Initialize solver and emitter
   sph = new SPH("params.json");
   emitter = new Emitter();
   emitter->setSolver(sph);
+
+  mvkPipeline = new MVkPipeline(mvkContext, MVkPipelineParams());
 }
 
 void Magma::cleanup() {
   // Clean up.
-  vkDestroySurfaceKHR(vkContext->instance, vkContext->surface, NULL);
+  vkDestroySurfaceKHR(mvkContext->instance, mvkContext->surface, NULL);
   SDL_DestroyWindow(window);
   SDL_Quit();
-  vkDestroyInstance(vkContext->instance, NULL);
+  vkDestroyInstance(mvkContext->instance, NULL);
   delete sph;
   delete emitter;
 }
@@ -53,19 +55,7 @@ void Magma::update(double deltaTime) {
 }
 
 void Magma::render(double deltaTime) {
-  VkWrap::prepareFrame(vkContext);
-  VkWrap::submitCommandBuffer(vkContext, 
-                              vkContext->commandBuffer,
-                              vkContext->imageAcquiredSemaphore,
-                              VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
-                              vkContext->drawFence);
-
-  VkResult res;
-  do {
-    VK_CHECK((res = vkWaitForFences(vkContext->device, 1, &vkContext->drawFence, VK_TRUE, UINT64_MAX)));
-  } while (res == VK_TIMEOUT);
-
-  VkWrap::presentSwapchain(vkContext);
+  mvkPipeline->render();
 }
 
 void Magma::mainLoop() {

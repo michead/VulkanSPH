@@ -85,7 +85,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;SDL_VIDEO_DRIVER_WINDOWS;VK_USE_PLATFORM_WIN32_KHR;VK_LAYER_PATH=$(VULKAN_SDK)\Source\lib;_DEBUG;_CONSOLE;_LIB;MAGMA_ROOT_DIR="$(ProjectDir)";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;SDL_VIDEO_DRIVER_WINDOWS;VK_USE_PLATFORM_WIN32_KHR;VK_SDK_BIN=R"($(VULKAN_SDK)\bin\)";VK_LAYER_PATH=R"($(VULKAN_SDK)\Source\lib\)";SHADER_PATH=LR"($(ProjectDir))";_DEBUG;_CONSOLE;_LIB;MAGMA_ROOT_DIR="$(ProjectDir)";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Third-Party\Include;$(FLEX_PATH)\include;$(SolutionDir)ext\glm;$(SolutionDir)ext\json;$(SolutionDir)ext\spdlog;$(SolutionDir)ext;$(BOOST_PATH)\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -94,6 +94,7 @@
       <AdditionalDependencies>vulkan-1.lib;SDL2.lib;flexDebug_x86.lib;flexExtDebug_x86.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib32;$(VULKAN_SDK)\Third-Party\Bin32;$(FLEX_PATH)\lib\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /y /d "$(FLEX_PATH)\bin\win32\*.dll" "$(OutDir)"</Command>
@@ -124,7 +125,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;SDL_VIDEO_DRIVER_WINDOWS;VK_USE_PLATFORM_WIN32_KHR;VK_LAYER_PATH=$(VULKAN_SDK)\Source\lib;NDEBUG;_CONSOLE;_LIB;VK_USE_PLATFORM_WIN32_KHR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;SDL_VIDEO_DRIVER_WINDOWS;VK_USE_PLATFORM_WIN32_KHR;VK_SDK_BIN=R"($(VULKAN_SDK)\bin\)";VK_LAYER_PATH=R"($(VULKAN_SDK)\Source\lib\)";SHADER_PATH=LR"($(ProjectDir))";NDEBUG;_CONSOLE;_LIB;VK_USE_PLATFORM_WIN32_KHR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Third-Party\Include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -135,6 +136,7 @@
       <AdditionalDependencies>vulkan-1.lib;SDL2.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib32;$(VULKAN_SDK)\Third-Party\Bin32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -162,24 +164,28 @@
     <ClCompile Include="emitter.cpp" />
     <ClCompile Include="magma.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="mvk_structs.cpp" />
+    <ClCompile Include="pipeline.cpp" />
     <ClCompile Include="sph.cpp" />
-    <ClCompile Include="vk_context.cpp" />
+    <ClCompile Include="mvk_context.cpp" />
     <ClCompile Include="logger.cpp" />
-    <ClCompile Include="vk_path.cpp" />
+    <ClCompile Include="mvk_pipeline.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="camera.h" />
     <ClInclude Include="config.h" />
     <ClInclude Include="emitter.h" />
     <ClInclude Include="magma.h" />
+    <ClInclude Include="pipeline.h" />
     <ClInclude Include="scene.h" />
     <ClInclude Include="scene_element.h" />
     <ClInclude Include="scene_graph.h" />
     <ClInclude Include="sph.h" />
-    <ClInclude Include="vk_context.h" />
+    <ClInclude Include="mvk_context.h" />
     <ClInclude Include="logger.h" />
-    <ClInclude Include="vk_path.h" />
-    <ClInclude Include="vk_wrap.h" />
+    <ClInclude Include="mvk_pipeline.h" />
+    <ClInclude Include="mvk_structs.h" />
+    <ClInclude Include="mvk_wrap.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="params.json" />

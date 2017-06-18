@@ -10,6 +10,6 @@ layout(binding = 0) uniform globals {
 layout(location = 0) in vec4 pos;
 
 void main() {
-  glPointSize = particleSize;
-  gl_Position = uniforms.mvp * pos;
+  gl_PointSize = uniforms.particleSize;
+  gl_Position  = uniforms.mvp * pos;
 }
