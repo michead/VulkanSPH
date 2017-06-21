@@ -1,5 +1,7 @@
 #pragma once
 
+#include <map>
+#include <vector>
 #include "vulkan\vulkan.hpp"
 
 struct MVkAttachment {
@@ -44,6 +46,8 @@ struct MVKPipeline {
   VkPipelineCache cache;
   VkPipeline handle;
 };
+
+typedef std::map<std::string, std::map<std::string, std::vector<unsigned int>>> MVkShaderMap;
 
 extern const VkClearValue             MVkClearValueColorWhite;
 extern const VkClearValue             MVkClearValueDepthStencilOneZero;

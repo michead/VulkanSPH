@@ -99,6 +99,9 @@
     <ClInclude Include="mvk_wrap.h">
       <Filter>Source Files\vk</Filter>
     </ClInclude>
+    <ClInclude Include="mvk_utils.h">
+      <Filter>Source Files\vk</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="params.json">

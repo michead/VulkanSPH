@@ -1,5 +1,6 @@
 #include "mvk_context.h"
 #include "mvk_wrap.h"
+#include "mvk_utils.h"
 #include "magma.h"
 
 bool MVkContext::bInit = false;
@@ -15,7 +16,7 @@ void MVkContext::init(const char* appName, uint32_t appVersion, HWND windowHandl
   MVkWrap::createFence(device, drawFence);
   initCommandPool();
   initCommandBuffer();
-  MVkWrap::compileShaders(SHADER_PATH);
+  loadShaders();
   bInit = true;
 }
 
@@ -37,7 +38,8 @@ void MVkContext::initDevice() {
 void MVkContext::selectPhysicalDevice() {
   MVkWrap::queryDevices(instance, physicalDevices);
   if (physicalDevices.empty()) {
-    MVK_FAIL("No Vulkan-enabled GPUs found.");
+    logger->error("No Vulkan-enabled GPUs found.");
+    exit(EXIT_FAILURE);
   }
   physicalDevice = physicalDevices.at(0);
   MVkWrap::printDeviceStats(physicalDevice);
@@ -90,4 +92,58 @@ void MVkContext::initDepthBuffer() {
     depthBuffer.image,
     deviceMemory,
     depthBuffer.imageView);
+}
+
+void MVkContext::loadShaders() {
+  HANDLE hFind;
+  WIN32_FIND_DATA data;
+
+  std::wstring wDir(SHADER_PATH);
+  wDir += L"*";
+  
+  hFind = FindFirstFile(wDir.c_str(), &data);
+  if (hFind != INVALID_HANDLE_VALUE) {
+    do {
+      char cGlsl[128];
+      sprintf_s(cGlsl, "%ws", data.cFileName);
+      if (MVkUtils::isGLSLFilename(cGlsl)) {
+        logger->info("Compiling shader {0} ...", cGlsl);
+        
+        std::string sGlsl = std::string(cGlsl);
+        std::string shaderName  = sGlsl.substr(0, sGlsl.size() - 5);
+        std::string shaderStage = sGlsl.substr(   sGlsl.size() - 4);
+
+        char command[128];
+        std::string sSpv = sGlsl + "." + shaderName + "." + shaderStage + ".spv";
+        sprintf_s(command, VK_SDK_BIN"glslangValidator %s -V -o %s", cGlsl, sSpv.c_str());
+        
+        int ret = system(command);
+        if (ret != 0) {
+          logger->error("Shader compilation failed.");
+          getchar();
+          exit(EXIT_FAILURE);
+        }
+        
+        if (shaderMap.find(shaderName) == shaderMap.end()) {
+          shaderMap[shaderName] = std::map<std::string, std::vector<unsigned int>>();
+          if (shaderMap[shaderName].find(shaderStage) == shaderMap[shaderName].end()) {
+            shaderMap[shaderName][shaderStage] = std::vector<unsigned int>();
+          } else {
+            shaderMap[shaderName][shaderStage].clear();
+          }
+        }
+
+        std::ifstream in{ sSpv };
+        unsigned int word;
+        while (in.good()) {
+          in >> word;
+          shaderMap[shaderName][shaderStage].emplace_back(word);
+        }
+      }
+    } while (FindNextFile(hFind, &data));
+    
+    FindClose(hFind);
+  }
+
+  logger->info("Shader compilation complete.");
 }

@@ -51,6 +51,7 @@ public:
 
   MVkAttachment            depthBuffer;
   MVkSwapchain             swapchain;
+  MVkShaderMap             shaderMap;
 
   std::vector<const char*>             extensions;
   std::vector<VkViewport>              viewports;
@@ -75,6 +76,7 @@ private:
   void initSwapchain();
   void initDepthBuffer();
   void initDescriptorPool();
+  void loadShaders();
 
   // Has context been initialized?
   static bool bInit;

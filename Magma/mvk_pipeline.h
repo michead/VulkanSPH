@@ -33,6 +33,7 @@ private:
   void initSubpasses();
   void initRenderPass();
   void initFramebuffers();
+  void initStages();
   void initPipeline();
   void registerCommandBuffer();
 };

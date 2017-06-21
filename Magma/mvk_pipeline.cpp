@@ -6,6 +6,7 @@ void MVkPipeline::init(const MVkPipelineParams& params) {
   initSubpasses();
   initRenderPass();
   initFramebuffers();
+  initStages();
   initPipeline();
   registerCommandBuffer();
 }
@@ -91,6 +92,23 @@ void MVkPipeline::initFramebuffers() {
     context->swapchain.extent.width,
     context->swapchain.extent.height,
     framebuffers);
+}
+
+void MVkPipeline::initStages() {
+  VkShaderModule moduleVert;
+  VkShaderModule moduleFrag;
+
+  VkPipelineShaderStageCreateInfo createInfoVert;
+  VkPipelineShaderStageCreateInfo createInfoFrag;
+
+  MVkWrap::createShaderModule(context->device, context->shaderMap["particle"]["vert"], moduleVert);
+  MVkWrap::createShaderModule(context->device, context->shaderMap["particle"]["frag"], moduleVert);
+
+  MVkWrap::shaderStage(moduleVert, VK_SHADER_STAGE_VERTEX_BIT, createInfoVert);
+  MVkWrap::shaderStage(moduleFrag, VK_SHADER_STAGE_FRAGMENT_BIT, createInfoFrag);
+
+  pipeline.shaderStages.push_back(createInfoVert);
+  pipeline.shaderStages.push_back(createInfoFrag);
 }
 
 void MVkPipeline::initPipeline() {

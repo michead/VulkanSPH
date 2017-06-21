@@ -15,8 +15,6 @@
 #define VK_DESCRIPTOR_POOL_MAX_SETS_DEFAULT 30
 #define VK_DESCRIPTOR_POOL_SIZE_DEFAULT     1
 
-#define MVK_FAIL(str) std::cerr << ##str" Exiting now..." << std::endl; exit(EXIT_FAILURE);
-
 namespace MVkWrap {
   inline void queryAvailableWSIExtensions(std::vector<const char*>& extensions) {
     extensions.clear();
@@ -104,7 +102,8 @@ namespace MVkWrap {
     
     if (graphicsQueueFamilyIndex < 0 ||
         presentQueueFamilyIndex  < 0) {
-      MVK_FAIL("No suitable device for performing graphics operations has been found.");
+      logger->error("No suitable device for performing graphics operations has been found.");
+      exit(EXIT_FAILURE);
     }
   }
   inline void createSemaphore(VkDevice device, VkSemaphore& semaphore) {
@@ -217,7 +216,8 @@ namespace MVkWrap {
     VkBool32 surfaceSupported;
     VK_CHECK(vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, *graphicsQueueFamilyIndex, surface, &surfaceSupported));
     if (!surfaceSupported || surfaceFormatCount < 1) {
-      MVK_FAIL("Surface is not supported. Cannot create swapchain.");
+      logger->error("Surface is not supported. Cannot create swapchain.");
+      exit(EXIT_FAILURE);
     }
     
     if (surfaceFormatCount == 1 && surfaceFormats[0].format == VK_FORMAT_UNDEFINED) {
@@ -627,14 +627,15 @@ namespace MVkWrap {
     moduleCreateInfo.pCode = spirV.data();
     VK_CHECK(vkCreateShaderModule(device, &moduleCreateInfo, nullptr, &shaderModule));
   }
-  inline void createShaderStage(VkShaderStageFlagBits stage, VkPipelineShaderStageCreateInfo& shaderStage) {
+  inline void shaderStage(const VkShaderModule& module, VkShaderStageFlagBits stage, VkPipelineShaderStageCreateInfo& shaderStage) {
     shaderStage = {};
-    shaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-    shaderStage.pNext = nullptr;
+    shaderStage.sType               = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    shaderStage.pNext               = nullptr;
     shaderStage.pSpecializationInfo = nullptr;
-    shaderStage.flags = 0;
-    shaderStage.stage = stage;
-    shaderStage.pName = "main";
+    shaderStage.flags               = 0;
+    shaderStage.stage               = stage;
+    shaderStage.pName               = "main";
+    shaderStage.module              = module;
   }
   inline void createFramebuffer(VkDevice device,
                                 const VkRenderPass& renderPass,
@@ -763,42 +764,6 @@ namespace MVkWrap {
     present.waitSemaphoreCount = 0;
     present.pResults           = nullptr;
     VK_CHECK(vkQueuePresentKHR(queue, &present));
-  }
-  inline bool isGLSLFilename(const char* filename) {
-    std::string extension = std::string(filename).substr(std::string(filename).find('.') + 1);
-    return extension == "conf"
-        || extension == "vert"
-        || extension == "tesc"
-        || extension == "tese"
-        || extension == "geom"
-        || extension == "frag"
-        || extension == "comp";              
-  }
-  inline void compileShaders(LPCWSTR dir) {
-    HANDLE hFind;
-    WIN32_FIND_DATA data;
-    std::wstring wDir(dir);
-    wDir += L"*";
-    hFind = FindFirstFile(wDir.c_str(), &data);
-    if (hFind != INVALID_HANDLE_VALUE) {
-      do {
-        char filename[128];
-        sprintf_s(filename, "%ws", data.cFileName);
-        if (isGLSLFilename(filename)) {
-          logger->info("Compiling shader {0} ...", filename);
-          char command[64];
-          sprintf_s(command, VK_SDK_BIN"glslangValidator %s", filename);
-          int ret = system(command);
-          if (ret != 0) {
-            logger->error("Shader compilation failed.");
-            getchar();
-            exit(EXIT_FAILURE);
-          }
-        }
-      } while (FindNextFile(hFind, &data));
-      FindClose(hFind);
-    }
-    logger->info("Shader compilation complete.");
   }
   inline void prepareFrame(VkDevice device, VkSwapchainKHR swapchain,
                            VkSemaphore semaphore, uint32_t imageIndex) {
