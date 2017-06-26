@@ -262,3 +262,6 @@ __pycache__/
 
 # External dependencies
 ext
+
+# SPIR-V
+*.spv

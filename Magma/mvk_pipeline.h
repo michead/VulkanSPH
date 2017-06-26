@@ -13,13 +13,9 @@ public:
 
 private:
   MVkContext*      context;
-
-  VkFormat         format;
-  VkRenderPass     renderPass;
-  VkPipelineLayout pipelineLayout;
-  uint32_t         vertexCount;
-
   MVKPipeline      pipeline;
+
+  uint32_t         vertexCount;
 
   std::vector<VkFramebuffer>           framebuffers;
   std::vector<VkBuffer>                vertexBuffers;
@@ -28,12 +24,15 @@ private:
   std::vector<VkSubpassDescription>    subpasses;
   std::vector<VkImageView>             colorAttachments;
   VkImageView                          depthAttachment;
+  VkDescriptorSetLayout                descriptorSetLayout;
 
   void init(const MVkPipelineParams& params) override;
-  void initSubpasses();
+  void initPipelineState();
   void initRenderPass();
   void initFramebuffers();
   void initStages();
+  void initPipelineLayout();
+  void initPipelineCache();
   void initPipeline();
   void registerCommandBuffer();
 };

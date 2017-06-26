@@ -16,6 +16,7 @@ void MVkContext::init(const char* appName, uint32_t appVersion, HWND windowHandl
   MVkWrap::createFence(device, drawFence);
   initCommandPool();
   initCommandBuffer();
+  initViewport();
   loadShaders();
   bInit = true;
 }
@@ -114,7 +115,7 @@ void MVkContext::loadShaders() {
         std::string shaderStage = sGlsl.substr(   sGlsl.size() - 4);
 
         char command[128];
-        std::string sSpv = sGlsl + "." + shaderName + "." + shaderStage + ".spv";
+        std::string sSpv = shaderName + "." + shaderStage + ".spv";
         sprintf_s(command, VK_SDK_BIN"glslangValidator %s -V -o %s", cGlsl, sSpv.c_str());
         
         int ret = system(command);
@@ -125,20 +126,30 @@ void MVkContext::loadShaders() {
         }
         
         if (shaderMap.find(shaderName) == shaderMap.end()) {
-          shaderMap[shaderName] = std::map<std::string, std::vector<unsigned int>>();
+          shaderMap[shaderName] = std::map<std::string, std::vector<char>>();
           if (shaderMap[shaderName].find(shaderStage) == shaderMap[shaderName].end()) {
-            shaderMap[shaderName][shaderStage] = std::vector<unsigned int>();
+            shaderMap[shaderName][shaderStage] = std::vector<char>();
           } else {
             shaderMap[shaderName][shaderStage].clear();
           }
         }
 
-        std::ifstream in{ sSpv };
-        unsigned int word;
-        while (in.good()) {
-          in >> word;
-          shaderMap[shaderName][shaderStage].emplace_back(word);
+        std::ifstream in(sSpv, std::ios::ate | std::ios::binary);
+
+        if (!in.is_open()) {
+          logger->error("Shader file cannot be opened.");
+          getchar();
+          exit(EXIT_FAILURE);
         }
+
+        size_t fileSize = (size_t) in.tellg();
+        std::vector<char> buffer(fileSize);
+
+        in.seekg(0);
+        in.read(buffer.data(), fileSize);
+        in.close();
+
+        shaderMap[shaderName][shaderStage] = buffer;
       }
     } while (FindNextFile(hFind, &data));
     
@@ -146,4 +157,9 @@ void MVkContext::loadShaders() {
   }
 
   logger->info("Shader compilation complete.");
+}
+
+void MVkContext::initViewport() {
+  viewport = MVkUtils::viewport( swapchain.extent.width, swapchain.extent.height );
+  scissor  = MVkUtils::scissor({ swapchain.extent.width, swapchain.extent.height });
 }

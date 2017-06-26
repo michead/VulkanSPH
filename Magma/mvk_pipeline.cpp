@@ -1,14 +1,28 @@
 #include "mvk_pipeline.h"
 #include "mvk_context.h"
 #include "mvk_wrap.h"
+#include "mvk_structs.h"
+#include "mvk_utils.h"
 
 void MVkPipeline::init(const MVkPipelineParams& params) {
-  initSubpasses();
+  initPipelineState();
   initRenderPass();
   initFramebuffers();
   initStages();
+  initPipelineLayout();
+  initPipelineCache();
   initPipeline();
   registerCommandBuffer();
+}
+
+void MVkPipeline::initPipelineLayout() {
+  VkDescriptorSetLayout descriptorSetLayout;
+  std::vector<VkDescriptorSetLayoutBinding> bindings = {
+    MVkDescriptorSetLayoutBindingUniformBufferVS,
+    MVkDescriptorSetLayoutBindingUniformBufferFS,
+  };
+  MVkWrap::createDescriptorSetLayout(context->device, bindings, descriptorSetLayout);
+  MVkWrap::createPipelineLayout(context->device, descriptorSetLayout, pipeline.layout);
 }
 
 void MVkPipeline::render() {
@@ -42,7 +56,7 @@ void MVkPipeline::registerCommandBuffer() {
   MVkWrap::beginCommandBuffer(context->commandBuffer);
   MVkWrap::beginRenderPass(
     context->commandBuffer,
-    renderPass,
+    pipeline.renderPass,
     framebuffers[context->currentSwapchainImageIndex],
     context->swapchain.extent,
     clearValues.data());
@@ -52,17 +66,14 @@ void MVkPipeline::registerCommandBuffer() {
   
   vkCmdBindDescriptorSets(context->commandBuffer, 
     VK_PIPELINE_BIND_POINT_GRAPHICS, 
-    pipelineLayout, 0, 1,
+    pipeline.layout, 0, 1,
     descriptorSets.data(), 0, nullptr);
 
   vkCmdBindVertexBuffers(context->commandBuffer, 0, 
     vertexBuffers.size(), vertexBuffers.data(), { 0 });
 
-  vkCmdSetViewport(context->commandBuffer, 0,
-    context->viewports.size(), context->viewports.data());
-  
-  vkCmdSetScissor(context->commandBuffer, 0,
-    context->scissors.size(), context->scissors.data());
+  vkCmdSetViewport(context->commandBuffer, 0, 1, &context->viewport);
+  vkCmdSetScissor (context->commandBuffer, 0, 1, &context->scissor);
   
   vkCmdDraw(context->commandBuffer, vertexCount, 1, 0, 0);
   
@@ -70,23 +81,32 @@ void MVkPipeline::registerCommandBuffer() {
   VK_CHECK(vkEndCommandBuffer(context->commandBuffer));
 }
 
-void MVkPipeline::initSubpasses() {
+void MVkPipeline::initPipelineState() {
   attachments.clear();
   attachments.push_back(MVkBaseAttachmentColor);
   attachments.push_back(MVkBaseAttachmentDepth);
 
   subpasses.clear();
   subpasses.push_back(MVkBaseSubpass);
+
+  pipeline.vertexInputState   = MVkPipelineVertexInputStateSPH;
+  pipeline.inputAssemblyState = MVkPipelineInputAssemblyStateSPH;
+  pipeline.rasterizationState = MVkPipelineRasterizationStateSPH;
+  pipeline.colorBlendState    = MVkPipelineColorBlendStateSPH;
+  pipeline.multisampleState   = MVkPipelieMultisampleStateSPH;
+  pipeline.dynamicState       = MVkPipelineDynamicStateSPH;
+  pipeline.viewportState      = MVkUtils::viewportState(context->viewport, context->scissor);
+  pipeline.depthStencilState  = MVkPipelineDepthStencilStateSPH;
 }
 
 void MVkPipeline::initRenderPass() {
-  MVkWrap::createRenderPass(context->device, pipeline.handle, attachments, subpasses, renderPass);
+  MVkWrap::createRenderPass(context->device, pipeline.handle, attachments, subpasses, pipeline.renderPass);
 }
 
 void MVkPipeline::initFramebuffers() {
   MVkWrap::createFramebuffer(
     context->device,
-    renderPass,
+    pipeline.renderPass,
     context->swapchain.imageViews,
     context->depthBuffer.imageView,
     context->swapchain.extent.width,
@@ -102,13 +122,18 @@ void MVkPipeline::initStages() {
   VkPipelineShaderStageCreateInfo createInfoFrag;
 
   MVkWrap::createShaderModule(context->device, context->shaderMap["particle"]["vert"], moduleVert);
-  MVkWrap::createShaderModule(context->device, context->shaderMap["particle"]["frag"], moduleVert);
+  MVkWrap::createShaderModule(context->device, context->shaderMap["particle"]["frag"], moduleFrag);
 
   MVkWrap::shaderStage(moduleVert, VK_SHADER_STAGE_VERTEX_BIT, createInfoVert);
   MVkWrap::shaderStage(moduleFrag, VK_SHADER_STAGE_FRAGMENT_BIT, createInfoFrag);
 
+  pipeline.shaderStages.clear();
   pipeline.shaderStages.push_back(createInfoVert);
   pipeline.shaderStages.push_back(createInfoFrag);
+}
+
+void MVkPipeline::initPipelineCache() {
+  pipeline.cache = VK_NULL_HANDLE;
 }
 
 void MVkPipeline::initPipeline() {

@@ -2,9 +2,11 @@
 #extension GL_ARB_separate_shader_objects  : enable
 #extension GL_ARB_shading_language_420pack : enable
 
-#define MAX_NUM_LIGHTS  32
-#define FLUID_COLOR     vec4(0, 0, 1, 1)
-#define AMBIENT_TERM    vec4(0.01, 0.01, 0.3, 1)
+#define MAX_NUM_LIGHTS    32
+#define FLUID_COLOR       vec4(0, 0, 1, 1)
+#define AMBIENT_TERM      vec4(0.01, 0.01, 0.3, 1)
+#define DEPTH_RANGE_NEAR  0.0
+#define DEPTH_RANGE_FAR   1.0
 
 layout(location = 0) out vec4 color;
 
@@ -13,7 +15,7 @@ struct Light {
   vec4 ke;
 };
 
-layout(binding = 0) uniform globals {
+layout(binding = 1) uniform globals {
   float particleSize;
   vec4  fluidDiffuse;
   vec4  ambientColor;
@@ -37,7 +39,8 @@ void main() {
 
   vec3 ndcPos;
   ndcPos.xy = (2.0 * gl_FragCoord.xy) / (uniforms.viewport.zw) - 1.0;
-  ndcPos.z  = (2.0 * gl_FragCoord.z - gl_DepthRange.near - gl_DepthRange.far) / (gl_DepthRange.far - gl_DepthRange.near);
+  ndcPos.z  = (2.0 * gl_FragCoord.z - DEPTH_RANGE_NEAR - DEPTH_RANGE_FAR)
+                                    / (DEPTH_RANGE_FAR - DEPTH_RANGE_NEAR);
 
   vec4 clipPos;
   clipPos.w   = uniforms.mvp[3][2] / (ndcPos.z - (uniforms.mvp[2][2] / uniforms.mvp[2][3]));

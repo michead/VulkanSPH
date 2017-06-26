@@ -48,14 +48,14 @@ public:
   VkFormat                 format;
   VkQueue                  graphicsQueue;
   VkQueue                  presentQueue;
+  VkViewport               viewport;
+  VkRect2D                 scissor;
 
   MVkAttachment            depthBuffer;
   MVkSwapchain             swapchain;
   MVkShaderMap             shaderMap;
 
   std::vector<const char*>             extensions;
-  std::vector<VkViewport>              viewports;
-  std::vector<VkRect2D>                scissors;
   std::vector<VkPhysicalDevice>        physicalDevices;
   std::vector<VkQueueFamilyProperties> queueFamilyProps;
   std::vector<const char*>             validationLayers;
@@ -76,6 +76,7 @@ private:
   void initSwapchain();
   void initDepthBuffer();
   void initDescriptorPool();
+  void initViewport();
   void loadShaders();
 
   // Has context been initialized?

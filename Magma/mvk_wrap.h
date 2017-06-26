@@ -474,6 +474,16 @@ namespace MVkWrap {
     vkUnmapMemory(device, deviceMemory);
     VK_CHECK(vkBindBufferMemory(device, buffer, deviceMemory, 0));
   }
+  inline void createDescriptorSetLayout(const VkDevice& device,
+                                        const std::vector<VkDescriptorSetLayoutBinding>& bindings,
+                                        VkDescriptorSetLayout& descriptorSetLayout) {
+    VkDescriptorSetLayoutCreateInfo createInfo = {};
+    createInfo.sType        = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    createInfo.pNext        = nullptr;
+    createInfo.bindingCount = bindings.size();
+    createInfo.pBindings    = bindings.data();
+    VK_CHECK(vkCreateDescriptorSetLayout(device, &createInfo, nullptr, &descriptorSetLayout));
+  }
   inline void createPipelineLayout(VkDevice device, VkDescriptorSetLayout& descriptorSetLayout,
                                    VkPipelineLayout& pipelineLayout) {
     VkDescriptorSetLayoutBinding layoutBindingInfo = {};
@@ -618,13 +628,13 @@ namespace MVkWrap {
     renderPassInfo.pDependencies   = nullptr;
     VK_CHECK(vkCreateRenderPass(device, &renderPassInfo, nullptr, &renderPass));
   }
-  inline void createShaderModule(VkDevice device, const std::vector<unsigned int>& spirV, VkShaderModule& shaderModule) {
+  inline void createShaderModule(VkDevice device, const std::vector<char>& spirV, VkShaderModule& shaderModule) {
     VkShaderModuleCreateInfo moduleCreateInfo;
-    moduleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-    moduleCreateInfo.pNext = nullptr;
-    moduleCreateInfo.flags = 0;
-    moduleCreateInfo.codeSize = spirV.size() * sizeof(unsigned int);
-    moduleCreateInfo.pCode = spirV.data();
+    moduleCreateInfo.sType    = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+    moduleCreateInfo.pNext    = nullptr;
+    moduleCreateInfo.flags    = 0;
+    moduleCreateInfo.codeSize = spirV.size();
+    moduleCreateInfo.pCode    = (uint32_t*) spirV.data();
     VK_CHECK(vkCreateShaderModule(device, &moduleCreateInfo, nullptr, &shaderModule));
   }
   inline void shaderStage(const VkShaderModule& module, VkShaderStageFlagBits stage, VkPipelineShaderStageCreateInfo& shaderStage) {
