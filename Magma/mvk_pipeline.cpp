@@ -9,20 +9,23 @@ void MVkPipeline::init(const MVkPipelineParams& params) {
   initRenderPass();
   initFramebuffers();
   initStages();
+  initVertexBuffer(params.vertexCount, params.positions);
   initPipelineLayout();
   initPipelineCache();
   initPipeline();
+  initUniformBuffers();
+  updateDescriptorSet();
   registerCommandBuffer();
 }
 
 void MVkPipeline::initPipelineLayout() {
-  VkDescriptorSetLayout descriptorSetLayout;
   std::vector<VkDescriptorSetLayoutBinding> bindings = {
     MVkDescriptorSetLayoutBindingUniformBufferVS,
     MVkDescriptorSetLayoutBindingUniformBufferFS,
   };
-  MVkWrap::createDescriptorSetLayout(context->device, bindings, descriptorSetLayout);
-  MVkWrap::createPipelineLayout(context->device, descriptorSetLayout, pipeline.layout);
+  MVkWrap::createDescriptorSetLayout(context->device, bindings, pipeline.descriptorSetLayout);
+  MVkWrap::createDescriptorSet(context->device, context->descriptorPool, pipeline.descriptorSetLayout, pipeline.descriptorSet);
+  MVkWrap::createPipelineLayout(context->device, pipeline.descriptorSetLayout, pipeline.layout);
 }
 
 void MVkPipeline::render() {
@@ -67,10 +70,11 @@ void MVkPipeline::registerCommandBuffer() {
   vkCmdBindDescriptorSets(context->commandBuffer, 
     VK_PIPELINE_BIND_POINT_GRAPHICS, 
     pipeline.layout, 0, 1,
-    descriptorSets.data(), 0, nullptr);
+    &pipeline.descriptorSet, 0, nullptr);
 
+  std::vector<VkDeviceSize> offsets(vertexBuffers.size(), 0);
   vkCmdBindVertexBuffers(context->commandBuffer, 0, 
-    vertexBuffers.size(), vertexBuffers.data(), { 0 });
+    vertexBuffers.size(), vertexBuffers.data(), offsets.data());
 
   vkCmdSetViewport(context->commandBuffer, 0, 1, &context->viewport);
   vkCmdSetScissor (context->commandBuffer, 0, 1, &context->scissor);
@@ -134,6 +138,47 @@ void MVkPipeline::initStages() {
 
 void MVkPipeline::initPipelineCache() {
   pipeline.cache = VK_NULL_HANDLE;
+}
+
+void MVkPipeline::initVertexBuffer(uint32_t vertexCount, const glm::vec4* vertices) {
+  vertexBuffers.clear();
+  vertexBuffers.resize(vertexCount);
+  
+  vertexBufferMemoryVec.clear();
+  vertexBufferMemoryVec.resize(vertexCount);
+
+  MVkWrap::createBuffer(context->physicalDevice,
+                        context->device,
+                        VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+                        (void*)vertices,
+                        vertexCount * sizeof(glm::vec4),
+                        vertexBuffers[0],
+                        vertexBufferMemoryVec[0]);
+}
+
+void MVkPipeline::initUniformBuffers() {
+  MVkWrap::createBuffer(context->physicalDevice,
+                        context->device,
+                        VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                        &uniformsVS,
+                        sizeof(MVkVertexShaderUniformParticle),
+                        uniformBufferVS,
+                        uniformBufferMemoryVS,
+                        &uniformBufferInfoVS);
+
+  MVkWrap::createBuffer(context->physicalDevice,
+                        context->device,
+                        VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                        &uniformsFS,
+                        sizeof(MVkFragmentShaderUniformParticle),
+                        uniformBufferFS,
+                        uniformBufferMemoryFS,
+                        &uniformBufferInfoFS);
+}
+
+void MVkPipeline::updateDescriptorSet() {
+  MVkWrap::updateDescriptorSet(context->device, pipeline.descriptorSet, uniformBufferInfoVS);
+  MVkWrap::updateDescriptorSet(context->device, pipeline.descriptorSet, uniformBufferInfoFS);
 }
 
 void MVkPipeline::initPipeline() {

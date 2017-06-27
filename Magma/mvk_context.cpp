@@ -18,6 +18,7 @@ void MVkContext::init(const char* appName, uint32_t appVersion, HWND windowHandl
   initCommandBuffer();
   initViewport();
   loadShaders();
+  initDescriptorPool();
   bInit = true;
 }
 
@@ -71,10 +72,7 @@ void MVkContext::initSwapchain() {
 }
 
 void MVkContext::initDescriptorPool() {
-  VkDescriptorPoolSize descriptorPoolSize = {
-    VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
-    1
-  };
+  VkDescriptorPoolSize descriptorPoolSize = VK_DESCRIPTOR_POOL_SIZE;
   MVkWrap::createDescriptorPool(device, descriptorPoolSize, descriptorPool);
 }
 

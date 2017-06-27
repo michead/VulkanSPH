@@ -56,6 +56,10 @@ void SPH::loadParamsFromJson() {
     particles.resize(jsonParticles["positions"].size());
     // TODO: Copy particle attributes
   }
+
+  // TODO: Only for testing purposes -- Remove it
+  particles.resize(1);
+  particles.positions[0] = { 0, 0, 0, 1 };
 }
 
 void SPH::draw() {

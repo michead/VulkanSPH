@@ -2,6 +2,7 @@
 
 #include <map>
 #include <vector>
+#include <glm\glm.hpp>
 #include <vulkan\vulkan.hpp>
 
 struct MVkAttachment {
@@ -29,9 +30,34 @@ struct MVkWsi {
 
 struct MVkPipelineParams {
   uint8_t numPasses;
+  uint32_t vertexCount;
+  glm::vec4* positions;
+};
+
+struct Light {
+  glm::vec3 pos;
+  glm::vec4 ke;
+};
+
+struct MVkVertexShaderUniformParticle {
+  float     particleSize;
+  glm::mat4 mvp;
+};
+
+struct MVkFragmentShaderUniformParticle {
+  float              particleSize;
+  glm::vec4          fluidDiffuse;
+  glm::vec4          ambientColor;
+  glm::mat4          mvp;
+  glm::mat4          invMvp;
+  glm::ivec4         viewport;
+  glm::uint8_t       lightCount;
+  std::vector<Light> lights;
 };
 
 struct MVKPipeline {
+  VkDescriptorSet descriptorSet;
+  VkDescriptorSetLayout descriptorSetLayout;
   VkPipelineLayout layout;
   VkPipelineVertexInputStateCreateInfo vertexInputState;
   VkPipelineInputAssemblyStateCreateInfo inputAssemblyState;

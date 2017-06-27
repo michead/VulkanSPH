@@ -49,6 +49,8 @@ public:
   virtual void draw();
   void update(double dt);
 
+  Particles getParticles() const { return particles; }
+
 private:
   void init();
   void loadParamsFromJson();

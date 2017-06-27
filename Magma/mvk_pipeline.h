@@ -1,6 +1,8 @@
 #pragma once
 
 #include "pipeline.h"
+#include "mvk_structs.h"
+#include <glm\glm.hpp>
 #include <vulkan\vulkan.hpp>
 
 class MVkContext;
@@ -15,16 +17,24 @@ private:
   MVkContext*      context;
   MVKPipeline      pipeline;
 
-  uint32_t         vertexCount;
+  MVkVertexShaderUniformParticle   uniformsVS;
+  MVkFragmentShaderUniformParticle uniformsFS;
 
   std::vector<VkFramebuffer>           framebuffers;
-  std::vector<VkBuffer>                vertexBuffers;
   std::vector<VkDescriptorSet>         descriptorSets;
+  std::vector<VkBuffer>                vertexBuffers;
+  std::vector<VkDeviceMemory>          vertexBufferMemoryVec;
   std::vector<VkAttachmentDescription> attachments;
   std::vector<VkSubpassDescription>    subpasses;
   std::vector<VkImageView>             colorAttachments;
+  VkBuffer                             uniformBufferVS;
+  VkBuffer                             uniformBufferFS;
+  VkDescriptorBufferInfo               uniformBufferInfoVS;
+  VkDescriptorBufferInfo               uniformBufferInfoFS;
+  VkDeviceMemory                       uniformBufferMemoryVS;
+  VkDeviceMemory                       uniformBufferMemoryFS;
   VkImageView                          depthAttachment;
-  VkDescriptorSetLayout                descriptorSetLayout;
+  uint32_t                             vertexCount;
 
   void init(const MVkPipelineParams& params) override;
   void initPipelineState();
@@ -34,5 +44,8 @@ private:
   void initPipelineLayout();
   void initPipelineCache();
   void initPipeline();
+  void initVertexBuffer(uint32_t vertexCount, const glm::vec4* vertices);
+  void initUniformBuffers();
+  void updateDescriptorSet();
   void registerCommandBuffer();
 };

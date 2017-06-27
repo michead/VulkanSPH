@@ -1,3 +1,4 @@
+#include <glm\glm.hpp>
 #include "mvk_structs.h"
 
 const VkAttachmentDescription MVkBaseAttachmentColor = {
@@ -59,13 +60,18 @@ const VkClearValue MVkClearValueDepthStencilOneZero = {
   0
 };
 
-const std::vector<VkVertexInputBindingDescription> MVkVertexInputBindingDescriptionsSPH = {
+const std::vector<VkVertexInputBindingDescription> MVkVertexInputBindingDescriptionsSPH = { {
+  0,
+  sizeof(glm::vec4),
+  VK_VERTEX_INPUT_RATE_VERTEX
+}};
 
-};
-
-const std::vector<VkVertexInputAttributeDescription> MVkVertexAttributeDescriptionsSPH = {
-
-};
+const std::vector<VkVertexInputAttributeDescription> MVkVertexAttributeDescriptionsSPH = {{
+  0,
+  0,
+  VK_FORMAT_R32G32B32A32_SFLOAT,
+  0
+}};
 
 const VkPipelineVertexInputStateCreateInfo  MVkPipelineVertexInputStateSPH = {
   VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,

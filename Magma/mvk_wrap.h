@@ -440,7 +440,8 @@ namespace MVkWrap {
   }
   inline void createBuffer(VkPhysicalDevice physicalDevice,VkDevice device, 
                            VkBufferUsageFlags usage, void* data, size_t size,
-                           VkBuffer& buffer, VkDeviceMemory& deviceMemory) {
+                           VkBuffer& buffer, VkDeviceMemory& deviceMemory,
+                           VkDescriptorBufferInfo* outBufferInfo = nullptr) {
     VkBufferCreateInfo bufferInfo = {};
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     bufferInfo.pNext = nullptr;
@@ -455,16 +456,16 @@ namespace MVkWrap {
     VkMemoryRequirements memReqs;
     vkGetBufferMemoryRequirements(device, buffer, &memReqs);
     
-    VkMemoryAllocateInfo allocateInfo = {};
-    allocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-    allocateInfo.pNext = nullptr;
-    allocateInfo.memoryTypeIndex = 0;
-    allocateInfo.allocationSize = memReqs.size;
-    
     uint32_t memoryTypeIndex;
     getMemTypeIndexFromMemProps(physicalDevice, memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
                                                                         VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &memoryTypeIndex);
     
+    VkMemoryAllocateInfo allocateInfo = {};
+    allocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    allocateInfo.pNext = nullptr;
+    allocateInfo.memoryTypeIndex = memoryTypeIndex;
+    allocateInfo.allocationSize = memReqs.size;
+
     VK_CHECK(vkAllocateMemory(device, &allocateInfo, nullptr, &deviceMemory));
     
     void* mappedMem;
@@ -473,6 +474,12 @@ namespace MVkWrap {
     memcpy(mappedMem, data, size);
     vkUnmapMemory(device, deviceMemory);
     VK_CHECK(vkBindBufferMemory(device, buffer, deviceMemory, 0));
+
+    if (outBufferInfo) {
+      outBufferInfo->buffer = buffer;
+      outBufferInfo->offset = 0;
+      outBufferInfo->range  = size;
+    }
   }
   inline void createDescriptorSetLayout(const VkDevice& device,
                                         const std::vector<VkDescriptorSetLayoutBinding>& bindings,
@@ -484,29 +491,19 @@ namespace MVkWrap {
     createInfo.pBindings    = bindings.data();
     VK_CHECK(vkCreateDescriptorSetLayout(device, &createInfo, nullptr, &descriptorSetLayout));
   }
-  inline void createPipelineLayout(VkDevice device, VkDescriptorSetLayout& descriptorSetLayout,
+  inline void createPipelineLayout(const VkDevice& device,
+                                   const VkDescriptorSetLayout& descriptorSetLayout,
                                    VkPipelineLayout& pipelineLayout) {
-    VkDescriptorSetLayoutBinding layoutBindingInfo = {};
-    layoutBindingInfo.binding = 0;
-    layoutBindingInfo.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    layoutBindingInfo.descriptorCount = 1;
-    layoutBindingInfo.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-    VkDescriptorSetLayoutCreateInfo descriptorLayoutInfo = {};
-    descriptorLayoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    descriptorLayoutInfo.pNext = nullptr;
-    descriptorLayoutInfo.bindingCount = 1;
-    descriptorLayoutInfo.pBindings = &layoutBindingInfo;
-    VK_CHECK(vkCreateDescriptorSetLayout(device, &descriptorLayoutInfo, nullptr, &descriptorSetLayout));
     VkPipelineLayoutCreateInfo pPipelineLayoutCreateInfo = {};
-    pPipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    pPipelineLayoutCreateInfo.pNext = nullptr;
-    pPipelineLayoutCreateInfo.pushConstantRangeCount = 0;
-    pPipelineLayoutCreateInfo.pPushConstantRanges = nullptr;
-    pPipelineLayoutCreateInfo.setLayoutCount = 1;
-    pPipelineLayoutCreateInfo.pSetLayouts = &descriptorSetLayout;
+    pPipelineLayoutCreateInfo.sType                      = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+    pPipelineLayoutCreateInfo.pNext                      = nullptr;
+    pPipelineLayoutCreateInfo.pushConstantRangeCount     = 0;
+    pPipelineLayoutCreateInfo.pPushConstantRanges        = nullptr;
+    pPipelineLayoutCreateInfo.setLayoutCount             = 1;
+    pPipelineLayoutCreateInfo.pSetLayouts                = &descriptorSetLayout;
     VK_CHECK(vkCreatePipelineLayout(device, &pPipelineLayoutCreateInfo, nullptr, &pipelineLayout));
   }
-  inline void createDescriptorPool(VkDevice device, VkDescriptorPoolSize descriptorPoolSize,
+  inline void createDescriptorPool(const VkDevice& device, VkDescriptorPoolSize descriptorPoolSize,
                                    VkDescriptorPool& descriptorPool) {
     VkDescriptorPoolCreateInfo descriptorPoolInfo = {};
     descriptorPoolInfo.sType         = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
@@ -516,7 +513,7 @@ namespace MVkWrap {
     descriptorPoolInfo.pPoolSizes    = &descriptorPoolSize;
     VK_CHECK(vkCreateDescriptorPool(device, &descriptorPoolInfo, nullptr, &descriptorPool));
   }
-  inline void createDescriptorSet(VkDevice device, VkDescriptorPool descriptorPool,
+  inline void createDescriptorSet(const VkDevice& device, VkDescriptorPool descriptorPool,
                                   VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet& descriptorSet) {
     VkDescriptorSetAllocateInfo allocateInfo = {};
     allocateInfo.sType              = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;

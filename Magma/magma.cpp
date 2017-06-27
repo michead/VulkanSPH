@@ -37,7 +37,13 @@ void Magma::init() {
   emitter = new Emitter();
   emitter->setSolver(sph);
 
-  mvkPipeline = new MVkPipeline(mvkContext, MVkPipelineParams());
+  MVkPipelineParams params = {
+    0,
+    sph->getParticles().positions.size(),
+    sph->getParticles().positions.data()
+  };
+
+  mvkPipeline = new MVkPipeline(mvkContext, params);
 }
 
 void Magma::cleanup() {
