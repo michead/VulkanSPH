@@ -49,7 +49,7 @@ public:
   virtual void draw();
   void update(double dt);
 
-  Particles getParticles() const { return particles; }
+  Particles getParticles() { return particles; }
 
 private:
   void init();

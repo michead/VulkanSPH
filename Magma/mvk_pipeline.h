@@ -6,16 +6,19 @@
 #include <vulkan\vulkan.hpp>
 
 class MVkContext;
+class SPH;
 
 class MVkPipeline : public MPipeline {
 public:
-  MVkPipeline(MVkContext* context, MVkPipelineParams& params) : context(context) { init(params); }
+  MVkPipeline(MVkContext* context, SPH* sph) : context(context), sph(sph) { init(); }
 
   void render() override;
 
 private:
   MVkContext*      context;
   MVKPipeline      pipeline;
+
+  SPH* sph;
 
   MVkVertexShaderUniformParticle   uniformsVS;
   MVkFragmentShaderUniformParticle uniformsFS;
@@ -34,9 +37,8 @@ private:
   VkDeviceMemory                       uniformBufferMemoryVS;
   VkDeviceMemory                       uniformBufferMemoryFS;
   VkImageView                          depthAttachment;
-  uint32_t                             vertexCount;
 
-  void init(const MVkPipelineParams& params) override;
+  void init() override;
   void initPipelineState();
   void initRenderPass();
   void initFramebuffers();
@@ -44,7 +46,7 @@ private:
   void initPipelineLayout();
   void initPipelineCache();
   void initPipeline();
-  void initVertexBuffer(uint32_t vertexCount, const glm::vec4* vertices);
+  void initVertexBuffer();
   void initUniformBuffers();
   void updateDescriptorSet();
   void registerCommandBuffer();

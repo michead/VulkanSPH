@@ -20,13 +20,15 @@
 #define SHADER_PATH L"."
 #endif
 
+struct Config;
+
 class MVkContext {
 public:
   // Get singleton instance of Vulkan context
-  static MVkContext* getContext(const char* appName, uint32_t appVersion, HWND windowHandle) {
+  static MVkContext* getContext(const char* appName, uint32_t appVersion, HWND windowHandle, const Config* config) {
     static MVkContext context;
     if (!bInit) {
-      context.init(appName, appVersion, windowHandle);
+      context.init(appName, appVersion, windowHandle, config);
       bInit = true;
     }
     return &context;
@@ -38,7 +40,6 @@ public:
   VkPhysicalDevice         physicalDevice;
   VkDevice                 device;
   VkSemaphore              imageAcquiredSemaphore;
-  VkFence                  drawFence;
   uint32_t                 currentSwapchainImageIndex;
   VkCommandPool            commandPool;
   VkCommandBuffer          commandBuffer;
@@ -60,21 +61,21 @@ public:
   std::vector<VkPhysicalDevice>        physicalDevices;
   std::vector<VkQueueFamilyProperties> queueFamilyProps;
   std::vector<const char*>             validationLayers;
+  std::vector<VkFence>                 drawFences;
 
 private:
   MVkContext() {}
 
   // Initialize context
-  void init(const char* appName, uint32_t appVersion, HWND windowHandle);
+  void init(const char* appName, uint32_t appVersion, HWND windowHandle, const Config* config);
 
-  void setValidationLayers();
   void initInstance(const char* appName, uint32_t appVersion);
   void selectPhysicalDevice();
   void initDevice();
   void initCommandPool();
   void initCommandBuffer();
   void initSurface(HWND hwnd);
-  void initSwapchain();
+  void initSwapchain(glm::ivec2 resolution);
   void initDepthBuffer();
   void initDescriptorPool();
   void initViewport();

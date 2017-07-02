@@ -9,6 +9,11 @@ layout(binding = 0) uniform globals {
 
 layout(location = 0) in vec4 pos;
 
+out gl_PerVertex{
+  vec4  gl_Position;
+  float gl_PointSize;
+};
+
 void main() {
   gl_PointSize = uniforms.particleSize;
   gl_Position  = uniforms.mvp * pos;

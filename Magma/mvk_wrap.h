@@ -106,6 +106,9 @@ namespace MVkWrap {
       exit(EXIT_FAILURE);
     }
   }
+  inline void queryDeviceFeatures(VkPhysicalDevice physicalDevice, VkPhysicalDeviceFeatures* deviceFeatures) {
+    vkGetPhysicalDeviceFeatures(physicalDevice, deviceFeatures);
+  }
   inline void createSemaphore(VkDevice device, VkSemaphore& semaphore) {
     VkSemaphoreCreateInfo imageAcquiredSemaphoreCreateInfo;
     imageAcquiredSemaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -250,8 +253,6 @@ namespace MVkWrap {
                               std::vector<VkImage>& swapchainImages,
                               std::vector<VkImageView>& swapchainImageViews) {
     if (surfaceCapabilities.currentExtent.width == 0xFFFFFFFF) {
-      swapchainExtent.width  = 1920;
-      swapchainExtent.height = 1080;
       if (swapchainExtent.width < surfaceCapabilities.minImageExtent.width) {
         swapchainExtent.width = surfaceCapabilities.minImageExtent.width;
       } else if (swapchainExtent.width > surfaceCapabilities.maxImageExtent.width) {
@@ -438,9 +439,13 @@ namespace MVkWrap {
     imageViewInfo.flags = 0;
     VK_CHECK(vkCreateImageView(device, &imageViewInfo, nullptr, &depthImageView));
   }
-  inline void createBuffer(VkPhysicalDevice physicalDevice,VkDevice device, 
-                           VkBufferUsageFlags usage, void* data, size_t size,
-                           VkBuffer& buffer, VkDeviceMemory& deviceMemory,
+  inline void createBuffer(VkPhysicalDevice physicalDevice,
+                           VkDevice device, 
+                           VkBufferUsageFlags usage,
+                           void* data,
+                           size_t size,
+                           VkBuffer& buffer,
+                           VkDeviceMemory& deviceMemory,
                            VkDescriptorBufferInfo* outBufferInfo = nullptr) {
     VkBufferCreateInfo bufferInfo = {};
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -478,7 +483,7 @@ namespace MVkWrap {
     if (outBufferInfo) {
       outBufferInfo->buffer = buffer;
       outBufferInfo->offset = 0;
-      outBufferInfo->range  = size;
+      outBufferInfo->range  = VK_WHOLE_SIZE;
     }
   }
   inline void createDescriptorSetLayout(const VkDevice& device,
@@ -492,15 +497,16 @@ namespace MVkWrap {
     VK_CHECK(vkCreateDescriptorSetLayout(device, &createInfo, nullptr, &descriptorSetLayout));
   }
   inline void createPipelineLayout(const VkDevice& device,
-                                   const VkDescriptorSetLayout& descriptorSetLayout,
+                                   uint32_t descriptorSetLayoutCount,
+                                   VkDescriptorSetLayout* descriptorSetLayouts,
                                    VkPipelineLayout& pipelineLayout) {
     VkPipelineLayoutCreateInfo pPipelineLayoutCreateInfo = {};
     pPipelineLayoutCreateInfo.sType                      = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
     pPipelineLayoutCreateInfo.pNext                      = nullptr;
     pPipelineLayoutCreateInfo.pushConstantRangeCount     = 0;
     pPipelineLayoutCreateInfo.pPushConstantRanges        = nullptr;
-    pPipelineLayoutCreateInfo.setLayoutCount             = 1;
-    pPipelineLayoutCreateInfo.pSetLayouts                = &descriptorSetLayout;
+    pPipelineLayoutCreateInfo.setLayoutCount             = descriptorSetLayoutCount;
+    pPipelineLayoutCreateInfo.pSetLayouts                = descriptorSetLayouts;
     VK_CHECK(vkCreatePipelineLayout(device, &pPipelineLayoutCreateInfo, nullptr, &pipelineLayout));
   }
   inline void createDescriptorPool(const VkDevice& device, VkDescriptorPoolSize descriptorPoolSize,
@@ -523,7 +529,10 @@ namespace MVkWrap {
     allocateInfo.pSetLayouts        = &descriptorSetLayout;
     VK_CHECK(vkAllocateDescriptorSets(device, &allocateInfo, &descriptorSet));
   }
-  inline void updateDescriptorSet(VkDevice device, const VkDescriptorSet& descriptorSet, const VkDescriptorBufferInfo& bufferInfo) {
+  inline void updateDescriptorSet(const VkDevice& device,
+                                  VkDescriptorSet descriptorSet,
+                                  uint32_t binding,
+                                  const VkDescriptorBufferInfo& bufferInfo) {
     VkWriteDescriptorSet writes = {};
     writes.sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
     writes.pNext           = nullptr;
@@ -532,7 +541,7 @@ namespace MVkWrap {
     writes.descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     writes.pBufferInfo     = &bufferInfo;
     writes.dstArrayElement = 0;
-    writes.dstBinding      = 0;
+    writes.dstBinding      = binding;
     vkUpdateDescriptorSets(device, 1, &writes, 0, nullptr);
   }
   inline void setImageLayout(const VkCommandBuffer& commandBuffer,
@@ -644,22 +653,24 @@ namespace MVkWrap {
     shaderStage.pName               = "main";
     shaderStage.module              = module;
   }
-  inline void createFramebuffer(VkDevice device,
+  inline void createFramebuffers(VkDevice device,
                                 const VkRenderPass& renderPass,
                                 const std::vector<VkImageView>& colorAttachments,
-                                const VkImageView& depthAttachment,
+                                VkImageView depthAttachment,
                                 uint32_t width,
                                 uint32_t height,
                                 std::vector<VkFramebuffer>& framebuffers) {
-    VkImageView attachments[2];
-    attachments[1] = depthAttachment;
+    std::vector<VkImageView> attachments(1);
+    if (depthAttachment != VK_NULL_HANDLE) {
+      attachments.push_back(depthAttachment);
+    }
     
     VkFramebufferCreateInfo framebufferInfo = {};
     framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
     framebufferInfo.pNext = nullptr;
     framebufferInfo.renderPass = renderPass;
-    framebufferInfo.attachmentCount = colorAttachments.size();
-    framebufferInfo.pAttachments = attachments;
+    framebufferInfo.attachmentCount = attachments.size();
+    framebufferInfo.pAttachments = attachments.data();
     framebufferInfo.width = width;
     framebufferInfo.height = height;
     framebufferInfo.layers = 1;
@@ -743,37 +754,41 @@ namespace MVkWrap {
     vkCmdBeginRenderPass(commandBuffer, &renderPassBegin, VK_SUBPASS_CONTENTS_INLINE);
   }
   inline void submitCommandBuffer(VkQueue queue,
-                                  const VkCommandBuffer& commandBuffer,
-                                  const VkSemaphore& waitSemaphore,
-                                  VkPipelineStageFlags stage,
-                                  VkFence& fence) {
+                                  uint32_t commandBufferCount,
+                                  const VkCommandBuffer* commandBuffers,
+                                  uint32_t waitSemaphoreCount,
+                                  const VkSemaphore* waitSemaphores,
+                                  const VkPipelineStageFlags* stageFlags,
+                                  VkFence fence) {
     VkSubmitInfo submitInfo         = {};
     submitInfo.pNext                = nullptr;
     submitInfo.sType                = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-    submitInfo.waitSemaphoreCount   = 1;
-    submitInfo.pWaitSemaphores      = &waitSemaphore;
-    submitInfo.pWaitDstStageMask    = &stage;
-    submitInfo.commandBufferCount   = 1;
-    submitInfo.pCommandBuffers      = &commandBuffer;
+    submitInfo.waitSemaphoreCount   = waitSemaphoreCount;
+    submitInfo.pWaitSemaphores      = waitSemaphores;
+    submitInfo.pWaitDstStageMask    = stageFlags;
+    submitInfo.commandBufferCount   = commandBufferCount;
+    submitInfo.pCommandBuffers      = commandBuffers;
     submitInfo.signalSemaphoreCount = 0;
     submitInfo.pSignalSemaphores    = nullptr;
     VK_CHECK(vkQueueSubmit(queue, 1, &submitInfo, fence));
   }
 
-  inline void presentSwapchain(VkQueue queue, VkSwapchainKHR swapchain, uint32_t imageIndex) {
+  inline void presentSwapchain(VkQueue queue, const VkSwapchainKHR* swapchain, const uint32_t* imageIndex) {
     VkPresentInfoKHR present   = {};
     present.sType              = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
     present.pNext              = nullptr;
     present.swapchainCount     = 1;
-    present.pSwapchains        = &swapchain;
-    present.pImageIndices      = &imageIndex;
+    present.pSwapchains        = swapchain;
+    present.pImageIndices      = imageIndex;
     present.pWaitSemaphores    = nullptr;
     present.waitSemaphoreCount = 0;
     present.pResults           = nullptr;
     VK_CHECK(vkQueuePresentKHR(queue, &present));
   }
-  inline void prepareFrame(VkDevice device, VkSwapchainKHR swapchain,
-                           VkSemaphore semaphore, uint32_t imageIndex) {
-    VK_CHECK(vkAcquireNextImageKHR(device, swapchain, UINT64_MAX, semaphore, VK_NULL_HANDLE, &imageIndex));
+  inline void prepareFrame(const VkDevice& device,
+                           VkSwapchainKHR swapchain,
+                           VkSemaphore semaphore,
+                           uint32_t* imageIndex) {
+    VK_CHECK(vkAcquireNextImageKHR(device, swapchain, UINT64_MAX, semaphore, VK_NULL_HANDLE, imageIndex));
   }
 }

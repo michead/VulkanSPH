@@ -5,28 +5,20 @@
 
 bool MVkContext::bInit = false;
 
-void MVkContext::init(const char* appName, uint32_t appVersion, HWND windowHandle) {
+void MVkContext::init(const char* appName, uint32_t appVersion, HWND windowHandle, const Config* config) {
   initInstance(appName, appVersion);
   selectPhysicalDevice();
   initSurface(windowHandle);
   initDevice();
-  initSwapchain();
+  initSwapchain(config->resolution);
   initDepthBuffer();
   MVkWrap::createSemaphore(device, imageAcquiredSemaphore);
-  MVkWrap::createFence(device, drawFence);
   initCommandPool();
   initCommandBuffer();
   initViewport();
   loadShaders();
   initDescriptorPool();
   bInit = true;
-}
-
-void MVkContext::setValidationLayers() {
-  validationLayers.clear();
-#if defined(_DEBUG)
-  validationLayers.push_back("VK_LAYER_LUNARG_standard_validation");
-#endif
 }
 
 void MVkContext::initInstance(const char* appName, uint32_t appVersion) {
@@ -63,12 +55,22 @@ void MVkContext::initSurface(HWND hwnd) {
     surface, surfaceCapabilities, format);
 }
 
-void MVkContext::initSwapchain() {
+void MVkContext::initSwapchain(glm::ivec2 resolution) {
+  swapchain.extent = {
+    (uint32_t) resolution.x,
+    (uint32_t) resolution.y
+  };
   MVkWrap::createSwapchain(device,
     surface, surfaceCapabilities, format,
     graphicsQueueFamilyIndex, presentQueueFamilyIndex, 
     swapchain.handle, swapchain.extent, swapchain.images, swapchain.imageViews);
   currentSwapchainImageIndex = 0;
+
+  size_t swapchainImageCount = swapchain.imageViews.size();
+  drawFences.resize(swapchainImageCount);
+  for (size_t i = 0; i < swapchainImageCount; i++) {
+    MVkWrap::createFence(device, drawFences[i]);
+  }
 }
 
 void MVkContext::initDescriptorPool() {

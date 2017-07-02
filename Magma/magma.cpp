@@ -30,20 +30,15 @@ void Magma::init() {
   mvkContext = MVkContext::getContext(
     MAGMA_DISPLAY_NAME,
     MAGMA_VERSION, 
-    windowInfo.info.win.window);
+    windowInfo.info.win.window,
+    &config);
 
   // Initialize solver and emitter
   sph = new SPH("params.json");
   emitter = new Emitter();
   emitter->setSolver(sph);
 
-  MVkPipelineParams params = {
-    0,
-    sph->getParticles().positions.size(),
-    sph->getParticles().positions.data()
-  };
-
-  mvkPipeline = new MVkPipeline(mvkContext, params);
+  mvkPipeline = new MVkPipeline(mvkContext, sph);
 }
 
 void Magma::cleanup() {

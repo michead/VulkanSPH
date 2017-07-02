@@ -10,7 +10,7 @@ class MPipeline {
 public:
   MPipeline() { }
 
-  virtual void init(const MVkPipelineParams& params) = 0;
+  virtual void init() = 0;
   virtual void render() = 0;
 };
 

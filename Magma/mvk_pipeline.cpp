@@ -3,13 +3,14 @@
 #include "mvk_wrap.h"
 #include "mvk_structs.h"
 #include "mvk_utils.h"
+#include "sph.h"
 
-void MVkPipeline::init(const MVkPipelineParams& params) {
+void MVkPipeline::init() {
   initPipelineState();
   initRenderPass();
   initFramebuffers();
   initStages();
-  initVertexBuffer(params.vertexCount, params.positions);
+  initVertexBuffer();
   initPipelineLayout();
   initPipelineCache();
   initPipeline();
@@ -25,7 +26,7 @@ void MVkPipeline::initPipelineLayout() {
   };
   MVkWrap::createDescriptorSetLayout(context->device, bindings, pipeline.descriptorSetLayout);
   MVkWrap::createDescriptorSet(context->device, context->descriptorPool, pipeline.descriptorSetLayout, pipeline.descriptorSet);
-  MVkWrap::createPipelineLayout(context->device, pipeline.descriptorSetLayout, pipeline.layout);
+  MVkWrap::createPipelineLayout(context->device, 1, &pipeline.descriptorSetLayout, pipeline.layout);
 }
 
 void MVkPipeline::render() {
@@ -33,24 +34,38 @@ void MVkPipeline::render() {
     context->device,
     context->swapchain.handle,
     context->imageAcquiredSemaphore,
-    context->currentSwapchainImageIndex);
+    &context->currentSwapchainImageIndex);
 
-  MVkWrap::submitCommandBuffer(
-    context->graphicsQueue,
-    context->commandBuffer,
-    context->imageAcquiredSemaphore,
-    VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
-    context->drawFence);
+  VK_CHECK(vkResetFences(
+    context->device,
+    1,
+    &context->drawFences[context->currentSwapchainImageIndex]));
 
   VkResult res;
   do {
-    VK_CHECK((res = vkWaitForFences(context->device, 1, &context->drawFence, VK_TRUE, UINT64_MAX)));
+    VK_CHECK((res = vkWaitForFences(
+      context->device,
+      1,
+      &context->drawFences[context->currentSwapchainImageIndex],
+      VK_TRUE,
+      UINT64_MAX)));
   } while (res == VK_TIMEOUT);
+
+  VkPipelineStageFlags stageFlags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+
+  MVkWrap::submitCommandBuffer(
+    context->graphicsQueue,
+    1,
+    &context->commandBuffer,
+    1,
+    &context->imageAcquiredSemaphore,
+    &stageFlags,
+    context->drawFences[context->currentSwapchainImageIndex]);
 
   MVkWrap::presentSwapchain(
     context->presentQueue,
-    context->swapchain.handle,
-    context->currentSwapchainImageIndex);
+    &context->swapchain.handle,
+    &context->currentSwapchainImageIndex);
 }
 
 void MVkPipeline::registerCommandBuffer() {
@@ -67,18 +82,19 @@ void MVkPipeline::registerCommandBuffer() {
   vkCmdBindPipeline(context->commandBuffer,
     VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.handle);
   
-  vkCmdBindDescriptorSets(context->commandBuffer, 
-    VK_PIPELINE_BIND_POINT_GRAPHICS, 
-    pipeline.layout, 0, 1,
-    &pipeline.descriptorSet, 0, nullptr);
+   vkCmdBindDescriptorSets(context->commandBuffer, 
+     VK_PIPELINE_BIND_POINT_GRAPHICS,
+     pipeline.layout, 0, 1,
+     &pipeline.descriptorSet, 0, nullptr);
 
   std::vector<VkDeviceSize> offsets(vertexBuffers.size(), 0);
   vkCmdBindVertexBuffers(context->commandBuffer, 0, 
-    vertexBuffers.size(), vertexBuffers.data(), offsets.data());
+    1, vertexBuffers.data(), offsets.data());
 
   vkCmdSetViewport(context->commandBuffer, 0, 1, &context->viewport);
   vkCmdSetScissor (context->commandBuffer, 0, 1, &context->scissor);
   
+  const uint32_t vertexCount = sph->getParticles().positions.size();
   vkCmdDraw(context->commandBuffer, vertexCount, 1, 0, 0);
   
   vkCmdEndRenderPass(context->commandBuffer);
@@ -108,7 +124,7 @@ void MVkPipeline::initRenderPass() {
 }
 
 void MVkPipeline::initFramebuffers() {
-  MVkWrap::createFramebuffer(
+  MVkWrap::createFramebuffers(
     context->device,
     pipeline.renderPass,
     context->swapchain.imageViews,
@@ -140,18 +156,21 @@ void MVkPipeline::initPipelineCache() {
   pipeline.cache = VK_NULL_HANDLE;
 }
 
-void MVkPipeline::initVertexBuffer(uint32_t vertexCount, const glm::vec4* vertices) {
+void MVkPipeline::initVertexBuffer() {
   vertexBuffers.clear();
-  vertexBuffers.resize(vertexCount);
+  vertexBuffers.resize(1);
   
   vertexBufferMemoryVec.clear();
-  vertexBufferMemoryVec.resize(vertexCount);
+  vertexBufferMemoryVec.resize(1);
+
+  Particles particles = sph->getParticles();
+  size_t size = particles.size() * sizeof(glm::vec4);
 
   MVkWrap::createBuffer(context->physicalDevice,
                         context->device,
                         VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-                        (void*)vertices,
-                        vertexCount * sizeof(glm::vec4),
+                        particles.positions.data(),
+                        size,
                         vertexBuffers[0],
                         vertexBufferMemoryVec[0]);
 }
@@ -177,8 +196,8 @@ void MVkPipeline::initUniformBuffers() {
 }
 
 void MVkPipeline::updateDescriptorSet() {
-  MVkWrap::updateDescriptorSet(context->device, pipeline.descriptorSet, uniformBufferInfoVS);
-  MVkWrap::updateDescriptorSet(context->device, pipeline.descriptorSet, uniformBufferInfoFS);
+  MVkWrap::updateDescriptorSet(context->device, pipeline.descriptorSet, 0, uniformBufferInfoVS);
+  MVkWrap::updateDescriptorSet(context->device, pipeline.descriptorSet, 1, uniformBufferInfoFS);
 }
 
 void MVkPipeline::initPipeline() {
