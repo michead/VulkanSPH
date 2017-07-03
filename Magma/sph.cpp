@@ -1,4 +1,5 @@
 #include "sph.h"
+#include "math.h"
 #include "json.hpp"
 #include <cassert>
 #include <fstream>
@@ -15,20 +16,8 @@ void SPH::init() {
   // Load fluid parameters from JSON config file
   loadParamsFromJson();
 
-  // Initialize solver
-  flexInit();
-  solver = flexCreateSolver(int(particles.size()), 0);
-  flexSetParams(solver, &params);
-  
-  // Set particles' initial attributes
-  flexSetParticles( solver, (const float*)particles.positions.data(),  int(particles.size()), eFlexMemoryHost);
-  flexSetVelocities(solver, (const float*)particles.velocities.data(), int(particles.size()), eFlexMemoryHost);
-  flexSetPhases(    solver,               particles.phases.data(),     int(particles.size()), eFlexMemoryHost);
-
-  // Set all particles as active
-  std::vector<int> activeIndices(particles.size());
-  std::iota(activeIndices.begin(), activeIndices.end(), 0);
-  flexSetActive(solver, activeIndices.data(), int(particles.size()), eFlexMemoryHost);
+  // Apply params to solver
+  NvFlexSetParams(solver, &params);
 }
 
 void SPH::loadParamsFromJson() {
@@ -39,27 +28,57 @@ void SPH::loadParamsFromJson() {
   i >> j;
 
   params = {};
-  params.mAdhesion              = j["fluidProps"]["adhesion"];
-  params.mBuoyancy              = j["fluidProps"]["buoyancy"];
-  params.mCohesion              = j["fluidProps"]["cohesion"];
-  params.mRadius                = j["fluidProps"]["radius"];
-  params.mViscosity             = j["fluidProps"]["viscosity"];
-  params.mVorticityConfinement  = j["fluidProps"]["vorticityConfinement"];
-
-  particles.clear();
+  params.adhesion             = j["fluidProps"]["adhesion"];
+  params.buoyancy             = j["fluidProps"]["buoyancy"];
+  params.cohesion             = j["fluidProps"]["cohesion"];
+  params.radius               = j["fluidProps"]["radius"];
+  params.viscosity            = j["fluidProps"]["viscosity"];
+  params.vorticityConfinement = j["fluidProps"]["vorticityConfinement"];
 
   if (j["fluidProps"]["particles"].is_object()) {
     nlohmann::json jsonParticles = j["fluidProps"]["particles"];
-    assert(jsonParticles["positions"].size()  ==
-           jsonParticles["velocities"].size() ==
-           jsonParticles["phases"].size());
-    particles.resize(jsonParticles["positions"].size());
+    assert(jsonParticles["positions"].size()
+        == jsonParticles["velocities"].size()
+        == jsonParticles["phases"].size());
     // TODO: Copy particle attributes
   }
 
-  // TODO: Only for testing purposes -- Remove it
-  particles.resize(1);
-  particles.positions[0] = { 0, 0, 0, 1 };
+  // Particle grid for testing purposes
+  particles.count = SPH::countParticlesInGrid(glm::vec3(-1), glm::vec3(1), 0.1f);
+
+  // Initialize library and solver
+  library = NvFlexInit();
+  solver  = NvFlexCreateSolver(library, particles.count, 0);
+
+  // Allocate buffers
+  particleBuffer = NvFlexAllocBuffer(library, particles.count, sizeof(glm::vec4), eNvFlexBufferHost);
+  velocityBuffer = NvFlexAllocBuffer(library, particles.count, sizeof(glm::vec4), eNvFlexBufferHost);
+  phaseBuffer    = NvFlexAllocBuffer(library, particles.count, sizeof(int),       eNvFlexBufferHost);
+
+  // Map buffers
+  particles.positions  = (glm::vec4*)NvFlexMap(particleBuffer, eNvFlexMapWait);
+  particles.velocities = (glm::vec3*)NvFlexMap(velocityBuffer, eNvFlexMapWait);
+  particles.phases     = (int*)      NvFlexMap(phaseBuffer,    eNvFlexMapWait);
+
+  // Set all particles as active
+  activeBuffer = NvFlexAllocBuffer(library, particles.count, sizeof(int), eNvFlexBufferHost);
+  activeIndices = (int*) NvFlexMap(activeBuffer, eNvFlexMapWait);
+  std::iota(activeIndices, activeIndices + particles.count, 0);
+  NvFlexUnmap(activeBuffer);
+  NvFlexSetActive(solver, activeBuffer, particles.count);
+
+  // Spawn particles
+  SPH::createParticleGrid(&particles, glm::vec3(-1), glm::vec3(1), 0.1f);
+
+  // unmap buffers
+  NvFlexUnmap(particleBuffer);
+  NvFlexUnmap(velocityBuffer);
+  NvFlexUnmap(phaseBuffer);
+
+  // write to device (async)
+  NvFlexSetParticles(solver,  particleBuffer, particles.count);
+  NvFlexSetVelocities(solver, velocityBuffer, particles.count);
+  NvFlexSetPhases(solver,     phaseBuffer,    particles.count);
 }
 
 void SPH::draw() {
@@ -68,4 +87,31 @@ void SPH::draw() {
 
 void SPH::update(double dt) {
 
+}
+
+uint32_t SPH::countParticlesInGrid(glm::vec3 bln, glm::vec3 trf, float radius) {
+  uint32_t i = 0;
+  for (int x = int(bln.x); x < trf.x; x++) {
+    for (int y = int(bln.y); y < trf.y; y++) {
+      for (int z = int(bln.z); z < trf.z; z++) {
+        i++;
+      }
+    }
+  }
+  return i;
+}
+
+void SPH::createParticleGrid(Particles* particles, glm::vec3 bln, glm::vec3 trf, float radius) {
+  uint32_t i = 0;
+  for (int x = int(bln.x); x < trf.x; x++) {
+    for (int y = int(bln.y); y < trf.y; y++) {
+      for (int z = int(bln.z); z < trf.z; z++) {
+        glm::vec3 pos = bln + glm::vec3(float(x), float(y), float(z)) * radius + randUnitVec() *  0.005f;
+        particles->positions[i]  = glm::vec4(pos.x, pos.y, pos.z, 1.0f);
+        particles->velocities[i] = glm::vec3(0);
+        particles->phases[i]     = eNvFlexPhaseSelfCollide | eNvFlexPhaseFluid;
+        i++;
+      }
+    }
+  }
 }

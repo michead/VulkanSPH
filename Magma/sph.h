@@ -1,5 +1,5 @@
 #pragma once
-#include <flex.h>
+#include <NvFlex.h>
 #include <glm\glm.hpp>
 #include <vector>
 #include "scene_element.h"
@@ -13,31 +13,14 @@ struct Particle {
 };
 
 struct Particles {
-  std::vector<glm::vec4> positions;
-  std::vector<glm::vec3> velocities;
-  std::vector<int>       phases;
+  glm::vec4* positions;
+  glm::vec3* velocities;
+  int*       phases;
+  size_t     count;
 
   Particle& operator[] (int i) {
     Particle particle{ positions[i], velocities[i], phases[i] };
     return   particle;
-  }
-
-  void clear() {
-    positions.clear();
-    velocities.clear();
-    phases.clear();
-  }
-
-  void resize(size_t newSize) {
-    positions.resize(newSize);
-    velocities.resize(newSize);
-    phases.resize(newSize);
-  }
-
-  size_t size() {
-    assert(positions.size() == velocities.size() &&
-          velocities.size() == phases.size());
-    return positions.size();
   }
 };
 
@@ -51,13 +34,24 @@ public:
 
   Particles getParticles() { return particles; }
 
+  static uint32_t countParticlesInGrid(glm::vec3 bln, glm::vec3 trf, float radius);
+  static void createParticleGrid(Particles* particles, glm::vec3 bln, glm::vec3 trf, float radius);
+
 private:
   void init();
   void loadParamsFromJson();
 
-  FlexSolver* solver;
-  FlexParams  params;
-  const char* paramsFilename;
+  NvFlexLibrary* library;
+  NvFlexSolver*  solver;
+  NvFlexParams   params;
+  NvFlexBuffer*  particleBuffer;
+  NvFlexBuffer*  velocityBuffer;
+  NvFlexBuffer*  phaseBuffer;
+  NvFlexBuffer*  activeBuffer;
 
-  Particles particles;
+  int*           activeIndices;
+
+  const char*    paramsFilename;
+
+  Particles      particles;
 };

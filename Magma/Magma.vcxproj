@@ -91,7 +91,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>vulkan-1.lib;SDL2.lib;flexDebug_x86.lib</AdditionalDependencies>
+      <AdditionalDependencies>vulkan-1.lib;SDL2.lib;NvFlexDebugCUDA_x86.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib32;$(VULKAN_SDK)\Third-Party\Bin32;$(FLEX_PATH)\lib\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
       <AdditionalOptions>/SUBSYSTEM:CONSOLE %(AdditionalOptions)</AdditionalOptions>
@@ -176,6 +176,7 @@
     <ClInclude Include="config.h" />
     <ClInclude Include="emitter.h" />
     <ClInclude Include="magma.h" />
+    <ClInclude Include="math.h" />
     <ClInclude Include="mvk_utils.h" />
     <ClInclude Include="pipeline.h" />
     <ClInclude Include="scene.h" />
@@ -189,8 +190,6 @@
     <ClInclude Include="mvk_wrap.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="base.frag" />
-    <None Include="base.vert" />
     <None Include="params.json" />
     <None Include="particle.frag" />
     <None Include="particle.vert" />

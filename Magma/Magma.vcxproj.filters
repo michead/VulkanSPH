@@ -102,6 +102,9 @@
     <ClInclude Include="mvk_utils.h">
       <Filter>Source Files\vk</Filter>
     </ClInclude>
+    <ClInclude Include="math.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="params.json">
@@ -111,12 +114,6 @@
       <Filter>Source Files\shaders</Filter>
     </None>
     <None Include="particle.vert">
-      <Filter>Source Files\shaders</Filter>
-    </None>
-    <None Include="base.vert">
-      <Filter>Source Files\shaders</Filter>
-    </None>
-    <None Include="base.frag">
       <Filter>Source Files\shaders</Filter>
     </None>
   </ItemGroup>

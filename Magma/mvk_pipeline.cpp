@@ -94,7 +94,7 @@ void MVkPipeline::registerCommandBuffer() {
   vkCmdSetViewport(context->commandBuffer, 0, 1, &context->viewport);
   vkCmdSetScissor (context->commandBuffer, 0, 1, &context->scissor);
   
-  const uint32_t vertexCount = sph->getParticles().positions.size();
+  const uint32_t vertexCount = sph->getParticles().count;
   vkCmdDraw(context->commandBuffer, vertexCount, 1, 0, 0);
   
   vkCmdEndRenderPass(context->commandBuffer);
@@ -164,12 +164,12 @@ void MVkPipeline::initVertexBuffer() {
   vertexBufferMemoryVec.resize(1);
 
   Particles particles = sph->getParticles();
-  size_t size = particles.size() * sizeof(glm::vec4);
+  size_t size = particles.count * sizeof(glm::vec4);
 
   MVkWrap::createBuffer(context->physicalDevice,
                         context->device,
                         VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-                        particles.positions.data(),
+                        particles.positions,
                         size,
                         vertexBuffers[0],
                         vertexBufferMemoryVec[0]);
