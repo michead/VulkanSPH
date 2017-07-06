@@ -31,17 +31,11 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="sph.cpp">
-      <Filter>Source Files\sph</Filter>
-    </ClCompile>
     <ClCompile Include="magma.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="logger.cpp">
       <Filter>Source Files\logger</Filter>
-    </ClCompile>
-    <ClCompile Include="emitter.cpp">
-      <Filter>Source Files\sph</Filter>
     </ClCompile>
     <ClCompile Include="pipeline.cpp">
       <Filter>Source Files</Filter>
@@ -54,6 +48,12 @@
     </ClCompile>
     <ClCompile Include="mvk_structs.cpp">
       <Filter>Source Files\vk</Filter>
+    </ClCompile>
+    <ClCompile Include="scene.cpp">
+      <Filter>Source Files\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="fluid.cpp">
+      <Filter>Source Files\sph</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -78,12 +78,6 @@
     <ClInclude Include="magma.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="sph.h">
-      <Filter>Source Files\sph</Filter>
-    </ClInclude>
-    <ClInclude Include="emitter.h">
-      <Filter>Source Files\sph</Filter>
-    </ClInclude>
     <ClInclude Include="pipeline.h">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -105,16 +99,19 @@
     <ClInclude Include="math.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="fluid.h">
+      <Filter>Source Files\sph</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="params.json">
-      <Filter>Source Files\sph</Filter>
-    </None>
     <None Include="particle.frag">
       <Filter>Source Files\shaders</Filter>
     </None>
     <None Include="particle.vert">
       <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="scene.json">
+      <Filter>Source Files</Filter>
     </None>
   </ItemGroup>
 </Project>

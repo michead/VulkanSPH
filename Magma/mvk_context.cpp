@@ -14,7 +14,6 @@ void MVkContext::init(const char* appName, uint32_t appVersion, HWND windowHandl
   initDepthBuffer();
   MVkWrap::createSemaphore(device, imageAcquiredSemaphore);
   initCommandPool();
-  initCommandBuffer();
   initViewport();
   loadShaders();
   initDescriptorPool();
@@ -66,7 +65,7 @@ void MVkContext::initSwapchain(glm::ivec2 resolution) {
     swapchain.handle, swapchain.extent, swapchain.images, swapchain.imageViews);
   currentSwapchainImageIndex = 0;
 
-  size_t swapchainImageCount = swapchain.imageViews.size();
+  swapchainImageCount = swapchain.imageViews.size();
   drawFences.resize(swapchainImageCount);
   for (size_t i = 0; i < swapchainImageCount; i++) {
     MVkWrap::createFence(device, drawFences[i]);
@@ -76,11 +75,6 @@ void MVkContext::initSwapchain(glm::ivec2 resolution) {
 void MVkContext::initDescriptorPool() {
   VkDescriptorPoolSize descriptorPoolSize = VK_DESCRIPTOR_POOL_SIZE;
   MVkWrap::createDescriptorPool(device, descriptorPoolSize, descriptorPool);
-}
-
-
-void MVkContext::initCommandBuffer() {
-  MVkWrap::createCommandBuffers(device, commandPool, 1, &commandBuffer);
 }
 
 void MVkContext::initDepthBuffer() {

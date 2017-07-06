@@ -1,0 +1,28 @@
+{
+  "camera": {
+    "from": [ 0, 1, 5 ],
+    "to": [ 0, 0, 0 ]
+  },
+  "root": {
+    "type": "PARTICLE_GRID",
+    "min": [ -3, -3, -3 ],
+    "max": [ 3, 3, 3 ],
+    "spacing": 0.05,
+    "fluidProps": {
+      "adhesion": 0.01,
+      "buoyancy": 1,
+      "cohesion": 0.01,
+      "radius": 0.005,
+      "viscosity": 0,
+      "vorticityConfinement": 40
+    }
+  },
+  "__ignored": {
+    "emitter": {
+      "position": [ 0, 0, 0 ],
+      "rate": 30,
+      "maxParticleCount": 10000,
+      "particleLifespan": 0
+    }
+  }
+}

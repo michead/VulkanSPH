@@ -4,8 +4,6 @@
 #include <SDL2\SDL_syswm.h>
 #include "config.h"
 #include "scene.h"
-#include "emitter.h"
-#include "sph.h"
 #include "mvk_context.h"
 #include "mvk_pipeline.h"
 
@@ -17,6 +15,8 @@
 #define MAGMA_CONFIG_FILENAME "magma.ini"
 #define MAGMA_RESULT int32_t
 
+struct NvFlexLibrary;
+
 class Magma {
 public:
   Magma() { init(); }
@@ -25,13 +25,15 @@ public:
   void mainLoop();
   
   Config config;
-  MVkContext* mvkContext;
+
+  MVkContext*  mvkContext;
   MVkPipeline* mvkPipeline;
+  
   SDL_Window* window;
+  
   double deltaTime;
-  Scene scene;
-  Emitter* emitter;
-  SPH* sph;
+  
+  Scene*    scene;
 
 private:
   void init();
@@ -39,3 +41,5 @@ private:
   void render(double deltaTime);
   void cleanup();
 };
+
+extern NvFlexLibrary* flexLibrary;

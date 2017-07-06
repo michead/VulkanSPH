@@ -55,6 +55,13 @@ struct MVkFragmentShaderUniformParticle {
   std::vector<Light> lights;
 };
 
+struct MVkUniformBuffer {
+  VkBuffer buffer;
+  VkDeviceSize allocSize;
+  VkDeviceMemory deviceMemory;
+  VkDescriptorBufferInfo bufferInfo;
+};
+
 struct MVKPipeline {
   VkDescriptorSet descriptorSet;
   VkDescriptorSetLayout descriptorSetLayout;

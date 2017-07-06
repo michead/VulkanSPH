@@ -161,12 +161,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="emitter.cpp" />
+    <ClCompile Include="fluid.cpp" />
     <ClCompile Include="magma.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mvk_structs.cpp" />
     <ClCompile Include="pipeline.cpp" />
-    <ClCompile Include="sph.cpp" />
+    <ClCompile Include="scene.cpp" />
     <ClCompile Include="mvk_context.cpp" />
     <ClCompile Include="logger.cpp" />
     <ClCompile Include="mvk_pipeline.cpp" />
@@ -174,15 +174,14 @@
   <ItemGroup>
     <ClInclude Include="camera.h" />
     <ClInclude Include="config.h" />
-    <ClInclude Include="emitter.h" />
     <ClInclude Include="magma.h" />
     <ClInclude Include="math.h" />
     <ClInclude Include="mvk_utils.h" />
+    <ClInclude Include="fluid.h" />
     <ClInclude Include="pipeline.h" />
     <ClInclude Include="scene.h" />
     <ClInclude Include="scene_element.h" />
     <ClInclude Include="scene_graph.h" />
-    <ClInclude Include="sph.h" />
     <ClInclude Include="mvk_context.h" />
     <ClInclude Include="logger.h" />
     <ClInclude Include="mvk_pipeline.h" />
@@ -190,9 +189,9 @@
     <ClInclude Include="mvk_wrap.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="params.json" />
     <None Include="particle.frag" />
     <None Include="particle.vert" />
+    <None Include="scene.json" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

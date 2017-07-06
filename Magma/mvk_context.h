@@ -42,7 +42,6 @@ public:
   VkSemaphore              imageAcquiredSemaphore;
   uint32_t                 currentSwapchainImageIndex;
   VkCommandPool            commandPool;
-  VkCommandBuffer          commandBuffer;
   VkDescriptorPool         descriptorPool;
   uint32_t                 graphicsQueueFamilyIndex;
   uint32_t                 presentQueueFamilyIndex;
@@ -73,7 +72,6 @@ private:
   void selectPhysicalDevice();
   void initDevice();
   void initCommandPool();
-  void initCommandBuffer();
   void initSurface(HWND hwnd);
   void initSwapchain(glm::ivec2 resolution);
   void initDepthBuffer();

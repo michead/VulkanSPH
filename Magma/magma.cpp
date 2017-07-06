@@ -6,7 +6,12 @@
 #include <glm/glm.hpp>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_syswm.h>
+#include <NvFlex.h>
+#include "mvk_wrap.h"
 #include "magma.h"
+
+// Initialize Flex library
+NvFlexLibrary* flexLibrary = NvFlexInit();
 
 void Magma::init() {
   // Load configs from INI file
@@ -33,30 +38,50 @@ void Magma::init() {
     windowInfo.info.win.window,
     &config);
 
-  // Initialize solver and emitter
-  sph = new SPH("params.json");
-  emitter = new Emitter();
-  emitter->setSolver(sph);
-
-  mvkPipeline = new MVkPipeline(mvkContext, sph);
+  // Load scene attributes and bind graphics context
+  scene = new Scene("scene.json", mvkContext);
 }
 
 void Magma::cleanup() {
-  // Clean up.
   vkDestroySurfaceKHR(mvkContext->instance, mvkContext->surface, NULL);
   SDL_DestroyWindow(window);
   SDL_Quit();
   vkDestroyInstance(mvkContext->instance, NULL);
-  delete sph;
-  delete emitter;
+  delete scene;
 }
 
 void Magma::update(double deltaTime) {
-  sph->update(deltaTime);
+  scene->update();
 }
 
 void Magma::render(double deltaTime) {
-  mvkPipeline->render();
+  MVkWrap::prepareFrame(
+    mvkContext->device,
+    mvkContext->swapchain.handle,
+    mvkContext->imageAcquiredSemaphore,
+    &mvkContext->currentSwapchainImageIndex);
+
+  VK_CHECK(vkResetFences(
+    mvkContext->device,
+    1,
+    &mvkContext->drawFences[mvkContext->currentSwapchainImageIndex]));
+
+  scene->render();
+
+  VkResult res;
+  do {
+    VK_CHECK((res = vkWaitForFences(
+      mvkContext->device,
+      1,
+      &mvkContext->drawFences[mvkContext->currentSwapchainImageIndex],
+      VK_TRUE,
+      UINT64_MAX)));
+  } while (res == VK_TIMEOUT);
+
+  MVkWrap::presentSwapchain(
+    mvkContext->presentQueue,
+    &mvkContext->swapchain.handle,
+    &mvkContext->currentSwapchainImageIndex);
 }
 
 void Magma::mainLoop() {

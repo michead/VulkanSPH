@@ -439,12 +439,47 @@ namespace MVkWrap {
     imageViewInfo.flags = 0;
     VK_CHECK(vkCreateImageView(device, &imageViewInfo, nullptr, &depthImageView));
   }
+  inline void allocateDeviceMemory(VkPhysicalDevice physicalDevice,
+                                   VkDevice device,
+                                   VkBuffer buffer,
+                                   VkDeviceSize* allocSize,
+                                   VkDeviceMemory& deviceMemory) {
+    VkMemoryRequirements memReqs;
+    vkGetBufferMemoryRequirements(device, buffer, &memReqs);
+
+    uint32_t memoryTypeIndex;
+    getMemTypeIndexFromMemProps(physicalDevice, memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+      VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &memoryTypeIndex);
+
+    VkMemoryAllocateInfo allocateInfo = {};
+    allocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    allocateInfo.pNext = nullptr;
+    allocateInfo.memoryTypeIndex = memoryTypeIndex;
+    allocateInfo.allocationSize = memReqs.size;
+
+    VK_CHECK(vkAllocateMemory(device, &allocateInfo, nullptr, &deviceMemory));
+    *allocSize = memReqs.size;
+  }
+  inline void writeToBuffer(VkPhysicalDevice physicalDevice,
+                            VkDevice device,
+                            VkBuffer& buffer,
+                            VkDeviceSize allocSize,
+                            VkDeviceMemory deviceMemory,
+                            void* data,
+                            size_t size) {
+    void* mappedMem;
+    VK_CHECK(vkMapMemory(device, deviceMemory, 0, allocSize, 0, (void**)&mappedMem));
+
+    memcpy(mappedMem, data, size);
+    vkUnmapMemory(device, deviceMemory);
+  }
   inline void createBuffer(VkPhysicalDevice physicalDevice,
                            VkDevice device, 
                            VkBufferUsageFlags usage,
                            void* data,
                            size_t size,
                            VkBuffer& buffer,
+                           VkDeviceSize* allocSize,
                            VkDeviceMemory& deviceMemory,
                            VkDescriptorBufferInfo* outBufferInfo = nullptr) {
     VkBufferCreateInfo bufferInfo = {};
@@ -458,26 +493,9 @@ namespace MVkWrap {
     bufferInfo.flags = 0;
     VK_CHECK(vkCreateBuffer(device, &bufferInfo, nullptr, &buffer));
 
-    VkMemoryRequirements memReqs;
-    vkGetBufferMemoryRequirements(device, buffer, &memReqs);
-    
-    uint32_t memoryTypeIndex;
-    getMemTypeIndexFromMemProps(physicalDevice, memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                                                                        VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &memoryTypeIndex);
-    
-    VkMemoryAllocateInfo allocateInfo = {};
-    allocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-    allocateInfo.pNext = nullptr;
-    allocateInfo.memoryTypeIndex = memoryTypeIndex;
-    allocateInfo.allocationSize = memReqs.size;
+    MVkWrap::allocateDeviceMemory(physicalDevice, device, buffer, allocSize, deviceMemory);
+    MVkWrap::writeToBuffer(physicalDevice, device, buffer, *allocSize, deviceMemory, data, size);
 
-    VK_CHECK(vkAllocateMemory(device, &allocateInfo, nullptr, &deviceMemory));
-    
-    void* mappedMem;
-    VK_CHECK(vkMapMemory(device, deviceMemory, 0, memReqs.size, 0, (void**)&mappedMem));
-
-    memcpy(mappedMem, data, size);
-    vkUnmapMemory(device, deviceMemory);
     VK_CHECK(vkBindBufferMemory(device, buffer, deviceMemory, 0));
 
     if (outBufferInfo) {
@@ -486,7 +504,7 @@ namespace MVkWrap {
       outBufferInfo->range  = VK_WHOLE_SIZE;
     }
   }
-  inline void createDescriptorSetLayout(const VkDevice& device,
+  inline void createDescriptorSetLayout(VkDevice device,
                                         const std::vector<VkDescriptorSetLayoutBinding>& bindings,
                                         VkDescriptorSetLayout& descriptorSetLayout) {
     VkDescriptorSetLayoutCreateInfo createInfo = {};
