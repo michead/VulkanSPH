@@ -14,7 +14,7 @@ struct SceneElement {
   SceneElement(Scene* scene, const nlohmann::json& jsonObj, MVkContext* context) : scene(scene), context(context) {}
 
   virtual void fromJSON(const nlohmann::json& jsonObj) = 0;
-  virtual void update() {}
+  virtual void update() { pipeline->update(); }
   virtual void render() {
     VkCommandBuffer drawCmd = pipeline->getDrawCmdBuffer();
     VkPipelineStageFlags stageFlags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;

@@ -15,7 +15,7 @@ void MVkPipeline::init() {
   initPipelineCache();
   initPipeline();
   initUniformBuffers();
-  updateDescriptorSet();
+  updateDescriptorSets();
   initCommandBuffers();
 }
 
@@ -127,9 +127,10 @@ void MVkPipeline::initPipelineCache() {
 void MVkPipeline::initVertexBuffer() {
   vertexBuffers.clear();
   vertexBuffers.resize(1);
-  
   vertexBufferMemoryVec.clear();
   vertexBufferMemoryVec.resize(1);
+  vertexBufferMappedMemoryVec.clear();
+  vertexBufferMappedMemoryVec.resize(1);
 
   size_t size = fluid->particleCount * sizeof(glm::vec4);
 
@@ -141,7 +142,8 @@ void MVkPipeline::initVertexBuffer() {
                         size,
                         vertexBuffers[0],
                         &allocSize,
-                        vertexBufferMemoryVec[0]);
+                        vertexBufferMemoryVec[0],
+                        &vertexBufferMappedMemoryVec[0]);
 }
 
 void MVkPipeline::initUniformBuffers() {
@@ -153,6 +155,7 @@ void MVkPipeline::initUniformBuffers() {
                         uniformBufferVS.buffer,
                         &uniformBufferVS.allocSize,
                         uniformBufferVS.deviceMemory,
+                        &uniformBufferVS.mappedMemory,
                         &uniformBufferVS.bufferInfo);
 
   MVkWrap::createBuffer(context->physicalDevice,
@@ -163,34 +166,35 @@ void MVkPipeline::initUniformBuffers() {
                         uniformBufferFS.buffer,
                         &uniformBufferFS.allocSize,
                         uniformBufferFS.deviceMemory,
+                        &uniformBufferFS.mappedMemory,
                         &uniformBufferFS.bufferInfo);
 }
 
 void MVkPipeline::update() {
-  updateDescriptorSet();
+  updateBuffers();
 }
 
-void MVkPipeline::updateDescriptorSet() {
-  // TODO: Write up-to-date data to uniform buffers
-  MVkWrap::writeToBuffer(
-    context->physicalDevice,
-    context->device,
-    uniformBufferVS.buffer,
-    uniformBufferVS.allocSize,
-    uniformBufferVS.deviceMemory,
-    nullptr,
-    0);
-  MVkWrap::writeToBuffer(
-    context->physicalDevice,
-    context->device,
-    uniformBufferFS.buffer,
-    uniformBufferFS.allocSize,
-    uniformBufferFS.deviceMemory,
-    nullptr,
-    0);
-
+void MVkPipeline::updateDescriptorSets() {
   MVkWrap::updateDescriptorSet(context->device, pipeline.descriptorSet, 0, uniformBufferVS.bufferInfo);
   MVkWrap::updateDescriptorSet(context->device, pipeline.descriptorSet, 1, uniformBufferFS.bufferInfo);
+}
+
+void MVkPipeline::updateBuffers() {
+  uniformsVS.mvp = camera->getMatrix();
+  uniformsVS.particleSize = 2.f;
+
+  uniformsFS.ambientColor = glm::vec4(0.5f, 0.5f, 0.5, 1.f);
+  uniformsFS.fluidDiffuse = glm::vec4(0.f, 0.f, 1.f, 1.f);
+  uniformsFS.lightCount = 0;
+  uniformsFS.mvp = camera->getMatrix();
+  uniformsFS.viewport = {
+    context->viewport.x,
+    context->viewport.y,
+    context->viewport.width,
+    context->viewport.height };
+
+  memcpy(uniformBufferVS.mappedMemory, &uniformBufferVS, sizeof(MVkVertexShaderUniformParticle));
+  memcpy(uniformBufferFS.mappedMemory, &uniformBufferFS, sizeof(MVkFragmentShaderUniformParticle));
 }
 
 void MVkPipeline::initPipeline() {

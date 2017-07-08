@@ -1,8 +1,9 @@
 #pragma once
-
-#include <iostream>
 #include <SDL2\SDL_syswm.h>
+#include <iostream>
 #include "config.h"
+#include "event_handler.h"
+#include "perf.h"
 #include "scene.h"
 #include "mvk_context.h"
 #include "mvk_pipeline.h"
@@ -24,16 +25,14 @@ public:
 
   void mainLoop();
   
-  Config config;
-
-  MVkContext*  mvkContext;
-  MVkPipeline* mvkPipeline;
-  
-  SDL_Window* window;
-  
-  double deltaTime;
-  
-  Scene*    scene;
+  Config        config;
+  MVkContext*   mvkContext;
+  MVkPipeline*  mvkPipeline;
+  Scene*        scene;
+  SDL_Window*   window;
+  EventHandler* eventHandler;
+  Perf*         perf;
+  bool          shouldQuit = false;
 
 private:
   void init();

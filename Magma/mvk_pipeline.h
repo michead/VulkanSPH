@@ -1,9 +1,11 @@
 #pragma once
-
-#include "pipeline.h"
-#include "mvk_structs.h"
+#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm\glm.hpp>
 #include <vulkan\vulkan.hpp>
+#include "pipeline.h"
+#include "mvk_structs.h"
+
 
 class MVkContext;
 struct Camera;
@@ -32,6 +34,7 @@ private:
   std::vector<VkDescriptorSet>         descriptorSets;
   std::vector<VkBuffer>                vertexBuffers;
   std::vector<VkDeviceMemory>          vertexBufferMemoryVec;
+  std::vector<void*>                   vertexBufferMappedMemoryVec;
   std::vector<VkAttachmentDescription> attachments;
   std::vector<VkSubpassDescription>    subpasses;
   std::vector<VkImageView>             colorAttachments;
@@ -49,6 +52,7 @@ private:
   void initPipeline();
   void initVertexBuffer();
   void initUniformBuffers();
-  void updateDescriptorSet();
+  void updateDescriptorSets();
   void initCommandBuffers();
+  void updateBuffers();
 };

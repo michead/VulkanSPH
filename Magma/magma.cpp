@@ -2,10 +2,11 @@
 #define SDL_MAIN_HANDLED
 #define SDL_CHECK(a)          ; // nop
 #define SDL_CHECK_NOT_NULL(a) ; // nop
-
-#include <glm/glm.hpp>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_syswm.h>
+#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#include <glm/glm.hpp>
 #include <NvFlex.h>
 #include "mvk_wrap.h"
 #include "magma.h"
@@ -16,6 +17,13 @@ NvFlexLibrary* flexLibrary = NvFlexInit();
 void Magma::init() {
   // Load configs from INI file
   config = Config::load(MAGMA_CONFIG_FILENAME);
+
+  // Initialize event handler and perf modules
+  eventHandler = new EventHandler();
+  perf         = new Perf();
+
+  // Register callback for engine exit
+  eventHandler->addListener(EVT_QUIT, [this](Event evt) { shouldQuit = true; });
 
   // Create an SDL window that supports Vulkan and OpenGL rendering.
   SDL_Init(SDL_INIT_VIDEO);
@@ -84,30 +92,21 @@ void Magma::render(double deltaTime) {
     &mvkContext->currentSwapchainImageIndex);
 }
 
-void Magma::mainLoop() {
-  bool stillRunning = true;
-  uint64_t timeNow = SDL_GetPerformanceCounter();
-  uint64_t timeOld = 0;
-  
-  while (stillRunning) {
+void Magma::mainLoop() {  
+  while (!shouldQuit) {
     SDL_Event event;
+    
     while (SDL_PollEvent(&event)) {
-      timeOld = timeNow;
-      timeNow = SDL_GetPerformanceCounter();
-      deltaTime = (double)((timeNow - timeOld) * 1000 / SDL_GetPerformanceFrequency());
-      switch (event.type) {
-      case SDL_QUIT:
-        stillRunning = false;
-        break;
-      default:
-        break;
-      }
+      // Update timers
+      perf->onFrameStart();
+      // Notify event listeners
+      eventHandler->handle(event);
     }
     
     // Update simulation
-    update(deltaTime);
+    update(perf->getLastDeltaTime());
     // Render scene
-    render(deltaTime);
+    render(perf->getLastDeltaTime());
 
     SDL_Delay(10);
   }

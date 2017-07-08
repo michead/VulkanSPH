@@ -28,12 +28,10 @@ struct Fluid : public SceneElement {
   Fluid(Scene* scene, const nlohmann::json& jsonObj, MVkContext* context);
   ~Fluid() { cleanup(); }
 
-  virtual void fromJSON(const nlohmann::json& jsonObj);
+  virtual void fromJSON(const nlohmann::json& jsonObj) override;
 
   static uint32_t countParticlesInGrid(glm::vec3 min, glm::vec3 max, float radius);
   void createParticleGrid(glm::vec3 min, glm::vec3 max, float radius);
-
-  void update(double dt);
 
   uint32_t   particleCount;
   glm::vec4* positions;

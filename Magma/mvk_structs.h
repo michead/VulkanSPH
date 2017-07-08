@@ -1,8 +1,10 @@
 #pragma once
 
+#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#include <glm\glm.hpp>
 #include <map>
 #include <vector>
-#include <glm\glm.hpp>
 #include <vulkan\vulkan.hpp>
 
 struct MVkAttachment {
@@ -56,28 +58,29 @@ struct MVkFragmentShaderUniformParticle {
 };
 
 struct MVkUniformBuffer {
-  VkBuffer buffer;
-  VkDeviceSize allocSize;
-  VkDeviceMemory deviceMemory;
+  VkBuffer               buffer;
+  VkDeviceSize           allocSize;
+  VkDeviceMemory         deviceMemory;
+  void*                  mappedMemory;
   VkDescriptorBufferInfo bufferInfo;
 };
 
 struct MVKPipeline {
-  VkDescriptorSet descriptorSet;
-  VkDescriptorSetLayout descriptorSetLayout;
-  VkPipelineLayout layout;
-  VkPipelineVertexInputStateCreateInfo vertexInputState;
-  VkPipelineInputAssemblyStateCreateInfo inputAssemblyState;
-  VkPipelineRasterizationStateCreateInfo rasterizationState;
-  VkPipelineColorBlendStateCreateInfo colorBlendState;
-  VkPipelineMultisampleStateCreateInfo multisampleState;
-  VkPipelineDynamicStateCreateInfo dynamicState;
-  VkPipelineViewportStateCreateInfo viewportState;
-  VkPipelineDepthStencilStateCreateInfo depthStencilState;
+  VkDescriptorSet                              descriptorSet;
+  VkDescriptorSetLayout                        descriptorSetLayout;
+  VkPipelineLayout                             layout;
+  VkPipelineVertexInputStateCreateInfo         vertexInputState;
+  VkPipelineInputAssemblyStateCreateInfo       inputAssemblyState;
+  VkPipelineRasterizationStateCreateInfo       rasterizationState;
+  VkPipelineColorBlendStateCreateInfo          colorBlendState;
+  VkPipelineMultisampleStateCreateInfo         multisampleState;
+  VkPipelineDynamicStateCreateInfo             dynamicState;
+  VkPipelineViewportStateCreateInfo            viewportState;
+  VkPipelineDepthStencilStateCreateInfo        depthStencilState;
   std::vector<VkPipelineShaderStageCreateInfo> shaderStages;
-  VkRenderPass renderPass;
-  VkPipelineCache cache;
-  VkPipeline handle;
+  VkRenderPass                                 renderPass;
+  VkPipelineCache                              cache;
+  VkPipeline                                   handle;
 };
 
 typedef std::map<std::string, std::map<std::string, std::vector<char>>> MVkShaderMap;

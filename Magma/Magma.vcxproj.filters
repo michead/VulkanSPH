@@ -8,9 +8,6 @@
     <Filter Include="Source Files\sph">
       <UniqueIdentifier>{018a84e6-b2ae-433c-bc64-8d7b92ead28b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\vk">
-      <UniqueIdentifier>{4878bd2a-38e7-4812-a1ba-28e56a0395a4}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\logger">
       <UniqueIdentifier>{2fb08f88-4049-43aa-8be2-42aa741ea0d0}</UniqueIdentifier>
     </Filter>
@@ -23,8 +20,11 @@
     <Filter Include="Source Files\shaders">
       <UniqueIdentifier>{a38a0efc-1c86-44bf-bce4-b22ba850fa58}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\ui">
+    <Filter Include="Source Files\hud">
       <UniqueIdentifier>{f6d1411b-dd90-46c9-aeb9-42dfc2fc86d5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gfx">
+      <UniqueIdentifier>{4878bd2a-38e7-4812-a1ba-28e56a0395a4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -41,19 +41,25 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="mvk_context.cpp">
-      <Filter>Source Files\vk</Filter>
+      <Filter>Source Files\gfx</Filter>
     </ClCompile>
     <ClCompile Include="mvk_pipeline.cpp">
-      <Filter>Source Files\vk</Filter>
+      <Filter>Source Files\gfx</Filter>
     </ClCompile>
     <ClCompile Include="mvk_structs.cpp">
-      <Filter>Source Files\vk</Filter>
+      <Filter>Source Files\gfx</Filter>
     </ClCompile>
     <ClCompile Include="scene.cpp">
       <Filter>Source Files\scene</Filter>
     </ClCompile>
     <ClCompile Include="fluid.cpp">
       <Filter>Source Files\sph</Filter>
+    </ClCompile>
+    <ClCompile Include="perf.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="event_handler.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -82,25 +88,31 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="mvk_context.h">
-      <Filter>Source Files\vk</Filter>
+      <Filter>Source Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="mvk_pipeline.h">
-      <Filter>Source Files\vk</Filter>
+      <Filter>Source Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="mvk_structs.h">
-      <Filter>Source Files\vk</Filter>
+      <Filter>Source Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="mvk_wrap.h">
-      <Filter>Source Files\vk</Filter>
+      <Filter>Source Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="mvk_utils.h">
-      <Filter>Source Files\vk</Filter>
+      <Filter>Source Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="math.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="fluid.h">
       <Filter>Source Files\sph</Filter>
+    </ClInclude>
+    <ClInclude Include="perf.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="event_handler.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

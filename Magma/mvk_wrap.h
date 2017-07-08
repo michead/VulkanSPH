@@ -460,19 +460,6 @@ namespace MVkWrap {
     VK_CHECK(vkAllocateMemory(device, &allocateInfo, nullptr, &deviceMemory));
     *allocSize = memReqs.size;
   }
-  inline void writeToBuffer(VkPhysicalDevice physicalDevice,
-                            VkDevice device,
-                            VkBuffer& buffer,
-                            VkDeviceSize allocSize,
-                            VkDeviceMemory deviceMemory,
-                            void* data,
-                            size_t size) {
-    void* mappedMem;
-    VK_CHECK(vkMapMemory(device, deviceMemory, 0, allocSize, 0, (void**)&mappedMem));
-
-    memcpy(mappedMem, data, size);
-    vkUnmapMemory(device, deviceMemory);
-  }
   inline void createBuffer(VkPhysicalDevice physicalDevice,
                            VkDevice device, 
                            VkBufferUsageFlags usage,
@@ -481,6 +468,7 @@ namespace MVkWrap {
                            VkBuffer& buffer,
                            VkDeviceSize* allocSize,
                            VkDeviceMemory& deviceMemory,
+                           void** mappedMemory,
                            VkDescriptorBufferInfo* outBufferInfo = nullptr) {
     VkBufferCreateInfo bufferInfo = {};
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -494,8 +482,8 @@ namespace MVkWrap {
     VK_CHECK(vkCreateBuffer(device, &bufferInfo, nullptr, &buffer));
 
     MVkWrap::allocateDeviceMemory(physicalDevice, device, buffer, allocSize, deviceMemory);
-    MVkWrap::writeToBuffer(physicalDevice, device, buffer, *allocSize, deviceMemory, data, size);
-
+    VK_CHECK(vkMapMemory(device, deviceMemory, 0, *allocSize, 0, mappedMemory));
+    memcpy(*mappedMemory, data, size);
     VK_CHECK(vkBindBufferMemory(device, buffer, deviceMemory, 0));
 
     if (outBufferInfo) {

@@ -94,10 +94,6 @@ void Fluid::fromJSON(const nlohmann::json& jsonObj) {
   NvFlexSetParams(solver, &params);
 }
 
-void Fluid::update(double dt) {
-  pipeline->update();
-}
-
 void Fluid::cleanup() {
   delete positions;
   delete velocities;
