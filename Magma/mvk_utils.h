@@ -15,16 +15,16 @@ namespace MVkUtils {
         || extension == "frag"
         || extension == "comp";
   }
-  inline VkPipelineViewportStateCreateInfo viewportState(const VkViewport& viewport,
-                                                         const VkRect2D& scissor) {
+  inline VkPipelineViewportStateCreateInfo viewportState(const VkViewport* viewport,
+                                                         const VkRect2D* scissor) {
     return {
       VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
       nullptr,
       0,
       1,
-      &viewport,
+      viewport,
       1,
-      &scissor
+      scissor
     };
   }
   inline VkViewport viewport(uint32_t width, uint32_t height) {

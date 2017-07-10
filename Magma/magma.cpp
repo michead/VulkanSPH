@@ -63,16 +63,23 @@ void Magma::update(double deltaTime) {
 }
 
 void Magma::render(double deltaTime) {
+  bool shouldResize;
   MVkWrap::prepareFrame(
     mvkContext->device,
     mvkContext->swapchain.handle,
     mvkContext->imageAcquiredSemaphore,
-    &mvkContext->currentSwapchainImageIndex);
+    &mvkContext->currentImageIndex,
+    &shouldResize);
+
+  if (shouldResize) {
+    eventHandler->handle(EVT_VIEWPORT_CHANGED);
+    return;
+  }
 
   VK_CHECK(vkResetFences(
     mvkContext->device,
     1,
-    &mvkContext->drawFences[mvkContext->currentSwapchainImageIndex]));
+    &mvkContext->drawFences[mvkContext->currentImageIndex]));
 
   scene->render();
 
@@ -81,7 +88,7 @@ void Magma::render(double deltaTime) {
     VK_CHECK((res = vkWaitForFences(
       mvkContext->device,
       1,
-      &mvkContext->drawFences[mvkContext->currentSwapchainImageIndex],
+      &mvkContext->drawFences[mvkContext->currentImageIndex],
       VK_TRUE,
       UINT64_MAX)));
   } while (res == VK_TIMEOUT);
@@ -89,10 +96,12 @@ void Magma::render(double deltaTime) {
   MVkWrap::presentSwapchain(
     mvkContext->presentQueue,
     &mvkContext->swapchain.handle,
-    &mvkContext->currentSwapchainImageIndex);
+    &mvkContext->currentImageIndex);
+
+  vkQueueWaitIdle(mvkContext->presentQueue);
 }
 
-void Magma::mainLoop() {  
+void Magma::mainLoop() {
   while (!shouldQuit) {
     SDL_Event event;
     
@@ -108,6 +117,6 @@ void Magma::mainLoop() {
     // Render scene
     render(perf->getLastDeltaTime());
 
-    SDL_Delay(10);
+    vkDeviceWaitIdle(mvkContext->device);
   }
 }

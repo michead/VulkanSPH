@@ -2,6 +2,10 @@
 
 #define isBtn(a, b) ((a).button.which & (b))
 
+void EventHandler::handle(EEventType evtType) {
+  notifyListeners(evtType, {});
+}
+
 void EventHandler::handle(Event evt) {
   switch (evt.type) {
   case SDL_QUIT:

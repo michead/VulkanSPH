@@ -1,13 +1,14 @@
 {
   "camera": {
-    "from": [ 0, 1, 5 ],
-    "to": [ 0, 0, 0 ]
+    "pos": [ 0, 0, 5 ],
+    "yaw": 0,
+    "pitch": 0
   },
   "root": {
     "type": "PARTICLE_GRID",
     "min": [ -3, -3, -3 ],
-    "max": [ 3, 3, 3 ],
-    "spacing": 0.05,
+    "max": [  3,  3,  3 ],
+    "spacing": 0.01,
     "fluidProps": {
       "adhesion": 0.01,
       "buoyancy": 1,

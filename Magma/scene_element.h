@@ -26,11 +26,15 @@ struct SceneElement {
       1,
       &context->imageAcquiredSemaphore,
       &stageFlags,
-      context->drawFences[context->currentSwapchainImageIndex]);
+      context->drawFences[context->currentImageIndex]);
 
     for (const auto& child : children) {
       child->render();
     }
+  }
+
+  glm::mat4 getModelMatrix() const {
+    return model;
   }
 
   std::vector<SceneElement*> children;
@@ -42,4 +46,6 @@ protected:
 
   MVkContext*  context;
   MVkPipeline* pipeline;
+
+  glm::mat4 model;
 };

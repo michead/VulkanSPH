@@ -1,15 +1,12 @@
 #pragma once
 
+#include <Windows.h>
 #include <vulkan\vulkan.hpp>
 #include "mvk_structs.h"
-#include <Windows.h>
 
 #define VK_VER_MAJOR(X)   ((((uint32_t)(X)) >> 22) & 0x3FF)
 #define VK_VER_MINOR(X)   ((((uint32_t)(X)) >> 12) & 0x3FF)
 #define VK_VER_PATCH(X)   ((( uint32_t)(X))        & 0xFFF)
-#define VK_CHECK(result)  assert(result == VK_SUCCESS);
-#define VK_ASSERT(handle) assert(handler != VK_NULL_HANDLE);
-#define VK_REGISTER(type, count, instances) ;
 
 #define VK_DESCRIPTOR_POOL_MAX_SETS   30
 #define VK_DESCRIPTOR_POOL_SIZE_COUNT 30
@@ -21,6 +18,7 @@
 #endif
 
 struct Config;
+class MVkPipeline;
 
 class MVkContext {
 public:
@@ -34,13 +32,21 @@ public:
     return &context;
   }
 
+  void setPipeline(const MVkPipeline* pipeline) {
+    this->pipeline = pipeline;
+  }
+
+  VkRenderPass getRenderPass() const;
+  VkCommandBuffer getCommandBuffer() const;
+  VkPipelineCache getPipelineCache() const;
+
   VkInstance               instance;
   VkSurfaceKHR             surface;
   VkSurfaceCapabilitiesKHR surfaceCapabilities;
   VkPhysicalDevice         physicalDevice;
   VkDevice                 device;
   VkSemaphore              imageAcquiredSemaphore;
-  uint32_t                 currentSwapchainImageIndex;
+  uint32_t                 currentImageIndex;
   VkCommandPool            commandPool;
   VkDescriptorPool         descriptorPool;
   uint32_t                 graphicsQueueFamilyIndex;
@@ -55,6 +61,8 @@ public:
   MVkAttachment            depthBuffer;
   MVkSwapchain             swapchain;
   MVkShaderMap             shaderMap;
+
+  const MVkPipeline*       pipeline;
 
   std::vector<const char*>             extensions;
   std::vector<VkPhysicalDevice>        physicalDevices;

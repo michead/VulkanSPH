@@ -12,6 +12,7 @@ enum EEventType {
   EVT_MOUSE_UP_RIGHT_BTN,
   EVT_MOUSE_DRAG_LEFT_BTN,
   EVT_MOUSE_DRAG_RIGHT_BTN,
+  EVT_VIEWPORT_CHANGED,
   EVT_QUIT,
   EVT_COUNT
 };
@@ -21,6 +22,7 @@ typedef std::function<void(Event)> EventCallback;
 
 class EventHandler {
 public:
+  void handle(EEventType evtType);
   void handle(Event evt);
   void addListener(EEventType evt, const EventCallback& callback);
   void removeListeners(EEventType evt);

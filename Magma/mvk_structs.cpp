@@ -52,11 +52,29 @@ const VkSubpassDescription MVkBaseSubpass = {
   nullptr
 };
 
+const std::vector<VkSubpassDependency> MVkBaseDependencies = {{
+  VK_SUBPASS_EXTERNAL,                                                        // srcSubpass
+  0,                                                                          // dstSubpass
+  VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,                                       // srcStageMask
+  VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,                              // dstStageMask
+  VK_ACCESS_MEMORY_READ_BIT,                                                  // srcAccessMask
+  VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, // dstAccessMask
+  VK_DEPENDENCY_BY_REGION_BIT                                                 // dependencyFlags
+}, {
+  0,
+  VK_SUBPASS_EXTERNAL,
+  VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+  VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+  VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+  VK_ACCESS_MEMORY_READ_BIT,
+  VK_DEPENDENCY_BY_REGION_BIT
+}};
+
 const VkClearValue MVkClearValueColorWhite = {
   0,
   0,
   0,
-  0
+  1
 };
 
 const VkClearValue MVkClearValueDepthStencilOneZero = {
@@ -92,7 +110,7 @@ const VkPipelineInputAssemblyStateCreateInfo MVkPipelineInputAssemblyStateSPH = 
   nullptr,
   0,
   VK_PRIMITIVE_TOPOLOGY_POINT_LIST,
-  VK_TRUE
+  VK_FALSE
 };
 
 const VkPipelineRasterizationStateCreateInfo MVkPipelineRasterizationStateSPH = {
@@ -100,7 +118,7 @@ const VkPipelineRasterizationStateCreateInfo MVkPipelineRasterizationStateSPH = 
   nullptr,
   0,
   VK_FALSE,
-  VK_TRUE,
+  VK_FALSE,
   VK_POLYGON_MODE_FILL,
   VK_CULL_MODE_NONE,
   VK_FRONT_FACE_COUNTER_CLOCKWISE,
@@ -119,10 +137,7 @@ const VkPipelineColorBlendAttachmentState MVkPipelineColorBlendAttachmentStateSP
   VK_BLEND_FACTOR_ONE,
   VK_BLEND_FACTOR_ZERO,
   VK_BLEND_OP_MAX,
-  VK_COLOR_COMPONENT_R_BIT |
-  VK_COLOR_COMPONENT_G_BIT |
-  VK_COLOR_COMPONENT_B_BIT |
-  VK_COLOR_COMPONENT_A_BIT
+  0xf
 };
 
 const VkPipelineColorBlendStateCreateInfo MVkPipelineColorBlendStateSPH = {
@@ -130,19 +145,19 @@ const VkPipelineColorBlendStateCreateInfo MVkPipelineColorBlendStateSPH = {
   nullptr,
   0,
   VK_FALSE,
-  VK_LOGIC_OP_NO_OP,
+  VK_LOGIC_OP_CLEAR,
   1,
   &MVkPipelineColorBlendAttachmentStateSPH,
   NULL
 };
 
-const VkPipelineMultisampleStateCreateInfo MVkPipelieMultisampleStateSPH = {
+const VkPipelineMultisampleStateCreateInfo MVkPipelineMultisampleStateSPH = {
   VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
   nullptr,
   0,
   VK_SAMPLE_COUNT_1_BIT,
   VK_TRUE,
-  1.f,
+  0.f,
   nullptr,
   VK_FALSE,
   VK_FALSE
@@ -164,9 +179,9 @@ const VkPipelineDynamicStateCreateInfo MVkPipelineDynamicStateSPH = {
 const VkStencilOpState MVkStencilOpStateFrontSPH, 
                        MVkStencilOpStateBackSPH = {
   VK_STENCIL_OP_KEEP,
-  VK_STENCIL_OP_REPLACE,
   VK_STENCIL_OP_KEEP,
-  VK_COMPARE_OP_LESS,
+  VK_STENCIL_OP_KEEP,
+  VK_COMPARE_OP_ALWAYS,
   0,
   0,
   0
@@ -178,8 +193,8 @@ const VkPipelineDepthStencilStateCreateInfo MVkPipelineDepthStencilStateSPH = {
   0,
   VK_TRUE,
   VK_TRUE,
-  VK_COMPARE_OP_LESS,
-  VK_TRUE,
+  VK_COMPARE_OP_LESS_OR_EQUAL,
+  VK_FALSE,
   VK_FALSE,
   MVkStencilOpStateFrontSPH,
   MVkStencilOpStateBackSPH,

@@ -8,31 +8,31 @@
 #include <vulkan\vulkan.hpp>
 
 struct MVkAttachment {
-  VkImage image;
+  VkImage     image;
   VkImageView imageView;
 };
 
 struct MVkFramebuffer {
-  VkFramebuffer handle;
-  VkRenderPass renderPass;
+  VkFramebuffer              handle;
+  VkRenderPass               renderPass;
   std::vector<MVkAttachment> attachments;
 };
 
 struct MVkSwapchain {
-  VkSwapchainKHR handle;
-  VkExtent2D     extent;
+  VkSwapchainKHR           handle;
+  VkExtent2D               extent;
   std::vector<VkImage>     images;
   std::vector<VkImageView> imageViews;
 };
 
 struct MVkWsi {
-  VkSurfaceKHR surface;
+  VkSurfaceKHR             surface;
   VkSurfaceCapabilitiesKHR surfaceCapabilities;
 };
 
 struct MVkPipelineParams {
-  uint8_t numPasses;
-  uint32_t vertexCount;
+  uint8_t    numPasses;
+  uint32_t   vertexCount;
   glm::vec4* positions;
 };
 
@@ -42,17 +42,18 @@ struct Light {
 };
 
 struct MVkVertexShaderUniformParticle {
+  glm::mat4 view;
+  glm::mat4 proj;
   float     particleSize;
-  glm::mat4 mvp;
 };
 
 struct MVkFragmentShaderUniformParticle {
-  float              particleSize;
   glm::vec4          fluidDiffuse;
   glm::vec4          ambientColor;
-  glm::mat4          mvp;
-  glm::mat4          invMvp;
+  glm::mat4          proj;
+  glm::mat4          invProj;
   glm::ivec4         viewport;
+  float              particleSize;
   glm::uint8_t       lightCount;
   std::vector<Light> lights;
 };
@@ -92,6 +93,7 @@ extern const VkAttachmentDescription                        MVkBaseAttachmentDep
 extern const VkAttachmentReference                          MVkBaseAttachmentColorReference;
 extern const VkAttachmentReference                          MVkBaseAttachmentDepthReference;
 extern const VkSubpassDescription                           MVkBaseSubpass;
+extern const std::vector<VkSubpassDependency>               MVkBaseDependencies;
 extern const std::vector<VkVertexInputBindingDescription>   MVkVertexInputBindingDescriptionsSPH;
 extern const std::vector<VkVertexInputAttributeDescription> MVkVertexAttributeDescriptionsSPH;
 extern const VkPipelineVertexInputStateCreateInfo           MVkPipelineVertexInputStateSPH;
@@ -99,7 +101,7 @@ extern const VkPipelineInputAssemblyStateCreateInfo         MVkPipelineInputAsse
 extern const VkPipelineRasterizationStateCreateInfo         MVkPipelineRasterizationStateSPH;
 extern const VkPipelineColorBlendAttachmentState            MVkPipelineColorBlendAttachmentStateSPH;
 extern const VkPipelineColorBlendStateCreateInfo            MVkPipelineColorBlendStateSPH;
-extern const VkPipelineMultisampleStateCreateInfo           MVkPipelieMultisampleStateSPH;
+extern const VkPipelineMultisampleStateCreateInfo           MVkPipelineMultisampleStateSPH;
 extern const std::vector<VkDynamicState>                    MVkDynamicStatesSPH;
 extern const VkPipelineDynamicStateCreateInfo               MVkPipelineDynamicStateSPH;
 extern const VkStencilOpState                               MVkStencilOpStateFrontSPH;

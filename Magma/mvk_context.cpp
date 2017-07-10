@@ -1,4 +1,5 @@
 #include "mvk_context.h"
+#include "mvk_pipeline.h"
 #include "mvk_wrap.h"
 #include "mvk_utils.h"
 #include "magma.h"
@@ -63,7 +64,7 @@ void MVkContext::initSwapchain(glm::ivec2 resolution) {
     surface, surfaceCapabilities, format,
     graphicsQueueFamilyIndex, presentQueueFamilyIndex, 
     swapchain.handle, swapchain.extent, swapchain.images, swapchain.imageViews);
-  currentSwapchainImageIndex = 0;
+  currentImageIndex = 0;
 
   swapchainImageCount = swapchain.imageViews.size();
   drawFences.resize(swapchainImageCount);
@@ -156,4 +157,16 @@ void MVkContext::loadShaders() {
 void MVkContext::initViewport() {
   viewport = MVkUtils::viewport( swapchain.extent.width, swapchain.extent.height );
   scissor  = MVkUtils::scissor({ swapchain.extent.width, swapchain.extent.height });
+}
+
+VkRenderPass MVkContext::getRenderPass() const {
+  return pipeline->pipeline.renderPass;
+}
+
+VkPipelineCache MVkContext::getPipelineCache() const {
+  return pipeline->pipeline.cache;
+}
+
+VkCommandBuffer MVkContext::getCommandBuffer() const {
+  return pipeline->drawCmds[currentImageIndex];
 }

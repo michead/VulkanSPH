@@ -5,43 +5,40 @@
 #include <glm\glm.hpp>
 #include <glm\gtc\matrix_transform.hpp>
 #include <json.hpp>
+#include "magma_types.h"
 
-#define CAMERA_FOV   45.f
-#define CAMERA_UP    { 0, 1, 0 }
-#define CAMERA_NEAR  0.1f
-#define CAMERA_FAR   1000.f
-#define CAMERA_RATIO 16 / 9.f
+#define CAMERA_FOV      45.f
+#define CAMERA_UP      { 0, 1, 0 }
+#define CAMERA_FORWARD { 0, 0, -1 }
+#define CAMERA_NEAR      0.1f
+#define CAMERA_FAR    1000.f
+#define CAMERA_RATIO    16 / 9.f
 
 struct Camera {
-  Camera(const nlohmann::json& cameraObj) : ratio(ratio) { fromJSON(cameraObj); }
+public:
+  Camera(const ConfigNode& cameraObj);
+
+  void parse(const ConfigNode& cameraObj);
+  
+  void onViewportChange(const Viewport& viewport);
+  
+  glm::mat4 getViewMatrix() const;
+  glm::mat4 getProjectionMatrix() const;
+
+  void rotate(float dx, float dy);
+  void pan(float dx, float dy);
+  void orbit(glm::vec3 target, float dx, float dy);
 
 private:
-  void updateMatrix() {
-    glm::mat4 viewMat = glm::lookAt(pos, to, CAMERA_UP);
-    glm::mat4 projMat = glm::perspective(CAMERA_FOV, ratio, CAMERA_NEAR, CAMERA_FAR);
-    matrix = projMat * viewMat;
-  }
+  void updateProjMatrix();
+  void updateViewMatrix();
 
-  float     ratio = CAMERA_RATIO;
-  glm::vec3 pos;
-  glm::vec3 to;
-  glm::mat4 matrix;
-
-public:
-  void fromJSON(const nlohmann::json& cameraObj) {
-    const nlohmann::json jFrom = cameraObj["from"];
-    const nlohmann::json jTo = cameraObj["to"];
-    pos = { jFrom[0], jFrom[1], jFrom[2] };
-    to = { jTo[0], jTo[1], jTo[2] };
-
-    updateMatrix();
-  }
-
-  void updateRatio(float ratio) {
-    this->ratio = ratio;
-  }
-
-  glm::mat4 getMatrix() const {
-    return matrix;
-  }
+  float ratio = CAMERA_RATIO;
+  
+  glm::vec3  pos;
+  float      yaw   = 0;
+  float      pitch = 0;
+  
+  glm::mat4 proj;
+  glm::mat4 view;
 };

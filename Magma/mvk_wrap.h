@@ -8,9 +8,10 @@
 #define VK_VER_MAJOR(X)   ((((uint32_t)(X)) >> 22) & 0x3FF)
 #define VK_VER_MINOR(X)   ((((uint32_t)(X)) >> 12) & 0x3FF)
 #define VK_VER_PATCH(X)   ((( uint32_t)(X))        & 0xFFF)
-#define VK_CHECK(result)  assert(result == VK_SUCCESS);
-#define VK_ASSERT(handle) assert(handler != VK_NULL_HANDLE);
-#define VK_REGISTER(type, count, instances) ;
+#define VK_CHECK(result)                   assert((result) == VK_SUCCESS)
+#define VK_CHECK_PRESENT_TOLERANT(result)  assert((result) == VK_SUCCESS || (result) == VK_ERROR_OUT_OF_DATE_KHR || (result) == VK_SUBOPTIMAL_KHR)
+#define VK_ASSERT(handler)                 assert((handler) != VK_NULL_HANDLE)
+#define VK_REGISTER(type, count, instances) { }
 
 #define VK_DESCRIPTOR_POOL_MAX_SETS_DEFAULT 30
 #define VK_DESCRIPTOR_POOL_SIZE_DEFAULT     1
@@ -347,8 +348,6 @@ namespace MVkWrap {
       colorImageView.subresourceRange.layerCount = 1;
       colorImageView.viewType = VK_IMAGE_VIEW_TYPE_2D;
       colorImageView.flags = 0;
-
-      swapchainImages[i] = swapchainImages[i];
       colorImageView.image = swapchainImages[i];
 
       VK_CHECK(vkCreateImageView(device, &colorImageView, nullptr, &swapchainImageViews[i]));
@@ -460,6 +459,16 @@ namespace MVkWrap {
     VK_CHECK(vkAllocateMemory(device, &allocateInfo, nullptr, &deviceMemory));
     *allocSize = memReqs.size;
   }
+  inline void updateBuffer(VkDevice device,
+                           size_t size,
+                           void* data,
+                           VkDeviceSize allocSize,
+                           VkDeviceMemory deviceMemory,
+                           void** mappedMemory) {
+    VK_CHECK(vkMapMemory(device, deviceMemory, 0, allocSize, 0, mappedMemory));
+    memcpy(*mappedMemory, data, size);
+    vkUnmapMemory(device, deviceMemory);
+  }
   inline void createBuffer(VkPhysicalDevice physicalDevice,
                            VkDevice device, 
                            VkBufferUsageFlags usage,
@@ -469,27 +478,23 @@ namespace MVkWrap {
                            VkDeviceSize* allocSize,
                            VkDeviceMemory& deviceMemory,
                            void** mappedMemory,
-                           VkDescriptorBufferInfo* outBufferInfo = nullptr) {
+                           VkDescriptorBufferInfo* outBufferInfo) {
     VkBufferCreateInfo bufferInfo = {};
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     bufferInfo.pNext = nullptr;
     bufferInfo.usage = usage;
-    bufferInfo.size = size;
-    bufferInfo.queueFamilyIndexCount = 0;
-    bufferInfo.pQueueFamilyIndices = nullptr;
-    bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    bufferInfo.size  = size;
     bufferInfo.flags = 0;
     VK_CHECK(vkCreateBuffer(device, &bufferInfo, nullptr, &buffer));
 
     MVkWrap::allocateDeviceMemory(physicalDevice, device, buffer, allocSize, deviceMemory);
-    VK_CHECK(vkMapMemory(device, deviceMemory, 0, *allocSize, 0, mappedMemory));
-    memcpy(*mappedMemory, data, size);
+    MVkWrap::updateBuffer(device, size, data, *allocSize, deviceMemory, mappedMemory);
     VK_CHECK(vkBindBufferMemory(device, buffer, deviceMemory, 0));
 
     if (outBufferInfo) {
       outBufferInfo->buffer = buffer;
       outBufferInfo->offset = 0;
-      outBufferInfo->range  = VK_WHOLE_SIZE;
+      outBufferInfo->range  = size;
     }
   }
   inline void createDescriptorSetLayout(VkDevice device,
@@ -628,6 +633,7 @@ namespace MVkWrap {
   inline void createRenderPass(const VkDevice device, VkPipeline& pipeline,
                                const std::vector<VkAttachmentDescription>& attachments,
                                const std::vector<VkSubpassDescription>& subpasses,
+                               const std::vector<VkSubpassDependency>& dependencies,
                                VkRenderPass& renderPass) {
     VkRenderPassCreateInfo renderPassInfo = {};
     renderPassInfo.sType           = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
@@ -636,8 +642,8 @@ namespace MVkWrap {
     renderPassInfo.pAttachments    = attachments.data();
     renderPassInfo.subpassCount    = subpasses.size();
     renderPassInfo.pSubpasses      = subpasses.data();
-    renderPassInfo.dependencyCount = 0;
-    renderPassInfo.pDependencies   = nullptr;
+    renderPassInfo.dependencyCount = dependencies.size();
+    renderPassInfo.pDependencies   = dependencies.data();
     VK_CHECK(vkCreateRenderPass(device, &renderPassInfo, nullptr, &renderPass));
   }
   inline void createShaderModule(VkDevice device, const std::vector<char>& spirV, VkShaderModule& shaderModule) {
@@ -672,14 +678,14 @@ namespace MVkWrap {
     }
     
     VkFramebufferCreateInfo framebufferInfo = {};
-    framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-    framebufferInfo.pNext = nullptr;
-    framebufferInfo.renderPass = renderPass;
+    framebufferInfo.sType           = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+    framebufferInfo.pNext           = nullptr;
+    framebufferInfo.renderPass      = renderPass;
     framebufferInfo.attachmentCount = attachments.size();
-    framebufferInfo.pAttachments = attachments.data();
-    framebufferInfo.width = width;
-    framebufferInfo.height = height;
-    framebufferInfo.layers = 1;
+    framebufferInfo.pAttachments    = attachments.data();
+    framebufferInfo.width           = width;
+    framebufferInfo.height          = height;
+    framebufferInfo.layers          = 1;
     
     framebuffers.clear();
     framebuffers.resize(colorAttachments.size());
@@ -732,13 +738,13 @@ namespace MVkWrap {
       &pipeline));
   }
   inline void clearValues(std::array<VkClearValue, 2>& clearValues,
-                          const VkClearColorValue& clearColor = {0, 0, 0, 0},
+                          const VkClearColorValue& clearColor = {0, 0, 0, 1},
                           const VkClearDepthStencilValue& clearDepthStencil = { 1.f, 0 }) {
-    clearValues[0].color.float32[0] = clearColor.float32[0];
-    clearValues[0].color.float32[1] = clearColor.float32[1];
-    clearValues[0].color.float32[2] = clearColor.float32[2];
-    clearValues[0].color.float32[3] = clearColor.float32[3];
-    clearValues[1].depthStencil.depth = clearDepthStencil.depth;
+    clearValues[0].color.float32[0]     = clearColor.float32[0];
+    clearValues[0].color.float32[1]     = clearColor.float32[1];
+    clearValues[0].color.float32[2]     = clearColor.float32[2];
+    clearValues[0].color.float32[3]     = clearColor.float32[3];
+    clearValues[1].depthStencil.depth   = clearDepthStencil.depth;
     clearValues[1].depthStencil.stencil = clearDepthStencil.stencil;
   }
   inline void beginRenderPass(const VkCommandBuffer& commandBuffer,
@@ -747,16 +753,16 @@ namespace MVkWrap {
                               const VkExtent2D& renderArea,
                               const VkClearValue* clearValues) {
     VkRenderPassBeginInfo renderPassBegin;
-    renderPassBegin.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    renderPassBegin.pNext = nullptr;
-    renderPassBegin.renderPass = renderPass;
-    renderPassBegin.framebuffer = framebuffer;
-    renderPassBegin.renderArea.offset.x = 0;
-    renderPassBegin.renderArea.offset.y = 0;
-    renderPassBegin.renderArea.extent.width = renderArea.width;
+    renderPassBegin.sType                    = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    renderPassBegin.pNext                    = nullptr;
+    renderPassBegin.renderPass               = renderPass;
+    renderPassBegin.framebuffer              = framebuffer;
+    renderPassBegin.renderArea.offset.x      = 0;
+    renderPassBegin.renderArea.offset.y      = 0;
+    renderPassBegin.renderArea.extent.width  = renderArea.width;
     renderPassBegin.renderArea.extent.height = renderArea.height;
-    renderPassBegin.clearValueCount = 2;
-    renderPassBegin.pClearValues = clearValues;
+    renderPassBegin.clearValueCount          = 2;
+    renderPassBegin.pClearValues             = clearValues;
     vkCmdBeginRenderPass(commandBuffer, &renderPassBegin, VK_SUBPASS_CONTENTS_INLINE);
   }
   inline void submitCommandBuffer(VkQueue queue,
@@ -789,12 +795,15 @@ namespace MVkWrap {
     present.pWaitSemaphores    = nullptr;
     present.waitSemaphoreCount = 0;
     present.pResults           = nullptr;
-    VK_CHECK(vkQueuePresentKHR(queue, &present));
+    VK_CHECK_PRESENT_TOLERANT(vkQueuePresentKHR(queue, &present));
   }
   inline void prepareFrame(const VkDevice& device,
                            VkSwapchainKHR swapchain,
                            VkSemaphore semaphore,
-                           uint32_t* imageIndex) {
-    VK_CHECK(vkAcquireNextImageKHR(device, swapchain, UINT64_MAX, semaphore, VK_NULL_HANDLE, imageIndex));
+                           uint32_t* imageIndex,
+                           bool* obsolete) {
+    VkResult res;
+    VK_CHECK_PRESENT_TOLERANT(res = vkAcquireNextImageKHR(device, swapchain, UINT64_MAX, semaphore, VK_NULL_HANDLE, imageIndex));
+    *obsolete = res == VK_ERROR_OUT_OF_DATE_KHR || res == VK_SUBOPTIMAL_KHR;
   }
 }

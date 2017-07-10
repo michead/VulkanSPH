@@ -1,3 +1,7 @@
+#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#include <glm\glm.hpp>
+#include <glm\gtc\matrix_transform.hpp>
 #include "mvk_pipeline.h"
 #include "mvk_context.h"
 #include "mvk_wrap.h"
@@ -17,6 +21,8 @@ void MVkPipeline::init() {
   initUniformBuffers();
   updateDescriptorSets();
   initCommandBuffers();
+
+  context->setPipeline(this);
 }
 
 void MVkPipeline::initPipelineLayout() {
@@ -38,7 +44,7 @@ void MVkPipeline::initCommandBuffers() {
 
   for (size_t i = 0; i < context->swapchainImageCount; i++) {
     MVkWrap::createCommandBuffers(context->device, context->commandPool, 1, &drawCmds[i]);
-
+    
     MVkWrap::beginCommandBuffer(drawCmds[i]);
     MVkWrap::beginRenderPass(
       drawCmds[i],
@@ -47,17 +53,16 @@ void MVkPipeline::initCommandBuffers() {
       context->swapchain.extent,
       clearValues.data());
 
-    vkCmdBindPipeline(drawCmds[i],
-      VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.handle);
+    vkCmdBindPipeline(drawCmds[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.handle);
 
     vkCmdBindDescriptorSets(drawCmds[i],
       VK_PIPELINE_BIND_POINT_GRAPHICS,
       pipeline.layout, 0, 1,
       &pipeline.descriptorSet, 0, nullptr);
 
-    std::vector<VkDeviceSize> offsets(vertexBuffers.size(), 0);
-    vkCmdBindVertexBuffers(drawCmds[i], 0,
-      1, vertexBuffers.data(), offsets.data());
+    VkDeviceSize offset = 0;
+    vkCmdBindVertexBuffers(drawCmds[i], 0, 1, &vertexBuffer, &offset);
+
 
     vkCmdSetViewport(drawCmds[i], 0, 1, &context->viewport);
     vkCmdSetScissor(drawCmds[i], 0, 1, &context->scissor);
@@ -77,18 +82,26 @@ void MVkPipeline::initPipelineState() {
   subpasses.clear();
   subpasses.push_back(MVkBaseSubpass);
 
-  pipeline.vertexInputState   = MVkPipelineVertexInputStateSPH;
+  dependencies = MVkBaseDependencies;
+
+  pipeline.vertexInputState = MVkPipelineVertexInputStateSPH;
   pipeline.inputAssemblyState = MVkPipelineInputAssemblyStateSPH;
   pipeline.rasterizationState = MVkPipelineRasterizationStateSPH;
-  pipeline.colorBlendState    = MVkPipelineColorBlendStateSPH;
-  pipeline.multisampleState   = MVkPipelieMultisampleStateSPH;
-  pipeline.dynamicState       = MVkPipelineDynamicStateSPH;
-  pipeline.viewportState      = MVkUtils::viewportState(context->viewport, context->scissor);
-  pipeline.depthStencilState  = MVkPipelineDepthStencilStateSPH;
+  pipeline.colorBlendState = MVkPipelineColorBlendStateSPH;
+  pipeline.multisampleState = MVkPipelineMultisampleStateSPH;
+  pipeline.dynamicState = MVkPipelineDynamicStateSPH;
+  pipeline.viewportState = MVkUtils::viewportState(&context->viewport, &context->scissor);
+  pipeline.depthStencilState = MVkPipelineDepthStencilStateSPH;
 }
 
 void MVkPipeline::initRenderPass() {
-  MVkWrap::createRenderPass(context->device, pipeline.handle, attachments, subpasses, pipeline.renderPass);
+  MVkWrap::createRenderPass(
+    context->device,
+    pipeline.handle,
+    attachments,
+    subpasses,
+    dependencies,
+    pipeline.renderPass);
 }
 
 void MVkPipeline::initFramebuffers() {
@@ -125,49 +138,60 @@ void MVkPipeline::initPipelineCache() {
 }
 
 void MVkPipeline::initVertexBuffer() {
-  vertexBuffers.clear();
-  vertexBuffers.resize(1);
-  vertexBufferMemoryVec.clear();
-  vertexBufferMemoryVec.resize(1);
-  vertexBufferMappedMemoryVec.clear();
-  vertexBufferMappedMemoryVec.resize(1);
-
   size_t size = fluid->particleCount * sizeof(glm::vec4);
 
   VkDeviceSize allocSize;
+  VkDescriptorBufferInfo vertexBufferInfo;
   MVkWrap::createBuffer(context->physicalDevice,
-                        context->device,
-                        VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-                        fluid->positions,
-                        size,
-                        vertexBuffers[0],
-                        &allocSize,
-                        vertexBufferMemoryVec[0],
-                        &vertexBufferMappedMemoryVec[0]);
+    context->device,
+    VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+    fluid->positions,
+    size,
+    vertexBuffer,
+    &allocSize,
+    vertexBufferMemory,
+    &vertexBufferMappedMemory,
+    &vertexBufferInfo);
 }
 
 void MVkPipeline::initUniformBuffers() {
-  MVkWrap::createBuffer(context->physicalDevice,
-                        context->device,
-                        VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-                        &uniformsVS,
-                        sizeof(MVkVertexShaderUniformParticle),
-                        uniformBufferVS.buffer,
-                        &uniformBufferVS.allocSize,
-                        uniformBufferVS.deviceMemory,
-                        &uniformBufferVS.mappedMemory,
-                        &uniformBufferVS.bufferInfo);
+  uniformsVS.view         = camera->getViewMatrix();
+  uniformsVS.proj         = camera->getProjectionMatrix();
+  uniformsVS.particleSize = 10.f;
 
   MVkWrap::createBuffer(context->physicalDevice,
-                        context->device,
-                        VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-                        &uniformsFS,
-                        sizeof(MVkFragmentShaderUniformParticle),
-                        uniformBufferFS.buffer,
-                        &uniformBufferFS.allocSize,
-                        uniformBufferFS.deviceMemory,
-                        &uniformBufferFS.mappedMemory,
-                        &uniformBufferFS.bufferInfo);
+    context->device,
+    VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+    &uniformsVS,
+    sizeof(MVkVertexShaderUniformParticle),
+    uniformBufferVS.buffer,
+    &uniformBufferVS.allocSize,
+    uniformBufferVS.deviceMemory,
+    &uniformBufferVS.mappedMemory,
+    &uniformBufferVS.bufferInfo);
+
+  uniformsFS.particleSize = 10.f;
+  uniformsFS.ambientColor = glm::vec4(0.5f, 0.5f, 0.5, 1.f);
+  uniformsFS.fluidDiffuse = glm::vec4(0.0f, 0.0f, 1.f, 1.f);
+  uniformsFS.lightCount   = 0;
+  uniformsFS.proj         = camera->getProjectionMatrix();
+  uniformsFS.invProj      = glm::inverse(camera->getProjectionMatrix());
+  uniformsFS.viewport = {
+    context->viewport.x,
+    context->viewport.y,
+    context->viewport.width,
+    context->viewport.height };
+
+  MVkWrap::createBuffer(context->physicalDevice,
+    context->device,
+    VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+    &uniformsFS,
+    sizeof(MVkFragmentShaderUniformParticle),
+    uniformBufferFS.buffer,
+    &uniformBufferFS.allocSize,
+    uniformBufferFS.deviceMemory,
+    &uniformBufferFS.mappedMemory,
+    &uniformBufferFS.bufferInfo);
 }
 
 void MVkPipeline::update() {
@@ -180,21 +204,32 @@ void MVkPipeline::updateDescriptorSets() {
 }
 
 void MVkPipeline::updateBuffers() {
-  uniformsVS.mvp = camera->getMatrix();
-  uniformsVS.particleSize = 2.f;
+  uniformsVS.view = camera->getViewMatrix();
+  uniformsVS.proj = camera->getProjectionMatrix();
 
-  uniformsFS.ambientColor = glm::vec4(0.5f, 0.5f, 0.5, 1.f);
-  uniformsFS.fluidDiffuse = glm::vec4(0.f, 0.f, 1.f, 1.f);
-  uniformsFS.lightCount = 0;
-  uniformsFS.mvp = camera->getMatrix();
+  MVkWrap::updateBuffer(
+    context->device,
+    sizeof(MVkVertexShaderUniformParticle),
+    &uniformsVS,
+    uniformBufferVS.allocSize,
+    uniformBufferFS.deviceMemory,
+    &uniformBufferFS.mappedMemory);
+
+  uniformsFS.proj = camera->getProjectionMatrix();
+  uniformsFS.invProj = glm::inverse(camera->getProjectionMatrix());
   uniformsFS.viewport = {
     context->viewport.x,
     context->viewport.y,
     context->viewport.width,
     context->viewport.height };
 
-  memcpy(uniformBufferVS.mappedMemory, &uniformBufferVS, sizeof(MVkVertexShaderUniformParticle));
-  memcpy(uniformBufferFS.mappedMemory, &uniformBufferFS, sizeof(MVkFragmentShaderUniformParticle));
+  MVkWrap::updateBuffer(
+    context->device,
+    sizeof(MVkFragmentShaderUniformParticle),
+    &uniformsFS,
+    uniformBufferFS.allocSize,
+    uniformBufferFS.deviceMemory,
+    &uniformBufferFS.mappedMemory);
 }
 
 void MVkPipeline::initPipeline() {
@@ -216,5 +251,5 @@ void MVkPipeline::initPipeline() {
 }
 
 VkCommandBuffer MVkPipeline::getDrawCmdBuffer() const {
-  return drawCmds[context->currentSwapchainImageIndex];
+  return drawCmds[context->currentImageIndex];
 }

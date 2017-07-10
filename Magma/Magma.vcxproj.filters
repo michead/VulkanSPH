@@ -61,6 +61,15 @@
     <ClCompile Include="event_handler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="camera.cpp">
+      <Filter>Source Files\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="hud.cpp">
+      <Filter>Source Files\hud</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_sdl_vulkan_bindings.cpp">
+      <Filter>Source Files\hud</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="scene_graph.h">
@@ -113,6 +122,15 @@
     </ClInclude>
     <ClInclude Include="event_handler.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="magma_types.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="hud.h">
+      <Filter>Source Files\hud</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui_sdl_vulkan_bindings.h">
+      <Filter>Source Files\hud</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -28,7 +28,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -91,8 +91,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>vulkan-1.lib;SDL2.lib;NvFlexDebugCUDA_x86.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib32;$(VULKAN_SDK)\Third-Party\Bin32;$(FLEX_PATH)\lib\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vulkan-1.lib;SDL2.lib;imgui.lib;NvFlexDebugCUDA_x86.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib32;$(VULKAN_SDK)\Third-Party\Bin32;$(FLEX_PATH)\lib\win32;%(AdditionalLibraryDirectories);$(IMGUI_LIB_PATH);$(IMGUI_LIB_PATH)</AdditionalLibraryDirectories>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
       <AdditionalOptions>/SUBSYSTEM:CONSOLE %(AdditionalOptions)</AdditionalOptions>
     </Link>
@@ -133,8 +133,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>vulkan-1.lib;SDL2.lib;shaderc_combined.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib32;$(VULKAN_SDK)\Third-Party\Bin32;%(AdditionalLibraryDirectories);$(SolutionDir)\ext\glslang;$(SolutionDir)ext\glslang</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vulkan-1.lib;SDL2.lib;imgui.lib;shaderc_combined.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib32;$(VULKAN_SDK)\Third-Party\Bin32;%(AdditionalLibraryDirectories);$(SolutionDir)\ext\glslang;$(SolutionDir)ext\glslang;$(IMGUI_LIB_PATH);$(IMGUI_LIB_PATH)</AdditionalLibraryDirectories>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
       <AdditionalOptions>/SUBSYSTEM:CONSOLE %(AdditionalOptions)</AdditionalOptions>
     </Link>
@@ -161,8 +161,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="camera.cpp" />
     <ClCompile Include="fluid.cpp" />
     <ClCompile Include="event_handler.cpp" />
+    <ClCompile Include="hud.cpp" />
+    <ClCompile Include="imgui_sdl_vulkan_bindings.cpp" />
     <ClCompile Include="magma.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mvk_structs.cpp" />
@@ -177,6 +180,8 @@
     <ClInclude Include="camera.h" />
     <ClInclude Include="config.h" />
     <ClInclude Include="event_handler.h" />
+    <ClInclude Include="hud.h" />
+    <ClInclude Include="imgui_sdl_vulkan_bindings.h" />
     <ClInclude Include="magma.h" />
     <ClInclude Include="math.h" />
     <ClInclude Include="mvk_utils.h" />
@@ -191,6 +196,7 @@
     <ClInclude Include="mvk_pipeline.h" />
     <ClInclude Include="mvk_structs.h" />
     <ClInclude Include="mvk_wrap.h" />
+    <ClInclude Include="magma_types.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="particle.frag" />

@@ -1,7 +1,4 @@
 #pragma once
-#define GLM_FORCE_RADIANS
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#include <glm\glm.hpp>
 #include <vulkan\vulkan.hpp>
 #include "pipeline.h"
 #include "mvk_structs.h"
@@ -12,6 +9,7 @@ struct Camera;
 struct Fluid;
 
 class MVkPipeline : public MPipeline {
+  friend class MVkContext;
 public:
   MVkPipeline(MVkContext* context, Camera* camera, Fluid* fluid) : context(context), camera(camera), fluid(fluid) { init(); }
 
@@ -29,14 +27,16 @@ private:
   MVkVertexShaderUniformParticle   uniformsVS;
   MVkFragmentShaderUniformParticle uniformsFS;
 
+  VkBuffer       vertexBuffer;
+  VkDeviceMemory vertexBufferMemory;
+  void*          vertexBufferMappedMemory;
+
   std::vector<VkCommandBuffer>         drawCmds;
   std::vector<VkFramebuffer>           framebuffers;
   std::vector<VkDescriptorSet>         descriptorSets;
-  std::vector<VkBuffer>                vertexBuffers;
-  std::vector<VkDeviceMemory>          vertexBufferMemoryVec;
-  std::vector<void*>                   vertexBufferMappedMemoryVec;
   std::vector<VkAttachmentDescription> attachments;
   std::vector<VkSubpassDescription>    subpasses;
+  std::vector<VkSubpassDependency>     dependencies;
   std::vector<VkImageView>             colorAttachments;
   MVkUniformBuffer                     uniformBufferVS;
   MVkUniformBuffer                     uniformBufferFS;

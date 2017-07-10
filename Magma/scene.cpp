@@ -4,8 +4,7 @@
 
 Scene::Scene(const char* filename, MVkContext* context) : context(context) {
   loadJSON(filename);
-  camera->updateRatio(context->viewport.width /
-                      context->viewport.height);
+  camera->onViewportChange(context->viewport);
 }
 
 void Scene::loadJSON(const char* filename) {

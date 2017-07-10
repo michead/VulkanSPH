@@ -26,7 +26,7 @@ void Fluid::createParticleGrid(glm::vec3 bln, glm::vec3 trf, float radius) {
   for (int x = int(bln.x); x < trf.x; x++) {
     for (int y = int(bln.y); y < trf.y; y++) {
       for (int z = int(bln.z); z < trf.z; z++) {
-        glm::vec3 pos = bln + glm::vec3(float(x), float(y), float(z)) * radius + randUnitVec() *  0.005f;
+        glm::vec3 pos = bln + glm::vec3(float(x), float(y), float(z)) * radius + Math::randUnitVec() *  0.005f;
         positions[i]  = glm::vec4(pos.x, pos.y, pos.z, 1.0f);
         velocities[i] = glm::vec3(0);
         phases[i]     = eNvFlexPhaseSelfCollide | eNvFlexPhaseFluid;
