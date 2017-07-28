@@ -1,6 +1,6 @@
 #pragma once
-#include <vulkan\vulkan.hpp>
 #include <json.hpp>
+#include <vulkan\vulkan.hpp>
 
-typedef VkViewport     Viewport;
+typedef VkViewport Viewport;
 typedef nlohmann::json ConfigNode;

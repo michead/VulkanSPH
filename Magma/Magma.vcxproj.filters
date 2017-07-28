@@ -70,6 +70,15 @@
     <ClCompile Include="imgui_sdl_vulkan_bindings.cpp">
       <Filter>Source Files\hud</Filter>
     </ClCompile>
+    <ClCompile Include="mesh.cpp">
+      <Filter>Source Files\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="scene_element.cpp">
+      <Filter>Source Files\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="fluid_simulation.cpp">
+      <Filter>Source Files\sph</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="scene_graph.h">
@@ -131,6 +140,15 @@
     </ClInclude>
     <ClInclude Include="imgui_sdl_vulkan_bindings.h">
       <Filter>Source Files\hud</Filter>
+    </ClInclude>
+    <ClInclude Include="mesh.h">
+      <Filter>Source Files\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="fluid_simulation.h">
+      <Filter>Source Files\sph</Filter>
+    </ClInclude>
+    <ClInclude Include="magma_context.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -94,7 +94,7 @@
       <AdditionalDependencies>vulkan-1.lib;SDL2.lib;imgui.lib;NvFlexDebugCUDA_x86.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib32;$(VULKAN_SDK)\Third-Party\Bin32;$(FLEX_PATH)\lib\win32;%(AdditionalLibraryDirectories);$(IMGUI_LIB_PATH);$(IMGUI_LIB_PATH)</AdditionalLibraryDirectories>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
-      <AdditionalOptions>/SUBSYSTEM:CONSOLE %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE /NODEFAULTLIB:LIBCMT %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /y /d "$(FLEX_PATH)\bin\win32\*.dll" "$(OutDir)"</Command>
@@ -115,6 +115,7 @@
       <AdditionalDependencies>vulkan-1.lib;SDL2.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib;$(VULKAN_SDK)\Third-Party\Bin;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE /NODEFAULTLIB:LIBCMT %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -164,10 +165,12 @@
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="fluid.cpp" />
     <ClCompile Include="event_handler.cpp" />
+    <ClCompile Include="fluid_simulation.cpp" />
     <ClCompile Include="hud.cpp" />
     <ClCompile Include="imgui_sdl_vulkan_bindings.cpp" />
     <ClCompile Include="magma.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="mesh.cpp" />
     <ClCompile Include="mvk_structs.cpp" />
     <ClCompile Include="perf.cpp" />
     <ClCompile Include="pipeline.cpp" />
@@ -175,15 +178,19 @@
     <ClCompile Include="mvk_context.cpp" />
     <ClCompile Include="logger.cpp" />
     <ClCompile Include="mvk_pipeline.cpp" />
+    <ClCompile Include="scene_element.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="camera.h" />
     <ClInclude Include="config.h" />
     <ClInclude Include="event_handler.h" />
+    <ClInclude Include="fluid_simulation.h" />
     <ClInclude Include="hud.h" />
     <ClInclude Include="imgui_sdl_vulkan_bindings.h" />
     <ClInclude Include="magma.h" />
+    <ClInclude Include="magma_context.h" />
     <ClInclude Include="math.h" />
+    <ClInclude Include="mesh.h" />
     <ClInclude Include="mvk_utils.h" />
     <ClInclude Include="fluid.h" />
     <ClInclude Include="perf.h" />

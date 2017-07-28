@@ -3,6 +3,7 @@
 #include <NvFlex.h>
 #include "glm\glm.hpp"
 #include "scene_element.h"
+#include "magma_types.h"
 
 struct FluidInitialState {
   glm::vec3 minPos;
@@ -23,12 +24,15 @@ struct Particle {
 };
 
 struct Scene;
+struct MagmaContext;
 
 struct Fluid : public SceneElement {
-  Fluid(Scene* scene, const nlohmann::json& jsonObj, MVkContext* context);
+  Fluid(Scene* scene, const ConfigNode& jsonObj, const MagmaContext* context);
   ~Fluid() { cleanup(); }
 
   virtual void fromJSON(const nlohmann::json& jsonObj) override;
+
+  NvFlexSolver* getSolver();
 
   static uint32_t countParticlesInGrid(glm::vec3 min, glm::vec3 max, float radius);
   void createParticleGrid(glm::vec3 min, glm::vec3 max, float radius);
@@ -37,9 +41,12 @@ struct Fluid : public SceneElement {
   glm::vec4* positions;
   glm::vec3* velocities;
   int*       phases;
+  float      radius;
 
 private:
   void cleanup();
+
+  FluidSimulation* fluidSimulation;
 
   NvFlexSolver*  solver;
   NvFlexParams   params;

@@ -1,23 +1,26 @@
 #pragma once
-
 #include "camera.h"
-#include "scene_graph.h"
-#include "fluid.h"
-#include "mvk_context.h"
 
-#define CAMERA_NODE(j) j["camera"]
-#define ROOT_NODE(j)   j["root"]
+#define CAMERA_NODE(j)   j["camera"]
+#define ROOT_NODE(j)     j["root"]
+#define CHILDREN_NODE(j) j["children"]
+#define TYPE_NODE(j)     j["type"]
+#define HAS_CHILDREN(j)  j.find("children") != j.end()
+
+struct SceneGraph;
+struct MagmaContext;
+class FluidSimulation;
 
 struct Scene {
-  Scene(const char* filename, MVkContext* context);
+  Scene(const char* filename, const MagmaContext* context);
 
   Camera* camera;
   SceneGraph* graph;
 
-  MVkContext* context;
+  const MagmaContext* context;
 
   void loadJSON(const char* filename);
   
-  void update() { graph->root->update(); }
-  void render() { graph->root->render(); }
+  void update();
+  void render();
 };

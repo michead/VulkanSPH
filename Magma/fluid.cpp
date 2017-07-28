@@ -1,19 +1,26 @@
 #include <NvFlex.h>
 #include <json.hpp>
 #include "magma.h"
+#include "magma_context.h"
 #include "math.h"
 #include "fluid.h"
+#include "fluid_simulation.h"
 
-Fluid::Fluid(Scene* scene, const nlohmann::json& jsonObj, MVkContext* context) : SceneElement(scene, jsonObj, context) {
-  fromJSON(jsonObj);
-  pipeline = new MVkPipeline(context, scene->camera, this);
+Fluid::Fluid(Scene* scene, const ConfigNode& fluidObj, const MagmaContext* context)
+  : SceneElement(scene, fluidObj, context), fluidSimulation(context->fluidSimulation) {
+  fromJSON(fluidObj);
+  pipeline = new MVkPipeline(context->graphics, scene->camera, this);
 };
 
-uint32_t Fluid::countParticlesInGrid(glm::vec3 bln, glm::vec3 trf, float radius) {
+NvFlexSolver* Fluid::getSolver() {
+  return solver;
+}
+
+uint32_t Fluid::countParticlesInGrid(glm::vec3 bln, glm::vec3 trf, float spacing) {
   uint32_t i = 0;
-  for (int x = int(bln.x); x < trf.x; x++) {
-    for (int y = int(bln.y); y < trf.y; y++) {
-      for (int z = int(bln.z); z < trf.z; z++) {
+  for (float x = bln.x; x < trf.x; x += spacing) {
+    for (float y = bln.y; y < trf.y; y += spacing) {
+      for (float z = bln.z; z < trf.z; z += spacing) {
         i++;
       }
     }
@@ -21,12 +28,12 @@ uint32_t Fluid::countParticlesInGrid(glm::vec3 bln, glm::vec3 trf, float radius)
   return i;
 }
 
-void Fluid::createParticleGrid(glm::vec3 bln, glm::vec3 trf, float radius) {
+void Fluid::createParticleGrid(glm::vec3 bln, glm::vec3 trf, float spacing) {
   uint32_t i = 0;
-  for (int x = int(bln.x); x < trf.x; x++) {
-    for (int y = int(bln.y); y < trf.y; y++) {
-      for (int z = int(bln.z); z < trf.z; z++) {
-        glm::vec3 pos = bln + glm::vec3(float(x), float(y), float(z)) * radius + Math::randUnitVec() *  0.005f;
+  for (float x = bln.x; x < trf.x; x += spacing) {
+    for (float y = bln.y; y < trf.y; y += spacing) {
+      for (float z = bln.z; z < trf.z; z += spacing) {
+        glm::vec3 pos = glm::vec3(x, y, z) + Math::randUnitVec() *  0.005f;
         positions[i]  = glm::vec4(pos.x, pos.y, pos.z, 1.0f);
         velocities[i] = glm::vec3(0);
         phases[i]     = eNvFlexPhaseSelfCollide | eNvFlexPhaseFluid;
@@ -51,12 +58,12 @@ void Fluid::fromJSON(const nlohmann::json& jsonObj) {
   velocities = (glm::vec3*)malloc(particleCount * sizeof(glm::vec3));
   phases     = (int*)malloc(particleCount * sizeof(int));
 
-  solver = NvFlexCreateSolver(flexLibrary, particleCount, 0);
+  solver = NvFlexCreateSolver(fluidSimulation->getLibrary(), particleCount, 0);
 
   // Allocate buffers
-  particleBuffer = NvFlexAllocBuffer(flexLibrary, particleCount, sizeof(glm::vec4), eNvFlexBufferHost);
-  velocityBuffer = NvFlexAllocBuffer(flexLibrary, particleCount, sizeof(glm::vec4), eNvFlexBufferHost);
-  phaseBuffer = NvFlexAllocBuffer(flexLibrary, particleCount, sizeof(int), eNvFlexBufferHost);
+  particleBuffer = NvFlexAllocBuffer(fluidSimulation->getLibrary(), particleCount, sizeof(glm::vec4), eNvFlexBufferHost);
+  velocityBuffer = NvFlexAllocBuffer(fluidSimulation->getLibrary(), particleCount, sizeof(glm::vec4), eNvFlexBufferHost);
+  phaseBuffer    = NvFlexAllocBuffer(fluidSimulation->getLibrary(), particleCount, sizeof(int), eNvFlexBufferHost);
 
   // Map buffers
   positions  = (glm::vec4*)NvFlexMap(particleBuffer, eNvFlexMapWait);
@@ -64,7 +71,7 @@ void Fluid::fromJSON(const nlohmann::json& jsonObj) {
   phases     = (int*)NvFlexMap(phaseBuffer, eNvFlexMapWait);
 
   // Set all particles as active
-  activeBuffer = NvFlexAllocBuffer(flexLibrary, particleCount, sizeof(int), eNvFlexBufferHost);
+  activeBuffer = NvFlexAllocBuffer(fluidSimulation->getLibrary(), particleCount, sizeof(int), eNvFlexBufferHost);
   activeIndices = (int*)NvFlexMap(activeBuffer, eNvFlexMapWait);
   std::iota(activeIndices, activeIndices + particleCount, 0);
   NvFlexUnmap(activeBuffer);
@@ -85,11 +92,11 @@ void Fluid::fromJSON(const nlohmann::json& jsonObj) {
 
   nlohmann::json jFluidProps = jsonObj["fluidProps"];
   params = {};
-  params.adhesion  = jFluidProps["adhesion"];
-  params.buoyancy  = jFluidProps["buoyancy"];
-  params.cohesion  = jFluidProps["cohesion"];
-  params.radius    = jFluidProps["radius"];
-  params.viscosity = jFluidProps["viscosity"];
+  params.adhesion             = jFluidProps["adhesion"];
+  params.buoyancy             = jFluidProps["buoyancy"];
+  params.cohesion             = jFluidProps["cohesion"];
+  params.radius = radius      = jFluidProps["radius"];
+  params.viscosity            = jFluidProps["viscosity"];
   params.vorticityConfinement = jFluidProps["vorticityConfinement"];
   NvFlexSetParams(solver, &params);
 }

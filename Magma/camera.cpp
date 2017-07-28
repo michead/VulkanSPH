@@ -1,5 +1,6 @@
 #include "camera.h"
 #include "math.h"
+#include "magma_context.h"
 
 Camera::Camera(const ConfigNode& cameraObj) {
   parse(cameraObj);

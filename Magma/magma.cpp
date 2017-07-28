@@ -7,12 +7,8 @@
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
-#include <NvFlex.h>
 #include "mvk_wrap.h"
 #include "magma.h"
-
-// Initialize Flex library
-NvFlexLibrary* flexLibrary = NvFlexInit();
 
 void Magma::init() {
   // Load configs from INI file
@@ -46,8 +42,18 @@ void Magma::init() {
     windowInfo.info.win.window,
     &config);
 
+  // Init fluid simulation
+  fluidSimulation = new FluidSimulation();
+
+  // Set context object
+  context.graphics = mvkContext;
+  context.fluidSimulation = fluidSimulation;
+
   // Load scene attributes and bind graphics context
-  scene = new Scene("scene.json", mvkContext);
+  scene = new Scene("scene.json", &context);
+
+  // Set collision
+  fluidSimulation->initCollision(scene);
 }
 
 void Magma::cleanup() {
@@ -58,8 +64,13 @@ void Magma::cleanup() {
   delete scene;
 }
 
+void updateSimulation(NvFlexLibrary* library, Scene* scene) {
+
+}
+
 void Magma::update(double deltaTime) {
   scene->update();
+  fluidSimulation->update();
 }
 
 void Magma::render(double deltaTime) {

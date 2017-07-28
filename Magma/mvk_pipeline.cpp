@@ -8,6 +8,7 @@
 #include "mvk_structs.h"
 #include "mvk_utils.h"
 #include "scene.h"
+#include "fluid.h"
 
 void MVkPipeline::init() {
   initPipelineState();
@@ -157,7 +158,7 @@ void MVkPipeline::initVertexBuffer() {
 void MVkPipeline::initUniformBuffers() {
   uniformsVS.view         = camera->getViewMatrix();
   uniformsVS.proj         = camera->getProjectionMatrix();
-  uniformsVS.particleSize = 10.f;
+  uniformsVS.particleSize = fluid->radius;
 
   MVkWrap::createBuffer(context->physicalDevice,
     context->device,

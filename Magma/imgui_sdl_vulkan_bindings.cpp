@@ -150,7 +150,7 @@ void ImGui_ImplSDLVulkan_RenderDrawLists(ImDrawData* draw_data) {
     VK_CHECK(err);
     VkMemoryRequirements req;
     vkGetBufferMemoryRequirements(g_Device, g_VertexBuffer[g_FrameIndex], &req);
-    g_BufferMemoryAlignment = (g_BufferMemoryAlignment > req.alignment) ? g_BufferMemoryAlignment : req.alignment;
+    g_BufferMemoryAlignment = (g_BufferMemoryAlignment > (size_t)req.alignment) ? g_BufferMemoryAlignment : (size_t)req.alignment;
     VkMemoryAllocateInfo alloc_info = {};
     alloc_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     alloc_info.allocationSize = req.size;
@@ -179,7 +179,7 @@ void ImGui_ImplSDLVulkan_RenderDrawLists(ImDrawData* draw_data) {
     VK_CHECK(err);
     VkMemoryRequirements req;
     vkGetBufferMemoryRequirements(g_Device, g_IndexBuffer[g_FrameIndex], &req);
-    g_BufferMemoryAlignment = (g_BufferMemoryAlignment > req.alignment) ? g_BufferMemoryAlignment : req.alignment;
+    g_BufferMemoryAlignment = (g_BufferMemoryAlignment > (size_t)req.alignment) ? g_BufferMemoryAlignment : (size_t)req.alignment;
     VkMemoryAllocateInfo alloc_info = {};
     alloc_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     alloc_info.allocationSize = req.size;
@@ -524,7 +524,7 @@ void ImGui_ImplSDLVulkan_NewFrame() {
   io.DisplayFramebufferScale = ImVec2(1, 1);
 
   // Setup time step
-  double current_time = SDL_GetPerformanceCounter() / SDL_GetPerformanceFrequency();
+  double current_time = (double)SDL_GetPerformanceCounter() / SDL_GetPerformanceFrequency();
   io.DeltaTime = g_Time > 0.0 ? (float)(current_time - g_Time) : (float)(1.0f / 60.0f);
   g_Time = current_time;
 
