@@ -58,7 +58,7 @@ struct MVkFragmentShaderUniformParticle {
   std::vector<Light> lights;
 };
 
-struct MVkUniformBuffer {
+struct MVkBufferDesc {
   VkBuffer               buffer;
   VkDeviceSize           allocSize;
   VkDeviceMemory         deviceMemory;

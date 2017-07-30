@@ -1,9 +1,11 @@
 #pragma once
 
-#include <NvFlex.h>
+#include <NvFlexExt.h>
 #include "glm\glm.hpp"
 #include "scene_element.h"
 #include "magma_types.h"
+
+#define SPH_TIME_STEP (1 / 60.f)
 
 struct FluidInitialState {
   glm::vec3 minPos;
@@ -31,6 +33,7 @@ struct Fluid : public SceneElement {
   ~Fluid() { cleanup(); }
 
   virtual void fromJSON(const nlohmann::json& jsonObj) override;
+  virtual void update() override;
 
   NvFlexSolver* getSolver();
 
@@ -50,10 +53,10 @@ private:
 
   NvFlexSolver*  solver;
   NvFlexParams   params;
-  NvFlexBuffer*  particleBuffer;
-  NvFlexBuffer*  velocityBuffer;
-  NvFlexBuffer*  phaseBuffer;
-  NvFlexBuffer*  activeBuffer;
+  NvFlexVector<glm::vec4>* particleBuffer;
+  NvFlexVector<glm::vec3>* velocityBuffer;
+  NvFlexVector<int>* phaseBuffer;
+  NvFlexVector<int>* activeBuffer;
 
-  int*       activeIndices;
+  int* activeIndices;
 };

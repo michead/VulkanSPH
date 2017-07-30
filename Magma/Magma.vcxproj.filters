@@ -26,6 +26,9 @@
     <Filter Include="Source Files\gfx">
       <UniqueIdentifier>{4878bd2a-38e7-4812-a1ba-28e56a0395a4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\data">
+      <UniqueIdentifier>{11c59530-1e9a-4ebf-a4bc-e94b754ec5ee}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -36,18 +39,6 @@
     </ClCompile>
     <ClCompile Include="logger.cpp">
       <Filter>Source Files\logger</Filter>
-    </ClCompile>
-    <ClCompile Include="pipeline.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="mvk_context.cpp">
-      <Filter>Source Files\gfx</Filter>
-    </ClCompile>
-    <ClCompile Include="mvk_pipeline.cpp">
-      <Filter>Source Files\gfx</Filter>
-    </ClCompile>
-    <ClCompile Include="mvk_structs.cpp">
-      <Filter>Source Files\gfx</Filter>
     </ClCompile>
     <ClCompile Include="scene.cpp">
       <Filter>Source Files\scene</Filter>
@@ -79,6 +70,21 @@
     <ClCompile Include="fluid_simulation.cpp">
       <Filter>Source Files\sph</Filter>
     </ClCompile>
+    <ClCompile Include="gfx_context.cpp">
+      <Filter>Source Files\gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="fluid_pipeline.cpp">
+      <Filter>Source Files\gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx_structs.cpp">
+      <Filter>Source Files\gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="pipeline.cpp">
+      <Filter>Source Files\gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="mesh_pipeline.cpp">
+      <Filter>Source Files\gfx</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="scene_graph.h">
@@ -101,24 +107,6 @@
     </ClInclude>
     <ClInclude Include="magma.h">
       <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="pipeline.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="mvk_context.h">
-      <Filter>Source Files\gfx</Filter>
-    </ClInclude>
-    <ClInclude Include="mvk_pipeline.h">
-      <Filter>Source Files\gfx</Filter>
-    </ClInclude>
-    <ClInclude Include="mvk_structs.h">
-      <Filter>Source Files\gfx</Filter>
-    </ClInclude>
-    <ClInclude Include="mvk_wrap.h">
-      <Filter>Source Files\gfx</Filter>
-    </ClInclude>
-    <ClInclude Include="mvk_utils.h">
-      <Filter>Source Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="math.h">
       <Filter>Source Files</Filter>
@@ -149,6 +137,27 @@
     </ClInclude>
     <ClInclude Include="magma_context.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx_context.h">
+      <Filter>Source Files\gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="fluid_pipeline.h">
+      <Filter>Source Files\gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx_structs.h">
+      <Filter>Source Files\gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx_utils.h">
+      <Filter>Source Files\gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx_wrap.h">
+      <Filter>Source Files\gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="pipeline.h">
+      <Filter>Source Files\gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="mesh_pipeline.h">
+      <Filter>Source Files\gfx</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

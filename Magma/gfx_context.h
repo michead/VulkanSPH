@@ -2,7 +2,7 @@
 
 #include <Windows.h>
 #include <vulkan\vulkan.hpp>
-#include "mvk_structs.h"
+#include "gfx_structs.h"
 
 #define VK_VER_MAJOR(X)   ((((uint32_t)(X)) >> 22) & 0x3FF)
 #define VK_VER_MINOR(X)   ((((uint32_t)(X)) >> 12) & 0x3FF)
@@ -18,13 +18,13 @@
 #endif
 
 struct Config;
-class MVkPipeline;
+class Pipeline;
 
-class MVkContext {
+class GfxContext {
 public:
   // Get singleton instance of Vulkan context
-  static MVkContext* getContext(const char* appName, uint32_t appVersion, HWND windowHandle, const Config* config) {
-    static MVkContext context;
+  static GfxContext* getContext(const char* appName, uint32_t appVersion, HWND windowHandle, const Config* config) {
+    static GfxContext context;
     if (!bInit) {
       context.init(appName, appVersion, windowHandle, config);
       bInit = true;
@@ -32,12 +32,11 @@ public:
     return &context;
   }
 
-  void setPipeline(const MVkPipeline* pipeline) {
+  void setPipeline(const Pipeline* pipeline) {
     this->pipeline = pipeline;
   }
 
   VkRenderPass getRenderPass() const;
-  VkCommandBuffer getCommandBuffer() const;
   VkPipelineCache getPipelineCache() const;
 
   VkInstance               instance;
@@ -62,7 +61,7 @@ public:
   MVkSwapchain             swapchain;
   MVkShaderMap             shaderMap;
 
-  const MVkPipeline*       pipeline;
+  const Pipeline*          pipeline;
 
   std::vector<const char*>             extensions;
   std::vector<VkPhysicalDevice>        physicalDevices;
@@ -71,7 +70,7 @@ public:
   std::vector<VkFence>                 drawFences;
 
 private:
-  MVkContext() {}
+  GfxContext() {}
 
   // Initialize context
   void init(const char* appName, uint32_t appVersion, HWND windowHandle, const Config* config);

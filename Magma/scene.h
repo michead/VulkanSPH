@@ -1,11 +1,16 @@
 #pragma once
 #include "camera.h"
 
-#define CAMERA_NODE(j)   j["camera"]
-#define ROOT_NODE(j)     j["root"]
-#define CHILDREN_NODE(j) j["children"]
-#define TYPE_NODE(j)     j["type"]
-#define HAS_CHILDREN(j)  j.find("children") != j.end()
+#define CAMERA_NODE(j)    j["camera"]
+#define ROOT_NODE(j)      j["root"]
+#define CHILDREN_NODE(j)  j["children"]
+#define TYPE_NODE(j)      j["type"]
+#define VERTICES_NODE(j)  j["vertices"]
+#define INDICES_NODE(j)   j["indices"]
+#define OBJ_PATH_NODE(j)  j["source"]
+#define HAS_CHILDREN(j)   j.find("children") != j.end()
+#define IS_VERTEX_LIST(j) j.find("vertices") != j.end()
+#define IS_OBJ_FILE(j)    j.find("source") != j.end()
 
 struct SceneGraph;
 struct MagmaContext;

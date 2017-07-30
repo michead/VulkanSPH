@@ -7,8 +7,8 @@
 #include "fluid_simulation.h"
 #include "perf.h"
 #include "scene.h"
-#include "mvk_context.h"
-#include "mvk_pipeline.h"
+#include "gfx_context.h"
+#include "pipeline.h"
 
 // Magma display name
 #define MAGMA_DISPLAY_NAME "Magma"
@@ -27,8 +27,8 @@ public:
   
   MagmaContext     context;
   Config           config;
-  MVkContext*      mvkContext;
-  MVkPipeline*     mvkPipeline;
+  GfxContext*      mvkContext;
+  Pipeline*        pipeline;
   Scene*           scene;
   SDL_Window*      window;
   EventHandler*    eventHandler;

@@ -7,7 +7,7 @@
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
-#include "mvk_wrap.h"
+#include "gfx_wrap.h"
 #include "magma.h"
 
 void Magma::init() {
@@ -36,7 +36,7 @@ void Magma::init() {
   SDL_GetWindowWMInfo(window, &windowInfo);
 
   // Initialize graphics context
-  mvkContext = MVkContext::getContext(
+  mvkContext = GfxContext::getContext(
     MAGMA_DISPLAY_NAME,
     MAGMA_VERSION, 
     windowInfo.info.win.window,
@@ -64,10 +64,6 @@ void Magma::cleanup() {
   delete scene;
 }
 
-void updateSimulation(NvFlexLibrary* library, Scene* scene) {
-
-}
-
 void Magma::update(double deltaTime) {
   scene->update();
   fluidSimulation->update();
@@ -75,7 +71,7 @@ void Magma::update(double deltaTime) {
 
 void Magma::render(double deltaTime) {
   bool shouldResize;
-  MVkWrap::prepareFrame(
+  GfxWrap::prepareFrame(
     mvkContext->device,
     mvkContext->swapchain.handle,
     mvkContext->imageAcquiredSemaphore,
@@ -104,7 +100,7 @@ void Magma::render(double deltaTime) {
       UINT64_MAX)));
   } while (res == VK_TIMEOUT);
 
-  MVkWrap::presentSwapchain(
+  GfxWrap::presentSwapchain(
     mvkContext->presentQueue,
     &mvkContext->swapchain.handle,
     &mvkContext->currentImageIndex);

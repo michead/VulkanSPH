@@ -1,8 +1,8 @@
 #pragma once
-#include "mvk_context.h"
+#include "gfx_context.h"
 #include "fluid_simulation.h"
 
 struct MagmaContext {
-  MVkContext* graphics;
+  GfxContext* graphics;
   FluidSimulation* fluidSimulation;
 };

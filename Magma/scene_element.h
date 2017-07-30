@@ -1,8 +1,8 @@
 #pragma once
 
 #include <vulkan\vulkan.hpp>
-#include "mvk_wrap.h"
-#include "mvk_pipeline.h"
+#include "gfx_wrap.h"
+#include "pipeline.h"
 #include "magma_types.h"
 
 #define SCENE_ELEM_PARTICLE_GRID "PARTICLE_GRID"
@@ -28,7 +28,7 @@ protected:
   Scene* scene;
 
   const MagmaContext* context;
-  MVkPipeline* pipeline;
+  Pipeline* pipeline;
 
   glm::mat4 model;
 };

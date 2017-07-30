@@ -1,13 +1,13 @@
 #pragma once
 
-class MVkContext;
+class GfxContext;
 class SDLWindow;
 
 class HUD {
-  HUD(const MVkContext* context, SDL_Window* window);
+  HUD(const GfxContext* context, SDL_Window* window);
 
   void render();
 
 private:
-  const MVkContext* context;
+  const GfxContext* context;
 };

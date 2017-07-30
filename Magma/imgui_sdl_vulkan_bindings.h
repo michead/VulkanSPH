@@ -2,7 +2,7 @@
 
 // Readapted from ImGui Vulkan example https://github.com/ocornut/imgui/tree/master/examples/vulkan_example
 
-#include "mvk_wrap.h"
+#include "gfx_wrap.h"
 
 struct SDL_Window;
 

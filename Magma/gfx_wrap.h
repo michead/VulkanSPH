@@ -16,7 +16,7 @@
 #define VK_DESCRIPTOR_POOL_MAX_SETS_DEFAULT 30
 #define VK_DESCRIPTOR_POOL_SIZE_DEFAULT     1
 
-namespace MVkWrap {
+namespace GfxWrap {
   inline void queryAvailableWSIExtensions(std::vector<const char*>& extensions) {
     extensions.clear();
     extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
@@ -487,8 +487,8 @@ namespace MVkWrap {
     bufferInfo.flags = 0;
     VK_CHECK(vkCreateBuffer(device, &bufferInfo, nullptr, &buffer));
 
-    MVkWrap::allocateDeviceMemory(physicalDevice, device, buffer, allocSize, deviceMemory);
-    MVkWrap::updateBuffer(device, size, data, *allocSize, deviceMemory, mappedMemory);
+    GfxWrap::allocateDeviceMemory(physicalDevice, device, buffer, allocSize, deviceMemory);
+    GfxWrap::updateBuffer(device, size, data, *allocSize, deviceMemory, mappedMemory);
     VK_CHECK(vkBindBufferMemory(device, buffer, deviceMemory, 0));
 
     if (outBufferInfo) {

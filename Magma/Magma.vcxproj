@@ -171,13 +171,14 @@
     <ClCompile Include="magma.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mesh.cpp" />
-    <ClCompile Include="mvk_structs.cpp" />
+    <ClCompile Include="gfx_structs.cpp" />
+    <ClCompile Include="mesh_pipeline.cpp" />
     <ClCompile Include="perf.cpp" />
     <ClCompile Include="pipeline.cpp" />
     <ClCompile Include="scene.cpp" />
-    <ClCompile Include="mvk_context.cpp" />
+    <ClCompile Include="gfx_context.cpp" />
     <ClCompile Include="logger.cpp" />
-    <ClCompile Include="mvk_pipeline.cpp" />
+    <ClCompile Include="fluid_pipeline.cpp" />
     <ClCompile Include="scene_element.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -191,18 +192,19 @@
     <ClInclude Include="magma_context.h" />
     <ClInclude Include="math.h" />
     <ClInclude Include="mesh.h" />
-    <ClInclude Include="mvk_utils.h" />
+    <ClInclude Include="gfx_utils.h" />
     <ClInclude Include="fluid.h" />
+    <ClInclude Include="mesh_pipeline.h" />
     <ClInclude Include="perf.h" />
     <ClInclude Include="pipeline.h" />
     <ClInclude Include="scene.h" />
     <ClInclude Include="scene_element.h" />
     <ClInclude Include="scene_graph.h" />
-    <ClInclude Include="mvk_context.h" />
+    <ClInclude Include="gfx_context.h" />
     <ClInclude Include="logger.h" />
-    <ClInclude Include="mvk_pipeline.h" />
-    <ClInclude Include="mvk_structs.h" />
-    <ClInclude Include="mvk_wrap.h" />
+    <ClInclude Include="fluid_pipeline.h" />
+    <ClInclude Include="gfx_structs.h" />
+    <ClInclude Include="gfx_wrap.h" />
     <ClInclude Include="magma_types.h" />
   </ItemGroup>
   <ItemGroup>

@@ -25,6 +25,10 @@ void SceneElement::update() {
   if (pipeline) {
     pipeline->update();
   }
+
+  for (const auto child : children) {
+    child->update();
+  }
 }
 
 void SceneElement::render() {
@@ -32,7 +36,7 @@ void SceneElement::render() {
     VkCommandBuffer drawCmd = pipeline->getDrawCmdBuffer();
     VkPipelineStageFlags stageFlags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 
-    MVkWrap::submitCommandBuffer(
+    GfxWrap::submitCommandBuffer(
       context->graphics->graphicsQueue,
       1,
       &drawCmd,

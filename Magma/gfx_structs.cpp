@@ -3,7 +3,7 @@
 #include <glm\glm.hpp>
 
 #include <glm\glm.hpp>
-#include "mvk_structs.h"
+#include "gfx_structs.h"
 
 const VkAttachmentDescription MVkBaseAttachmentColor = {
   0,

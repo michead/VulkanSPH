@@ -2,15 +2,19 @@
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm\glm.hpp>
 #include <glm\gtc\matrix_transform.hpp>
-#include "mvk_pipeline.h"
-#include "mvk_context.h"
-#include "mvk_wrap.h"
-#include "mvk_structs.h"
-#include "mvk_utils.h"
+#include "fluid_pipeline.h"
+#include "gfx_context.h"
+#include "gfx_wrap.h"
+#include "gfx_structs.h"
+#include "gfx_utils.h"
 #include "scene.h"
 #include "fluid.h"
 
-void MVkPipeline::init() {
+FluidPipeline::FluidPipeline(GfxContext* context, Camera* camera, Fluid* elem) : Pipeline(context, camera, elem) {
+  init();
+}
+
+void FluidPipeline::init() {
   initPipelineState();
   initRenderPass();
   initFramebuffers();
@@ -18,36 +22,37 @@ void MVkPipeline::init() {
   initVertexBuffer();
   initPipelineLayout();
   initPipelineCache();
-  initPipeline();
   initUniformBuffers();
   updateDescriptorSets();
-  initCommandBuffers();
 
+  initPipeline();
   context->setPipeline(this);
+
+  initCommandBuffers();
 }
 
-void MVkPipeline::initPipelineLayout() {
+void FluidPipeline::initPipelineLayout() {
   std::vector<VkDescriptorSetLayoutBinding> bindings = {
     MVkDescriptorSetLayoutBindingUniformBufferVS,
     MVkDescriptorSetLayoutBindingUniformBufferFS,
   };
-  MVkWrap::createDescriptorSetLayout(context->device, bindings, pipeline.descriptorSetLayout);
-  MVkWrap::createDescriptorSet(context->device, context->descriptorPool, pipeline.descriptorSetLayout, pipeline.descriptorSet);
-  MVkWrap::createPipelineLayout(context->device, 1, &pipeline.descriptorSetLayout, pipeline.layout);
+  GfxWrap::createDescriptorSetLayout(context->device, bindings, pipeline.descriptorSetLayout);
+  GfxWrap::createDescriptorSet(context->device, context->descriptorPool, pipeline.descriptorSetLayout, pipeline.descriptorSet);
+  GfxWrap::createPipelineLayout(context->device, 1, &pipeline.descriptorSetLayout, pipeline.layout);
 }
 
-void MVkPipeline::initCommandBuffers() {
+void FluidPipeline::initCommandBuffers() {
   drawCmds.clear();
   drawCmds.resize(context->swapchainImageCount);
 
   std::array<VkClearValue, 2> clearValues;
-  MVkWrap::clearValues(clearValues);
+  GfxWrap::clearValues(clearValues);
 
   for (size_t i = 0; i < context->swapchainImageCount; i++) {
-    MVkWrap::createCommandBuffers(context->device, context->commandPool, 1, &drawCmds[i]);
+    GfxWrap::createCommandBuffers(context->device, context->commandPool, 1, &drawCmds[i]);
     
-    MVkWrap::beginCommandBuffer(drawCmds[i]);
-    MVkWrap::beginRenderPass(
+    GfxWrap::beginCommandBuffer(drawCmds[i]);
+    GfxWrap::beginRenderPass(
       drawCmds[i],
       pipeline.renderPass,
       framebuffers[i],
@@ -64,18 +69,17 @@ void MVkPipeline::initCommandBuffers() {
     VkDeviceSize offset = 0;
     vkCmdBindVertexBuffers(drawCmds[i], 0, 1, &vertexBuffer, &offset);
 
-
     vkCmdSetViewport(drawCmds[i], 0, 1, &context->viewport);
     vkCmdSetScissor(drawCmds[i], 0, 1, &context->scissor);
 
-    vkCmdDraw(drawCmds[i], fluid->particleCount, 1, 0, 0);
+    vkCmdDraw(drawCmds[i], to_fluid(elem)->particleCount, 1, 0, 0);
 
     vkCmdEndRenderPass(drawCmds[i]);
     VK_CHECK(vkEndCommandBuffer(drawCmds[i]));
   }
 }
 
-void MVkPipeline::initPipelineState() {
+void FluidPipeline::initPipelineState() {
   attachments.clear();
   attachments.push_back(MVkBaseAttachmentColor);
   attachments.push_back(MVkBaseAttachmentDepth);
@@ -91,12 +95,12 @@ void MVkPipeline::initPipelineState() {
   pipeline.colorBlendState = MVkPipelineColorBlendStateSPH;
   pipeline.multisampleState = MVkPipelineMultisampleStateSPH;
   pipeline.dynamicState = MVkPipelineDynamicStateSPH;
-  pipeline.viewportState = MVkUtils::viewportState(&context->viewport, &context->scissor);
+  pipeline.viewportState = GfxUtils::viewportState(&context->viewport, &context->scissor);
   pipeline.depthStencilState = MVkPipelineDepthStencilStateSPH;
 }
 
-void MVkPipeline::initRenderPass() {
-  MVkWrap::createRenderPass(
+void FluidPipeline::initRenderPass() {
+  GfxWrap::createRenderPass(
     context->device,
     pipeline.handle,
     attachments,
@@ -105,8 +109,8 @@ void MVkPipeline::initRenderPass() {
     pipeline.renderPass);
 }
 
-void MVkPipeline::initFramebuffers() {
-  MVkWrap::createFramebuffers(
+void FluidPipeline::initFramebuffers() {
+  GfxWrap::createFramebuffers(
     context->device,
     pipeline.renderPass,
     context->swapchain.imageViews,
@@ -116,60 +120,58 @@ void MVkPipeline::initFramebuffers() {
     framebuffers);
 }
 
-void MVkPipeline::initStages() {
+void FluidPipeline::initStages() {
   VkShaderModule moduleVert;
   VkShaderModule moduleFrag;
 
   VkPipelineShaderStageCreateInfo createInfoVert;
   VkPipelineShaderStageCreateInfo createInfoFrag;
 
-  MVkWrap::createShaderModule(context->device, context->shaderMap["particle"]["vert"], moduleVert);
-  MVkWrap::createShaderModule(context->device, context->shaderMap["particle"]["frag"], moduleFrag);
+  GfxWrap::createShaderModule(context->device, context->shaderMap["particle"]["vert"], moduleVert);
+  GfxWrap::createShaderModule(context->device, context->shaderMap["particle"]["frag"], moduleFrag);
 
-  MVkWrap::shaderStage(moduleVert, VK_SHADER_STAGE_VERTEX_BIT, createInfoVert);
-  MVkWrap::shaderStage(moduleFrag, VK_SHADER_STAGE_FRAGMENT_BIT, createInfoFrag);
+  GfxWrap::shaderStage(moduleVert, VK_SHADER_STAGE_VERTEX_BIT, createInfoVert);
+  GfxWrap::shaderStage(moduleFrag, VK_SHADER_STAGE_FRAGMENT_BIT, createInfoFrag);
 
   pipeline.shaderStages.clear();
   pipeline.shaderStages.push_back(createInfoVert);
   pipeline.shaderStages.push_back(createInfoFrag);
 }
 
-void MVkPipeline::initPipelineCache() {
+void FluidPipeline::initPipelineCache() {
   pipeline.cache = VK_NULL_HANDLE;
 }
 
-void MVkPipeline::initVertexBuffer() {
-  size_t size = fluid->particleCount * sizeof(glm::vec4);
+void FluidPipeline::initVertexBuffer() {
+  size_t size = to_fluid(elem)->particleCount * sizeof(glm::vec4);
 
-  VkDeviceSize allocSize;
-  VkDescriptorBufferInfo vertexBufferInfo;
-  MVkWrap::createBuffer(context->physicalDevice,
+  GfxWrap::createBuffer(context->physicalDevice,
     context->device,
     VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-    fluid->positions,
+    to_fluid(elem)->positions,
     size,
     vertexBuffer,
-    &allocSize,
-    vertexBufferMemory,
-    &vertexBufferMappedMemory,
-    &vertexBufferInfo);
+    &vertexBufferDesc.allocSize,
+    vertexBufferDesc.deviceMemory,
+    &vertexBufferDesc.mappedMemory,
+    &vertexBufferDesc.bufferInfo);
 }
 
-void MVkPipeline::initUniformBuffers() {
+void FluidPipeline::initUniformBuffers() {
   uniformsVS.view         = camera->getViewMatrix();
   uniformsVS.proj         = camera->getProjectionMatrix();
-  uniformsVS.particleSize = fluid->radius;
+  uniformsVS.particleSize = to_fluid(elem)->radius;
 
-  MVkWrap::createBuffer(context->physicalDevice,
+  GfxWrap::createBuffer(context->physicalDevice,
     context->device,
     VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
     &uniformsVS,
     sizeof(MVkVertexShaderUniformParticle),
-    uniformBufferVS.buffer,
-    &uniformBufferVS.allocSize,
-    uniformBufferVS.deviceMemory,
-    &uniformBufferVS.mappedMemory,
-    &uniformBufferVS.bufferInfo);
+    uniformBufferVSDesc.buffer,
+    &uniformBufferVSDesc.allocSize,
+    uniformBufferVSDesc.deviceMemory,
+    &uniformBufferVSDesc.mappedMemory,
+    &uniformBufferVSDesc.bufferInfo);
 
   uniformsFS.particleSize = 10.f;
   uniformsFS.ambientColor = glm::vec4(0.5f, 0.5f, 0.5, 1.f);
@@ -183,38 +185,38 @@ void MVkPipeline::initUniformBuffers() {
     context->viewport.width,
     context->viewport.height };
 
-  MVkWrap::createBuffer(context->physicalDevice,
+  GfxWrap::createBuffer(context->physicalDevice,
     context->device,
     VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
     &uniformsFS,
     sizeof(MVkFragmentShaderUniformParticle),
-    uniformBufferFS.buffer,
-    &uniformBufferFS.allocSize,
-    uniformBufferFS.deviceMemory,
-    &uniformBufferFS.mappedMemory,
-    &uniformBufferFS.bufferInfo);
+    uniformBufferFSDesc.buffer,
+    &uniformBufferFSDesc.allocSize,
+    uniformBufferFSDesc.deviceMemory,
+    &uniformBufferFSDesc.mappedMemory,
+    &uniformBufferFSDesc.bufferInfo);
 }
 
-void MVkPipeline::update() {
+void FluidPipeline::update() {
   updateBuffers();
 }
 
-void MVkPipeline::updateDescriptorSets() {
-  MVkWrap::updateDescriptorSet(context->device, pipeline.descriptorSet, 0, uniformBufferVS.bufferInfo);
-  MVkWrap::updateDescriptorSet(context->device, pipeline.descriptorSet, 1, uniformBufferFS.bufferInfo);
+void FluidPipeline::updateDescriptorSets() {
+  GfxWrap::updateDescriptorSet(context->device, pipeline.descriptorSet, 0, uniformBufferVSDesc.bufferInfo);
+  GfxWrap::updateDescriptorSet(context->device, pipeline.descriptorSet, 1, uniformBufferFSDesc.bufferInfo);
 }
 
-void MVkPipeline::updateBuffers() {
+void FluidPipeline::updateBuffers() {
   uniformsVS.view = camera->getViewMatrix();
   uniformsVS.proj = camera->getProjectionMatrix();
 
-  MVkWrap::updateBuffer(
+  GfxWrap::updateBuffer(
     context->device,
     sizeof(MVkVertexShaderUniformParticle),
     &uniformsVS,
-    uniformBufferVS.allocSize,
-    uniformBufferFS.deviceMemory,
-    &uniformBufferFS.mappedMemory);
+    uniformBufferVSDesc.allocSize,
+    uniformBufferFSDesc.deviceMemory,
+    &uniformBufferFSDesc.mappedMemory);
 
   uniformsFS.proj = camera->getProjectionMatrix();
   uniformsFS.invProj = glm::inverse(camera->getProjectionMatrix());
@@ -224,17 +226,25 @@ void MVkPipeline::updateBuffers() {
     context->viewport.width,
     context->viewport.height };
 
-  MVkWrap::updateBuffer(
+  GfxWrap::updateBuffer(
     context->device,
     sizeof(MVkFragmentShaderUniformParticle),
     &uniformsFS,
-    uniformBufferFS.allocSize,
-    uniformBufferFS.deviceMemory,
-    &uniformBufferFS.mappedMemory);
+    uniformBufferFSDesc.allocSize,
+    uniformBufferFSDesc.deviceMemory,
+    &uniformBufferFSDesc.mappedMemory);
+
+  GfxWrap::updateBuffer(
+    context->device,
+    to_fluid(elem)->particleCount * sizeof(glm::vec4),
+    to_fluid(elem)->positions,
+    vertexBufferDesc.allocSize,
+    vertexBufferDesc.deviceMemory,
+    &vertexBufferMappedMemory);
 }
 
-void MVkPipeline::initPipeline() {
-  MVkWrap::createGraphicsPipeline(
+void FluidPipeline::initPipeline() {
+  GfxWrap::createGraphicsPipeline(
     context->device,
     pipeline.layout,
     pipeline.vertexInputState,
@@ -249,8 +259,4 @@ void MVkPipeline::initPipeline() {
     pipeline.renderPass,
     pipeline.cache,
     pipeline.handle);
-}
-
-VkCommandBuffer MVkPipeline::getDrawCmdBuffer() const {
-  return drawCmds[context->currentImageIndex];
 }

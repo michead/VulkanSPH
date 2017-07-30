@@ -3,9 +3,9 @@
 #include <SDL2\SDL_syswm.h>
 #include "hud.h"
 #include "imgui_sdl_vulkan_bindings.h"
-#include "mvk_context.h"
+#include "gfx_context.h"
 
-HUD::HUD(const MVkContext* context, SDL_Window* window) : context(context) {
+HUD::HUD(const GfxContext* context, SDL_Window* window) : context(context) {
   ImGui_ImplSDLVulkan_Init_Data init_data = {};
   init_data.allocator       = nullptr;
   init_data.gpu             = context->physicalDevice;
@@ -17,5 +17,6 @@ HUD::HUD(const MVkContext* context, SDL_Window* window) : context(context) {
 }
 
 void HUD::render() {
-  ImGui_ImplSDLVulkan_Render(context->getCommandBuffer());
+  // TODO: Init ImGui's VkCommandBuffer
+  ImGui_ImplSDLVulkan_Render(VK_NULL_HANDLE);
 }

@@ -4,7 +4,7 @@
 #include <vector>
 #include "logger.h"
 
-namespace MVkUtils {
+namespace GfxUtils {
   inline bool isGLSLFilename(const char* filename) {
     std::string extension = std::string(filename).substr(std::string(filename).find('.') + 1);
     return extension == "conf"

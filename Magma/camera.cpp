@@ -49,6 +49,7 @@ void Camera::orbit(glm::vec3 target, float dx, float dy) {
 
 void Camera::updateProjMatrix() {
   proj = glm::perspective(glm::radians(CAMERA_FOV), ratio, CAMERA_NEAR, CAMERA_FAR);
+  proj[1][1] *= -1;
 }
 
 void Camera::updateViewMatrix() {

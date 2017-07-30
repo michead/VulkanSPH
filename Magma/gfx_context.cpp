@@ -1,19 +1,19 @@
-#include "mvk_context.h"
-#include "mvk_pipeline.h"
-#include "mvk_wrap.h"
-#include "mvk_utils.h"
+#include "gfx_context.h"
+#include "pipeline.h"
+#include "gfx_wrap.h"
+#include "gfx_utils.h"
 #include "magma.h"
 
-bool MVkContext::bInit = false;
+bool GfxContext::bInit = false;
 
-void MVkContext::init(const char* appName, uint32_t appVersion, HWND windowHandle, const Config* config) {
+void GfxContext::init(const char* appName, uint32_t appVersion, HWND windowHandle, const Config* config) {
   initInstance(appName, appVersion);
   selectPhysicalDevice();
   initSurface(windowHandle);
   initDevice();
   initSwapchain(config->resolution);
   initDepthBuffer();
-  MVkWrap::createSemaphore(device, imageAcquiredSemaphore);
+  GfxWrap::createSemaphore(device, imageAcquiredSemaphore);
   initCommandPool();
   initViewport();
   loadShaders();
@@ -21,25 +21,25 @@ void MVkContext::init(const char* appName, uint32_t appVersion, HWND windowHandl
   bInit = true;
 }
 
-void MVkContext::initInstance(const char* appName, uint32_t appVersion) {
-  MVkWrap::createInstance(appName, appVersion, instance);
+void GfxContext::initInstance(const char* appName, uint32_t appVersion) {
+  GfxWrap::createInstance(appName, appVersion, instance);
 }
 
-void MVkContext::initDevice() {
-  MVkWrap::queryQueueFamilyIndices(physicalDevice, surface, &graphicsQueueFamilyIndex, &presentQueueFamilyIndex);
-  MVkWrap::createDevice(physicalDevice, graphicsQueueFamilyIndex, presentQueueFamilyIndex, device, graphicsQueue, presentQueue);
+void GfxContext::initDevice() {
+  GfxWrap::queryQueueFamilyIndices(physicalDevice, surface, &graphicsQueueFamilyIndex, &presentQueueFamilyIndex);
+  GfxWrap::createDevice(physicalDevice, graphicsQueueFamilyIndex, presentQueueFamilyIndex, device, graphicsQueue, presentQueue);
 }
-void MVkContext::selectPhysicalDevice() {
-  MVkWrap::queryDevices(instance, physicalDevices);
+void GfxContext::selectPhysicalDevice() {
+  GfxWrap::queryDevices(instance, physicalDevices);
   if (physicalDevices.empty()) {
     logger->error("No Vulkan-enabled GPUs found.");
     exit(EXIT_FAILURE);
   }
   physicalDevice = physicalDevices.at(0);
-  MVkWrap::printDeviceStats(physicalDevice);
+  GfxWrap::printDeviceStats(physicalDevice);
 }
 
-void MVkContext::initCommandPool() {
+void GfxContext::initCommandPool() {
   VkCommandPoolCreateInfo info = {};
   info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
   info.pNext = nullptr;
@@ -49,18 +49,18 @@ void MVkContext::initCommandPool() {
   VK_REGISTER(VkCommandPool, 1, &commandPool);
 }
 
-void MVkContext::initSurface(HWND hwnd) {
-  MVkWrap::createSurface(instance, physicalDevice, hwnd,
+void GfxContext::initSurface(HWND hwnd) {
+  GfxWrap::createSurface(instance, physicalDevice, hwnd,
     &graphicsQueueFamilyIndex, &presentQueueFamilyIndex,
     surface, surfaceCapabilities, format);
 }
 
-void MVkContext::initSwapchain(glm::ivec2 resolution) {
+void GfxContext::initSwapchain(glm::ivec2 resolution) {
   swapchain.extent = {
     (uint32_t) resolution.x,
     (uint32_t) resolution.y
   };
-  MVkWrap::createSwapchain(device,
+  GfxWrap::createSwapchain(device,
     surface, surfaceCapabilities, format,
     graphicsQueueFamilyIndex, presentQueueFamilyIndex, 
     swapchain.handle, swapchain.extent, swapchain.images, swapchain.imageViews);
@@ -69,18 +69,18 @@ void MVkContext::initSwapchain(glm::ivec2 resolution) {
   swapchainImageCount = swapchain.imageViews.size();
   drawFences.resize(swapchainImageCount);
   for (size_t i = 0; i < swapchainImageCount; i++) {
-    MVkWrap::createFence(device, drawFences[i]);
+    GfxWrap::createFence(device, drawFences[i]);
   }
 }
 
-void MVkContext::initDescriptorPool() {
+void GfxContext::initDescriptorPool() {
   VkDescriptorPoolSize descriptorPoolSize = VK_DESCRIPTOR_POOL_SIZE;
-  MVkWrap::createDescriptorPool(device, descriptorPoolSize, descriptorPool);
+  GfxWrap::createDescriptorPool(device, descriptorPoolSize, descriptorPool);
 }
 
-void MVkContext::initDepthBuffer() {
+void GfxContext::initDepthBuffer() {
   VkDeviceMemory deviceMemory;
-  MVkWrap::createDepthBuffer(
+  GfxWrap::createDepthBuffer(
     physicalDevice,
     device,
     swapchain.extent,
@@ -90,7 +90,7 @@ void MVkContext::initDepthBuffer() {
     depthBuffer.imageView);
 }
 
-void MVkContext::loadShaders() {
+void GfxContext::loadShaders() {
   HANDLE hFind;
   WIN32_FIND_DATA data;
 
@@ -102,7 +102,7 @@ void MVkContext::loadShaders() {
     do {
       char cGlsl[128];
       sprintf_s(cGlsl, "%ws", data.cFileName);
-      if (MVkUtils::isGLSLFilename(cGlsl)) {
+      if (GfxUtils::isGLSLFilename(cGlsl)) {
         logger->info("Compiling shader {0} ...", cGlsl);
         
         std::string sGlsl = std::string(cGlsl);
@@ -154,19 +154,15 @@ void MVkContext::loadShaders() {
   logger->info("Shader compilation complete.");
 }
 
-void MVkContext::initViewport() {
-  viewport = MVkUtils::viewport( swapchain.extent.width, swapchain.extent.height );
-  scissor  = MVkUtils::scissor({ swapchain.extent.width, swapchain.extent.height });
+void GfxContext::initViewport() {
+  viewport = GfxUtils::viewport( swapchain.extent.width, swapchain.extent.height );
+  scissor  = GfxUtils::scissor({ swapchain.extent.width, swapchain.extent.height });
 }
 
-VkRenderPass MVkContext::getRenderPass() const {
+VkRenderPass GfxContext::getRenderPass() const {
   return pipeline->pipeline.renderPass;
 }
 
-VkPipelineCache MVkContext::getPipelineCache() const {
+VkPipelineCache GfxContext::getPipelineCache() const {
   return pipeline->pipeline.cache;
-}
-
-VkCommandBuffer MVkContext::getCommandBuffer() const {
-  return pipeline->drawCmds[currentImageIndex];
 }
