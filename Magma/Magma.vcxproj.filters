@@ -161,14 +161,19 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="particle.frag">
+    <None Include="data\scene.json">
+      <Filter>Source Files\data</Filter>
+    </None>
+    <None Include="shaders\particle.frag">
       <Filter>Source Files\shaders</Filter>
     </None>
-    <None Include="particle.vert">
+    <None Include="shaders\particle.vert">
       <Filter>Source Files\shaders</Filter>
     </None>
-    <None Include="scene.json">
-      <Filter>Source Files</Filter>
-    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Object Include="data\bowl.obj">
+      <Filter>Source Files\data</Filter>
+    </Object>
   </ItemGroup>
 </Project>

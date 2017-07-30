@@ -85,7 +85,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;SDL_VIDEO_DRIVER_WINDOWS;VK_USE_PLATFORM_WIN32_KHR;VK_SDK_BIN=R"($(VULKAN_SDK)\bin32\)";VK_LAYER_PATH=R"($(VULKAN_SDK)\Source\lib32\)";SHADER_PATH=LR"($(ProjectDir))";_DEBUG;_CONSOLE;_LIB;MAGMA_ROOT_DIR="$(ProjectDir)";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;SDL_VIDEO_DRIVER_WINDOWS;VK_USE_PLATFORM_WIN32_KHR;VK_SDK_BIN=R"($(VULKAN_SDK)\bin32\)";VK_LAYER_PATH=R"($(VULKAN_SDK)\Source\lib32\)";SHADER_PATH=LR"($(ProjectDir)shaders\)";_DEBUG;_CONSOLE;_LIB;MAGMA_ROOT_DIR="$(ProjectDir)";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Third-Party\Include;$(FLEX_PATH)\include;$(SolutionDir)ext\glm;$(SolutionDir)ext\json;$(SolutionDir)ext\spdlog;$(SolutionDir)ext;$(BOOST_PATH)\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -208,9 +208,14 @@
     <ClInclude Include="magma_types.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="particle.frag" />
-    <None Include="particle.vert" />
-    <None Include="scene.json" />
+    <None Include="data\scene.json" />
+    <None Include="shaders\particle.frag" />
+    <None Include="shaders\particle.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <Object Include="data\bowl.obj">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </Object>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

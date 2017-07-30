@@ -95,9 +95,8 @@ void GfxContext::loadShaders() {
   WIN32_FIND_DATA data;
 
   std::wstring wDir(SHADER_PATH);
-  wDir += L"*";
   
-  hFind = FindFirstFile(wDir.c_str(), &data);
+  hFind = FindFirstFile((wDir + L"*").c_str(), &data);
   if (hFind != INVALID_HANDLE_VALUE) {
     do {
       char cGlsl[128];
@@ -108,10 +107,21 @@ void GfxContext::loadShaders() {
         std::string sGlsl = std::string(cGlsl);
         std::string shaderName  = sGlsl.substr(0, sGlsl.size() - 5);
         std::string shaderStage = sGlsl.substr(   sGlsl.size() - 4);
-
-        char command[128];
         std::string sSpv = shaderName + "." + shaderStage + ".spv";
-        sprintf_s(command, VK_SDK_BIN"glslangValidator %s -V -o %s", cGlsl, sSpv.c_str());
+
+        char cDir[128];
+        sprintf_s(cDir, "%ws", wDir.c_str());
+
+        char cGlslAbs[256];
+        strcpy_s(cGlslAbs, cDir);
+        strcat_s(cGlslAbs, cGlsl);
+
+        char cSpvAbs[256];
+        strcpy_s(cSpvAbs, cDir);
+        strcat_s(cSpvAbs, sSpv.c_str());
+
+        char command[512];
+        sprintf_s(command, VK_SDK_BIN"glslangValidator \"%s\" -V -o \"%s\"", cGlslAbs, cSpvAbs);
         
         int ret = system(command);
         if (ret != 0) {
@@ -129,7 +139,8 @@ void GfxContext::loadShaders() {
           }
         }
 
-        std::ifstream in(sSpv, std::ios::ate | std::ios::binary);
+        std::string sSpvAbs(cSpvAbs);
+        std::ifstream in(sSpvAbs, std::ios::ate | std::ios::binary);
 
         if (!in.is_open()) {
           logger->error("Shader file cannot be opened.");

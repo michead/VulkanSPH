@@ -20,7 +20,7 @@
       }
     }, {
       "type": "TRIANGLE_MESH",
-      "source": "bowl.obj"
+      "source": "data/bowl.obj"
     }]
   },
   "__ignored": {

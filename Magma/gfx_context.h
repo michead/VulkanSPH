@@ -14,7 +14,7 @@
 #define VK_NUM_IMAGE_SAMPLES          VK_SAMPLE_COUNT_1_BIT
 
 #ifndef SHADER_PATH
-#define SHADER_PATH L"."
+#define SHADER_PATH L"shaders"
 #endif
 
 struct Config;
