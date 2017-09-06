@@ -6,6 +6,10 @@
 #include <map>
 #include <vector>
 #include <vulkan\vulkan.hpp>
+#include "camera.h"
+#include "light.h"
+
+#define MAX_NUM_LIGHTS 32
 
 struct MVkAttachment {
   VkImage     image;
@@ -36,11 +40,6 @@ struct MVkPipelineParams {
   glm::vec4* positions;
 };
 
-struct Light {
-  glm::vec3 pos;
-  glm::vec4 ke;
-};
-
 struct MVkVertexShaderUniformParticle {
   glm::mat4 view;
   glm::mat4 proj;
@@ -54,8 +53,8 @@ struct MVkFragmentShaderUniformParticle {
   glm::mat4          invProj;
   glm::ivec4         viewport;
   float              particleSize;
-  glm::uint8_t       lightCount;
-  std::vector<Light> lights;
+  unsigned int       lightCount;
+  Light              lights[MAX_NUM_LIGHTS];
 };
 
 struct MVkBufferDesc {

@@ -18,6 +18,7 @@
 #endif
 
 struct Config;
+struct Scene;
 class Pipeline;
 
 class GfxContext {
@@ -32,11 +33,9 @@ public:
     return &context;
   }
 
-  void setPipeline(const Pipeline* pipeline) {
-    this->pipeline = pipeline;
-  }
-
-  VkRenderPass getRenderPass() const;
+  void            setPipeline(Pipeline* pipeline);
+  Pipeline*       getPipeline()      const;
+  VkRenderPass    getRenderPass()    const;
   VkPipelineCache getPipelineCache() const;
 
   VkInstance               instance;
@@ -61,7 +60,8 @@ public:
   MVkSwapchain             swapchain;
   MVkShaderMap             shaderMap;
 
-  const Pipeline*          pipeline;
+  Pipeline*                pipeline;
+  Scene*                   scene;
 
   std::vector<const char*>             extensions;
   std::vector<VkPhysicalDevice>        physicalDevices;

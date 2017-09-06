@@ -10,7 +10,7 @@
 Fluid::Fluid(Scene* scene, const ConfigNode& fluidObj, const MagmaContext* context)
   : SceneElement(scene, fluidObj, context), fluidSimulation(context->fluidSimulation) {
   fromJSON(fluidObj);
-  pipeline = new FluidPipeline(context->graphics, scene->camera, this);
+  pipeline = new FluidPipeline(context->graphics, scene, this);
 };
 
 NvFlexSolver* Fluid::getSolver() {

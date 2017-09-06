@@ -10,8 +10,9 @@
 #include "scene.h"
 #include "fluid.h"
 
-FluidPipeline::FluidPipeline(GfxContext* context, Camera* camera, Fluid* elem) : Pipeline(context, camera, elem) {
+FluidPipeline::FluidPipeline(GfxContext* context, Scene* scene, Fluid* elem) : Pipeline(context, scene, elem) {
   init();
+  postInit();
 }
 
 void FluidPipeline::init() {
@@ -22,12 +23,13 @@ void FluidPipeline::init() {
   initVertexBuffer();
   initPipelineLayout();
   initPipelineCache();
+}
+
+void FluidPipeline::postInit() {
   initUniformBuffers();
   updateDescriptorSets();
-
   initPipeline();
   context->setPipeline(this);
-
   initCommandBuffers();
 }
 
@@ -158,9 +160,9 @@ void FluidPipeline::initVertexBuffer() {
 }
 
 void FluidPipeline::initUniformBuffers() {
-  uniformsVS.view         = camera->getViewMatrix();
-  uniformsVS.proj         = camera->getProjectionMatrix();
-  uniformsVS.particleSize = to_fluid(elem)->radius;
+  uniformsVS.view         = scene->camera->getViewMatrix();
+  uniformsVS.proj         = scene->camera->getProjectionMatrix();
+  uniformsVS.particleSize = to_fluid(elem)->radius * 2000;
 
   GfxWrap::createBuffer(context->physicalDevice,
     context->device,
@@ -173,12 +175,13 @@ void FluidPipeline::initUniformBuffers() {
     &uniformBufferVSDesc.mappedMemory,
     &uniformBufferVSDesc.bufferInfo);
 
-  uniformsFS.particleSize = 10.f;
+  uniformsFS.particleSize = uniformsVS.particleSize;
   uniformsFS.ambientColor = glm::vec4(0.5f, 0.5f, 0.5, 1.f);
   uniformsFS.fluidDiffuse = glm::vec4(0.0f, 0.0f, 1.f, 1.f);
-  uniformsFS.lightCount   = 0;
-  uniformsFS.proj         = camera->getProjectionMatrix();
-  uniformsFS.invProj      = glm::inverse(camera->getProjectionMatrix());
+  uniformsFS.lightCount   = scene->lights.size();
+  memcpy(uniformsFS.lights, scene->lights.data(), sizeof(Light) * uniformsFS.lightCount);
+  uniformsFS.proj         = scene->camera->getProjectionMatrix();
+  uniformsFS.invProj      = glm::inverse(scene->camera->getProjectionMatrix());
   uniformsFS.viewport = {
     context->viewport.x,
     context->viewport.y,
@@ -207,8 +210,8 @@ void FluidPipeline::updateDescriptorSets() {
 }
 
 void FluidPipeline::updateBuffers() {
-  uniformsVS.view = camera->getViewMatrix();
-  uniformsVS.proj = camera->getProjectionMatrix();
+  uniformsVS.view = scene->camera->getViewMatrix();
+  uniformsVS.proj = scene->camera->getProjectionMatrix();
 
   GfxWrap::updateBuffer(
     context->device,
@@ -218,8 +221,8 @@ void FluidPipeline::updateBuffers() {
     uniformBufferFSDesc.deviceMemory,
     &uniformBufferFSDesc.mappedMemory);
 
-  uniformsFS.proj = camera->getProjectionMatrix();
-  uniformsFS.invProj = glm::inverse(camera->getProjectionMatrix());
+  uniformsFS.proj = scene->camera->getProjectionMatrix();
+  uniformsFS.invProj = glm::inverse(scene->camera->getProjectionMatrix());
   uniformsFS.viewport = {
     context->viewport.x,
     context->viewport.y,

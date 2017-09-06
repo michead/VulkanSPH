@@ -4,7 +4,7 @@
 #include "gfx_structs.h"
 
 class GfxContext;
-struct Camera;
+struct Scene;
 struct SceneElement;
 
 /**
@@ -12,9 +12,10 @@ struct SceneElement;
  */
 class Pipeline {
 public:
-  Pipeline(GfxContext* context, Camera* camera, SceneElement* elem);
+  Pipeline(GfxContext* context, Scene* scene, SceneElement* elem);
 
   virtual void init();
+  virtual void postInit();
   virtual void update();
 
   virtual VkCommandBuffer getDrawCmdBuffer() const;
@@ -37,7 +38,7 @@ protected:
 
   GfxContext* context;
 
-  Camera* camera;
+  Scene*         scene;
   SceneElement*  elem;
 
   MVkVertexShaderUniformParticle   uniformsVS;

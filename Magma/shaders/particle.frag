@@ -15,7 +15,7 @@ struct Light {
   vec4 ke;
 };
 
-layout(binding = 1) uniform globals {
+layout(binding = 1, std140) uniform globals {
   vec4  fluidDiffuse;
   vec4  ambientColor;
   mat4  proj;
@@ -27,7 +27,6 @@ layout(binding = 1) uniform globals {
 } uniforms;
 
 void main() {
-  /*
   vec3 normal;
   normal.xy = gl_PointCoord * 2.0 - 1.0;
   
@@ -59,7 +58,4 @@ void main() {
     vec3 lightDir = normalize(light.pos - eyePos.xyz);
     color += max(0, dot(normal, lightDir)) * uniforms.fluidDiffuse;
   }
-  */
-
-  color = vec4(1, 1, 1, 1);
 }

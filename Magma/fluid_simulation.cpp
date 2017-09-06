@@ -142,9 +142,9 @@ void FluidSimulation::errorCallback(NvFlexErrorSeverity sev, const char* msg, co
 const NvFlexParams defaultFluidParams = {
   3,                      // numIterations
   { 0, -9.8f, 0 },        // gravity
-  0.2f,                   // radius
-  0.0f,                   // solidRestDistance
-  0.0f,                   // fluidRestDistance
+  0.05f,                  // radius
+  0.1f,                   // solidRestDistance
+  0.1f,                   // fluidRestDistance
   0.0f,                   // dynamicFriction
   0.0f,                   // staticFriction
   0.0f,                   // particleFriction
@@ -182,15 +182,15 @@ const NvFlexParams defaultFluidParams = {
   0.025f,                 // collisionDistance
   0.01f,                  // particleCollisionMargin
   0.01f,                  // shapeCollisionMargin
-  { { 0, 0, 0, 0 },
-    { 0, 0, 0, 0 },
-    { 0, 0, 0, 0 },
-    { 0, 0, 0, 0 },
-    { 0, 0, 0, 0 },
-    { 0, 0, 0, 0 },
-    { 0, 0, 0, 0 },
-    { 0, 0, 0, 0 } },     // planes
-  0,                      // numPlanes
+  { {  0,  1,  0,  2 },
+    {  0,  0,  0,  0 },
+    {  0,  0,  0,  0 },
+    {  0,  0,  0,  0 },
+    {  0,  0,  0,  0 },
+    {  0,  0,  0,  0 },
+    {  0,  0,  0,  0 },
+    {  0,  0,  0,  0 } }, // planes
+  1,                      // numPlanes
   eNvFlexRelaxationLocal, // relaxationMode
   1                       // relaxationFactor
 };

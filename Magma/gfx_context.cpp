@@ -2,6 +2,7 @@
 #include "pipeline.h"
 #include "gfx_wrap.h"
 #include "gfx_utils.h"
+#include "scene.h"
 #include "magma.h"
 
 bool GfxContext::bInit = false;
@@ -168,6 +169,14 @@ void GfxContext::loadShaders() {
 void GfxContext::initViewport() {
   viewport = GfxUtils::viewport( swapchain.extent.width, swapchain.extent.height );
   scissor  = GfxUtils::scissor({ swapchain.extent.width, swapchain.extent.height });
+}
+
+void GfxContext::setPipeline(Pipeline* pipeline) {
+  this->pipeline = pipeline;
+}
+
+Pipeline* GfxContext::getPipeline() const {
+  return pipeline;
 }
 
 VkRenderPass GfxContext::getRenderPass() const {

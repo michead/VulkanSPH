@@ -168,6 +168,7 @@
     <ClCompile Include="fluid_simulation.cpp" />
     <ClCompile Include="hud.cpp" />
     <ClCompile Include="imgui_sdl_vulkan_bindings.cpp" />
+    <ClCompile Include="light.cpp" />
     <ClCompile Include="magma.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mesh.cpp" />
@@ -188,6 +189,7 @@
     <ClInclude Include="fluid_simulation.h" />
     <ClInclude Include="hud.h" />
     <ClInclude Include="imgui_sdl_vulkan_bindings.h" />
+    <ClInclude Include="light.h" />
     <ClInclude Include="magma.h" />
     <ClInclude Include="magma_context.h" />
     <ClInclude Include="math.h" />

@@ -1,7 +1,10 @@
 #pragma once
+#include <vector>
 #include "camera.h"
+#include "light.h"
 
 #define CAMERA_NODE(j)    j["camera"]
+#define LIGHTS_NODE(j)    j["lights"]
 #define ROOT_NODE(j)      j["root"]
 #define CHILDREN_NODE(j)  j["children"]
 #define TYPE_NODE(j)      j["type"]
@@ -19,13 +22,16 @@ class FluidSimulation;
 struct Scene {
   Scene(const char* filename, const MagmaContext* context);
 
-  Camera* camera;
-  SceneGraph* graph;
+  Camera*             camera;
+  std::vector<Light>  lights;
+  SceneGraph*         graph;
 
   const MagmaContext* context;
 
   void loadJSON(const char* filename);
-  
+
   void update();
   void render();
+
+  static std::vector<Light> parseLights(const ConfigNode& lightsNode);
 };

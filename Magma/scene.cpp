@@ -19,6 +19,7 @@ void Scene::loadJSON(const char* filename) {
   i >> j;
 
   camera = new Camera(CAMERA_NODE(j));
+  lights = parseLights(LIGHTS_NODE(j));
   graph  = new SceneGraph(this, ROOT_NODE(j), context);
 }
 
@@ -28,4 +29,12 @@ void Scene::update() {
 
 void Scene::render() {
   graph->root->render();
+}
+
+std::vector<Light> Scene::parseLights(const ConfigNode& lightsNode) {
+  std::vector<Light> lights;
+  for (size_t i = 0; i < lightsNode.size(); i++) {
+    lights.push_back(Light(lightsNode[i]));
+  }
+  return lights;
 }

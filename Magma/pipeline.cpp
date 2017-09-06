@@ -1,8 +1,9 @@
 #include "pipeline.h"
 #include "gfx_context.h"
 
-Pipeline::Pipeline(GfxContext* context, Camera* camera, SceneElement* elem) : context(context), camera(camera), elem(elem) {
+Pipeline::Pipeline(GfxContext* context, Scene* scene, SceneElement* elem) : context(context), scene(scene), elem(elem) {
   init();
+  postInit();
 }
 
 VkCommandBuffer Pipeline::getDrawCmdBuffer() const {
@@ -17,12 +18,11 @@ void Pipeline::init() {
   initVertexBuffer();
   initPipelineLayout();
   initPipelineCache();
+}
+
+void Pipeline::postInit() {
   initUniformBuffers();
   updateDescriptorSets();
-
-  initPipeline();
-  context->setPipeline(this);
-
   initCommandBuffers();
 }
 
