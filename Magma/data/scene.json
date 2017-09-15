@@ -6,8 +6,7 @@
   },
   "lights": [{
     "type": "SPOT",
-    "pos": [ 0, 5, 0 ],
-    "ke": [ 10, 10, 10 ]  
+    "pos": [ 0, 5, 0 ]
   }],
   "root": {
     "children": [{

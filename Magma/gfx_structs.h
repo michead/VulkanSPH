@@ -34,6 +34,54 @@ struct MVkWsi {
   VkSurfaceCapabilitiesKHR surfaceCapabilities;
 };
 
+struct MVkShaderStage {
+  VkPipelineShaderStageCreateInfo info;
+  VkDescriptorSetLayoutBinding layout;
+};
+
+struct MVkShaderProgram {
+public:
+  std::vector<VkDescriptorSetLayoutBinding> getLayoutBindings() const {
+    std::vector<VkDescriptorSetLayoutBinding> layoutBindings;
+    if (bVert) layoutBindings.push_back(vert.layout);
+    if (bGeom) layoutBindings.push_back(geom.layout);
+    if (bFrag) layoutBindings.push_back(frag.layout);
+    return layoutBindings;
+  }
+
+  std::vector<VkPipelineShaderStageCreateInfo> getStages() const {
+    std::vector<VkPipelineShaderStageCreateInfo> stages;
+    if (bVert) stages.push_back(vert.info);
+    if (bGeom) stages.push_back(geom.info);
+    if (bFrag) stages.push_back(frag.info);
+    return stages;
+  }
+
+  void setVert(MVkShaderStage vert) {
+    this->vert = vert;
+    bVert = true;
+  }
+
+  void setGeom(MVkShaderStage geom) {
+    this->geom = geom;
+    bGeom = true;
+  }
+
+  void setFrag(MVkShaderStage frag) {
+    this->frag = frag;
+    bFrag = true;
+  }
+
+private:
+  MVkShaderStage vert;
+  MVkShaderStage geom;
+  MVkShaderStage frag;
+
+  bool bVert = false;
+  bool bGeom = false;
+  bool bFrag = false;
+};
+
 struct MVkPipelineParams {
   uint8_t    numPasses;
   uint32_t   vertexCount;
@@ -89,8 +137,10 @@ extern const VkClearValue                                   MVkClearValueColorWh
 extern const VkClearValue                                   MVkClearValueDepthStencilOneZero;
 extern const VkAttachmentDescription                        MVkBaseAttachmentColor;
 extern const VkAttachmentDescription                        MVkBaseAttachmentDepth;
+extern const std::vector<VkAttachmentDescription>           MVkBaseAttachments;
 extern const VkAttachmentReference                          MVkBaseAttachmentColorReference;
 extern const VkAttachmentReference                          MVkBaseAttachmentDepthReference;
+extern const std::vector<VkAttachmentReference>             MVkBaseAttachmentReferences;
 extern const VkSubpassDescription                           MVkBaseSubpass;
 extern const std::vector<VkSubpassDependency>               MVkBaseDependencies;
 extern const std::vector<VkVertexInputBindingDescription>   MVkVertexInputBindingDescriptionsSPH;

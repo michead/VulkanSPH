@@ -11,6 +11,9 @@ Fluid::Fluid(Scene* scene, const ConfigNode& fluidObj, const MagmaContext* conte
   : SceneElement(scene, fluidObj, context), fluidSimulation(context->fluidSimulation) {
   fromJSON(fluidObj);
   pipeline = new FluidPipeline(context->graphics, scene, this);
+
+  // TODO: Pipeline should be set downstream
+  context->graphics->setPipeline(pipeline);
 };
 
 NvFlexSolver* Fluid::getSolver() {

@@ -6,6 +6,7 @@
 #include "magma_types.h"
 
 #define SPH_TIME_STEP (1 / 60.f)
+#define to_fluid(elem) dynamic_cast<Fluid*>(elem)
 
 struct FluidInitialState {
   glm::vec3 minPos;
@@ -25,8 +26,9 @@ struct Particle {
   int       phase;
 };
 
-struct Scene;
+class FluidSimulation;
 struct MagmaContext;
+struct Scene;
 
 struct Fluid : public SceneElement {
   Fluid(Scene* scene, const ConfigNode& jsonObj, const MagmaContext* context);

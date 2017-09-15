@@ -88,6 +88,12 @@
     <ClCompile Include="light.cpp">
       <Filter>Source Files\scene</Filter>
     </ClCompile>
+    <ClCompile Include="subpass.cpp">
+      <Filter>Source Files\gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="fluid_gbuffer_subpass.cpp">
+      <Filter>Source Files\gfx</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="scene_graph.h">
@@ -165,15 +171,21 @@
     <ClInclude Include="light.h">
       <Filter>Source Files\scene</Filter>
     </ClInclude>
+    <ClInclude Include="subpass.h">
+      <Filter>Source Files\gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="fluid_gbuffer_subpass.h">
+      <Filter>Source Files\gfx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="data\scene.json">
       <Filter>Source Files\data</Filter>
     </None>
-    <None Include="shaders\particle.frag">
+    <None Include="shaders\fluid_gbuffer.frag">
       <Filter>Source Files\shaders</Filter>
     </None>
-    <None Include="shaders\particle.vert">
+    <None Include="shaders\fluid_gbuffer.vert">
       <Filter>Source Files\shaders</Filter>
     </None>
   </ItemGroup>

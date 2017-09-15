@@ -7,5 +7,4 @@ struct Light {
   Light(const ConfigNode& lightObj);
 
   glm::vec3 pos;
-  glm::vec3 ke;
 };

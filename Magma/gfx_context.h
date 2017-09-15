@@ -34,9 +34,12 @@ public:
   }
 
   void            setPipeline(Pipeline* pipeline);
+  void            setScene(Scene* scene);
+
   Pipeline*       getPipeline()      const;
   VkRenderPass    getRenderPass()    const;
   VkPipelineCache getPipelineCache() const;
+  Scene*          getScene()         const;
 
   VkInstance               instance;
   VkSurfaceKHR             surface;

@@ -29,6 +29,11 @@ const VkAttachmentDescription MVkBaseAttachmentDepth = {
   VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
 };
 
+const std::vector<VkAttachmentDescription> MVkBaseAttachments = {
+  MVkBaseAttachmentColor,
+  MVkBaseAttachmentDepth
+};
+
 const VkAttachmentReference MVkBaseAttachmentColorReference = {
   0,
   VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
@@ -37,6 +42,11 @@ const VkAttachmentReference MVkBaseAttachmentColorReference = {
 const VkAttachmentReference MVkBaseAttachmentDepthReference = {
   1,
   VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+};
+
+const std::vector<VkAttachmentReference> MVkBaseAttachmentReferences = {
+  MVkBaseAttachmentColorReference,
+  MVkBaseAttachmentDepthReference
 };
 
 const VkSubpassDescription MVkBaseSubpass = {

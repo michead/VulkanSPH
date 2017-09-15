@@ -2,7 +2,18 @@
 
 #include <map>
 #include <vector>
+#include "gfx_context.h"
+#include "gfx_structs.h"
+#include "gfx_wrap.h"
 #include "logger.h"
+
+#define shader(context, shaderName, shaderStage) context->shaderMap[shaderName][shaderStage]
+#define vert_shader(context, shaderName) shader(context, shaderName, "vert")
+#define geom_shader(context, shaderName) shader(context, shaderName, "geom")
+#define frag_shader(context, shaderName) shader(context, shaderName, "frag")
+#define has_vert_shader(context, shaderName) ((vert_shader(context, shaderName)).size() > 0)
+#define has_geom_shader(context, shaderName) ((geom_shader(context, shaderName)).size() > 0)
+#define has_frag_shader(context, shaderName) ((frag_shader(context, shaderName)).size() > 0)
 
 namespace GfxUtils {
   inline bool isGLSLFilename(const char* filename) {
@@ -42,5 +53,36 @@ namespace GfxUtils {
       { 0, 0 },
       extent
     };
+  }
+  inline MVkShaderProgram buildShaderProgram(GfxContext* context, const char* shaderName) {
+    VkShaderModule moduleVert;
+    VkShaderModule moduleGeom;
+    VkShaderModule moduleFrag;
+
+    VkPipelineShaderStageCreateInfo createInfoVert;
+    VkPipelineShaderStageCreateInfo createInfoGeom;
+    VkPipelineShaderStageCreateInfo createInfoFrag;
+
+    MVkShaderProgram program;
+
+    if (has_vert_shader(context, shaderName)) {
+      GfxWrap::createShaderModule(context->device, vert_shader(context, shaderName), moduleVert);
+      GfxWrap::shaderStage(moduleVert, VK_SHADER_STAGE_VERTEX_BIT, createInfoVert);
+      program.setVert({ createInfoVert, MVkDescriptorSetLayoutBindingUniformBufferVS });
+    }
+
+    if (has_geom_shader(context, shaderName)) {
+      GfxWrap::createShaderModule(context->device, geom_shader(context, shaderName), moduleGeom);
+      GfxWrap::shaderStage(moduleFrag, VK_SHADER_STAGE_GEOMETRY_BIT, createInfoGeom);
+      program.setGeom({ { }, { } }); /* Placeholder */
+    }
+
+    if (has_frag_shader(context, shaderName)) {
+      GfxWrap::createShaderModule(context->device, frag_shader(context, shaderName), moduleFrag);
+      GfxWrap::shaderStage(moduleFrag, VK_SHADER_STAGE_FRAGMENT_BIT, createInfoFrag);
+      program.setFrag({ createInfoFrag, MVkDescriptorSetLayoutBindingUniformBufferFS });
+    }
+
+    return program;
   }
 }

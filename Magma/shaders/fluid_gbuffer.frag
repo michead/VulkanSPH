@@ -12,7 +12,6 @@ layout(location = 0) out vec4 color;
 
 struct Light {
   vec3 pos;
-  vec4 ke;
 };
 
 layout(binding = 1, std140) uniform globals {

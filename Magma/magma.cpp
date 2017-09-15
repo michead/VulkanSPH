@@ -53,7 +53,9 @@ void Magma::init() {
   scene = new Scene("data/scene.json", &context);
 
   // Set scene in physics and graphics modules
-  fluidSimulation->initCollision(scene);
+  context.fluidSimulation->initCollision(scene);
+  context.graphics->setScene(scene);
+  context.graphics->getPipeline()->postInit();
 }
 
 void Magma::cleanup() {

@@ -4,6 +4,7 @@
 #include "gfx_structs.h"
 
 class GfxContext;
+class Subpass;
 struct Scene;
 struct SceneElement;
 
@@ -16,23 +17,16 @@ public:
 
   virtual void init();
   virtual void postInit();
-  virtual void update();
+  virtual void update() {}
 
-  virtual VkCommandBuffer getDrawCmdBuffer() const;
-
-  MVKPipeline pipeline;
+  VkCommandBuffer getDrawCmdBuffer() const;
+  VkRenderPass    getRenderPass()    const;
 
 protected:
   virtual void initPipelineState() {}
   virtual void initRenderPass() {}
   virtual void initFramebuffers() {}
-  virtual void initStages() {}
-  virtual void initPipelineLayout() {}
-  virtual void initPipelineCache() {}
-  virtual void initPipeline() {}
   virtual void initVertexBuffer() {}
-  virtual void initUniformBuffers() {}
-  virtual void updateDescriptorSets() {}
   virtual void initCommandBuffers() {}
   virtual void updateBuffers() {}
 
@@ -41,24 +35,19 @@ protected:
   Scene*         scene;
   SceneElement*  elem;
 
-  MVkVertexShaderUniformParticle   uniformsVS;
-  MVkFragmentShaderUniformParticle uniformsFS;
-
   VkBuffer       vertexBuffer;
   VkDeviceMemory vertexBufferMemory;
   void*          vertexBufferMappedMemory;
 
+  VkRenderPass renderPass;
+
   std::vector<VkCommandBuffer>         drawCmds;
   std::vector<VkFramebuffer>           framebuffers;
-  std::vector<VkDescriptorSet>         descriptorSets;
-  std::vector<VkAttachmentDescription> attachments;
-  std::vector<VkSubpassDescription>    subpasses;
-  std::vector<VkSubpassDependency>     dependencies;
   std::vector<VkImageView>             colorAttachments;
   MVkBufferDesc                        vertexBufferDesc;
-  MVkBufferDesc                        uniformBufferVSDesc;
-  MVkBufferDesc                        uniformBufferFSDesc;
   VkImageView                          depthAttachment;
+  std::vector<VkAttachmentDescription> attachments = MVkBaseAttachments;
+  std::vector<Subpass*>                subpasses;
 };
 
 extern const MVkPipelineParams BasePipeline;

@@ -630,7 +630,7 @@ namespace GfxWrap {
     description.preserveAttachmentCount = 0;
     description.pPreserveAttachments = nullptr;
   }
-  inline void createRenderPass(const VkDevice device, VkPipeline& pipeline,
+  inline void createRenderPass(const VkDevice device,
                                const std::vector<VkAttachmentDescription>& attachments,
                                const std::vector<VkSubpassDescription>& subpasses,
                                const std::vector<VkSubpassDependency>& dependencies,

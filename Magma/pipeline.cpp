@@ -1,32 +1,29 @@
 #include "pipeline.h"
 #include "gfx_context.h"
+#include "subpass.h"
 
 Pipeline::Pipeline(GfxContext* context, Scene* scene, SceneElement* elem) : context(context), scene(scene), elem(elem) {
   init();
   postInit();
 }
 
-VkCommandBuffer Pipeline::getDrawCmdBuffer() const {
-  return drawCmds[context->currentImageIndex];
-}
-
 void Pipeline::init() {
   initPipelineState();
   initRenderPass();
   initFramebuffers();
-  initStages();
   initVertexBuffer();
-  initPipelineLayout();
-  initPipelineCache();
 }
 
 void Pipeline::postInit() {
-  initUniformBuffers();
-  updateDescriptorSets();
   initCommandBuffers();
 }
 
-void Pipeline::update() {
+VkCommandBuffer Pipeline::getDrawCmdBuffer() const {
+  return drawCmds[context->currentImageIndex];
+}
+
+VkRenderPass Pipeline::getRenderPass() const {
+  return renderPass;
 }
 
 const MVkPipelineParams BasePipeline = { 1 };

@@ -180,9 +180,17 @@ Pipeline* GfxContext::getPipeline() const {
 }
 
 VkRenderPass GfxContext::getRenderPass() const {
-  return pipeline->pipeline.renderPass;
+  return pipeline->getRenderPass();
 }
 
 VkPipelineCache GfxContext::getPipelineCache() const {
-  return pipeline->pipeline.cache;
+  return VK_NULL_HANDLE;
+}
+
+void GfxContext::setScene(Scene* scene) {
+  this->scene = scene;
+}
+
+Scene* GfxContext::getScene() const {
+  return scene;
 }
