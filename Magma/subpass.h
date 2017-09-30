@@ -1,13 +1,13 @@
 #pragma once
 #include <vulkan\vulkan.hpp>
 #include <vector>
-#include "gfx_context.h"
+#include "magma_context.h"
 #include "gfx_structs.h"
 #include "scene_element.h"
 
 class Subpass {
 public:
-  Subpass(GfxContext* context, VkRenderPass *renderPass, SceneElement* elem, uint8_t index) :
+  Subpass(const MagmaContext* context, VkRenderPass *renderPass, SceneElement* elem, uint8_t index) :
     context(context), renderPass(renderPass), elem(elem), index(index) {
     init();
   }
@@ -26,7 +26,7 @@ public:
   }
 
 protected:
-  GfxContext*                  context;
+  const MagmaContext*          context;
   VkRenderPass*                renderPass;
   SceneElement*                elem;
   VkSubpassDescription         description;

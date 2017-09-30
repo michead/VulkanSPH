@@ -3,7 +3,7 @@
 #include <vector>
 #include "gfx_structs.h"
 
-class GfxContext;
+struct MagmaContext;
 class Subpass;
 struct Scene;
 struct SceneElement;
@@ -13,24 +13,22 @@ struct SceneElement;
  */
 class Pipeline {
 public:
-  Pipeline(GfxContext* context, Scene* scene, SceneElement* elem);
+  Pipeline(const MagmaContext* context, Scene* scene, SceneElement* elem);
 
   virtual void init();
   virtual void postInit();
   virtual void update() {}
+  virtual void draw() {}
 
-  VkCommandBuffer getDrawCmdBuffer() const;
-  VkRenderPass    getRenderPass()    const;
+  VkRenderPass getRenderPass() const;
 
 protected:
   virtual void initPipelineState() {}
   virtual void initRenderPass() {}
-  virtual void initFramebuffers() {}
   virtual void initVertexBuffer() {}
-  virtual void initCommandBuffers() {}
   virtual void updateBuffers() {}
 
-  GfxContext* context;
+  const MagmaContext* context;
 
   Scene*         scene;
   SceneElement*  elem;
@@ -41,8 +39,6 @@ protected:
 
   VkRenderPass renderPass;
 
-  std::vector<VkCommandBuffer>         drawCmds;
-  std::vector<VkFramebuffer>           framebuffers;
   std::vector<VkImageView>             colorAttachments;
   MVkBufferDesc                        vertexBufferDesc;
   VkImageView                          depthAttachment;

@@ -15,11 +15,17 @@ void GfxContext::init(const char* appName, uint32_t appVersion, HWND windowHandl
   initSwapchain(config->resolution);
   initDepthBuffer();
   GfxWrap::createSemaphore(device, imageAcquiredSemaphore);
-  initCommandPool();
+  initCommandPools();
   initViewport();
   loadShaders();
   initDescriptorPool();
+  initCommandBuffers();
   bInit = true;
+}
+
+void GfxContext::postInit() {
+  assert(pipeline != nullptr);
+  initFramebuffers();
 }
 
 void GfxContext::initInstance(const char* appName, uint32_t appVersion) {
@@ -30,6 +36,7 @@ void GfxContext::initDevice() {
   GfxWrap::queryQueueFamilyIndices(physicalDevice, surface, &graphicsQueueFamilyIndex, &presentQueueFamilyIndex);
   GfxWrap::createDevice(physicalDevice, graphicsQueueFamilyIndex, presentQueueFamilyIndex, device, graphicsQueue, presentQueue);
 }
+
 void GfxContext::selectPhysicalDevice() {
   GfxWrap::queryDevices(instance, physicalDevices);
   if (physicalDevices.empty()) {
@@ -40,14 +47,20 @@ void GfxContext::selectPhysicalDevice() {
   GfxWrap::printDeviceStats(physicalDevice);
 }
 
-void GfxContext::initCommandPool() {
-  VkCommandPoolCreateInfo info = {};
-  info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-  info.pNext = nullptr;
-  info.queueFamilyIndex = graphicsQueueFamilyIndex;
-  info.flags = 0;
-  VK_CHECK(vkCreateCommandPool(device, &info, nullptr, &commandPool));
-  VK_REGISTER(VkCommandPool, 1, &commandPool);
+void GfxContext::initCommandPools() {
+  cmdPools.clear();
+
+  for (size_t i = 0; i < swapchainImageCount; i++) {
+    VkCommandPool cmdPool;
+    VkCommandPoolCreateInfo info = {};
+    info.sType                   = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+    info.pNext                   = nullptr;
+    info.queueFamilyIndex        = graphicsQueueFamilyIndex;
+    info.flags                   = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+    VK_CHECK(vkCreateCommandPool(device, &info, nullptr, &cmdPool));
+    VK_REGISTER(VkCommandPool, 1, &cmdPool);
+    cmdPools.push_back(cmdPool);
+  }
 }
 
 void GfxContext::initSurface(HWND hwnd) {
@@ -132,9 +145,9 @@ void GfxContext::loadShaders() {
         }
         
         if (shaderMap.find(shaderName) == shaderMap.end()) {
-          shaderMap[shaderName] = std::map<std::string, std::vector<char>>();
+          shaderMap[shaderName] = std::map<std::string, std::vector<uint32_t>>();
           if (shaderMap[shaderName].find(shaderStage) == shaderMap[shaderName].end()) {
-            shaderMap[shaderName][shaderStage] = std::vector<char>();
+            shaderMap[shaderName][shaderStage] = std::vector<uint32_t>();
           } else {
             shaderMap[shaderName][shaderStage].clear();
           }
@@ -150,10 +163,10 @@ void GfxContext::loadShaders() {
         }
 
         size_t fileSize = (size_t) in.tellg();
-        std::vector<char> buffer(fileSize);
+        std::vector<uint32_t> buffer(fileSize / sizeof(uint32_t));
 
         in.seekg(0);
-        in.read(buffer.data(), fileSize);
+        in.read((char*)buffer.data(), fileSize);
         in.close();
 
         shaderMap[shaderName][shaderStage] = buffer;
@@ -169,6 +182,26 @@ void GfxContext::loadShaders() {
 void GfxContext::initViewport() {
   viewport = GfxUtils::viewport( swapchain.extent.width, swapchain.extent.height );
   scissor  = GfxUtils::scissor({ swapchain.extent.width, swapchain.extent.height });
+}
+
+void GfxContext::initFramebuffers() {
+  GfxWrap::createFramebuffers(
+    device,
+    pipeline->getRenderPass(),
+    swapchain.imageViews,
+    depthBuffer.imageView,
+    swapchain.extent.width,
+    swapchain.extent.height,
+    framebuffers);
+}
+
+void GfxContext::initCommandBuffers() {
+  drawCmds.clear();
+  for (size_t i = 0; i < swapchainImageCount; i++) {
+    VkCommandBuffer drawCmd;
+    GfxWrap::createCommandBuffers(device, cmdPools[i], 1, &drawCmd);
+    drawCmds.push_back(drawCmd);
+  }
 }
 
 void GfxContext::setPipeline(Pipeline* pipeline) {
@@ -193,4 +226,28 @@ void GfxContext::setScene(Scene* scene) {
 
 Scene* GfxContext::getScene() const {
   return scene;
+}
+
+std::vector<VkCommandBuffer> GfxContext::getCmdBuffers() const {
+  return drawCmds;
+}
+
+VkCommandBuffer GfxContext::getCurrentCmdBuffer() const {
+  return drawCmds[currentImageIndex];
+}
+
+std::vector<VkCommandPool> GfxContext::getCmdPools() const {
+  return cmdPools;
+}
+
+VkCommandPool GfxContext::getCurrentCmdPool() const {
+  return cmdPools[currentImageIndex];
+}
+
+std::vector<VkFramebuffer> GfxContext::getFramebuffers() const {
+  return framebuffers;
+}
+
+VkFramebuffer GfxContext::getCurrentFramebuffer() const {
+  return framebuffers[currentImageIndex];
 }

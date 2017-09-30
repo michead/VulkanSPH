@@ -29,6 +29,12 @@
     <Filter Include="Source Files\data">
       <UniqueIdentifier>{11c59530-1e9a-4ebf-a4bc-e94b754ec5ee}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\ext">
+      <UniqueIdentifier>{244705e7-33e9-4a1c-95ff-0b86266a99d8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ext\imgui">
+      <UniqueIdentifier>{16dd626b-9656-4441-b98a-48065808d84d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -93,6 +99,18 @@
     </ClCompile>
     <ClCompile Include="fluid_gbuffer_subpass.cpp">
       <Filter>Source Files\gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="layout_reflection.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ext\imgui\imgui.cpp">
+      <Filter>Source Files\ext\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ext\imgui\imgui_demo.cpp">
+      <Filter>Source Files\ext\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ext\imgui\imgui_draw.cpp">
+      <Filter>Source Files\ext\imgui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -176,6 +194,9 @@
     </ClInclude>
     <ClInclude Include="fluid_gbuffer_subpass.h">
       <Filter>Source Files\gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="layout_reflection.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

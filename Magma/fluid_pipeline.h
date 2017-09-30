@@ -3,23 +3,22 @@
 #include "pipeline.h"
 #include "gfx_structs.h"
 
-class GfxContext;
+struct MagmaContext;
 struct Scene;
 struct Fluid;
 
 class FluidPipeline : public Pipeline {
-  friend class GfxContext;
+  friend struct MagmaContext;
 public:
-  FluidPipeline(GfxContext* context, Scene* scene, Fluid* elem);
+  FluidPipeline(const MagmaContext* context, Scene* scene, Fluid* elem);
 
   virtual void init()     override;
   virtual void postInit() override;
   virtual void update()   override;
+  virtual void draw()     override;
 
 protected:
   virtual void initRenderPass()       override;
-  virtual void initFramebuffers()     override;
   virtual void initVertexBuffer()     override;
-  virtual void initCommandBuffers()   override;
   virtual void updateBuffers()        override;
 };

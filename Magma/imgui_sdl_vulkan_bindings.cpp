@@ -282,6 +282,153 @@ void ImGui_ImplSDLVulkan_RenderDrawLists(ImDrawData* draw_data) {
   }
 }
 
+void ImGui_ImplSDLVulkan_CreateFontsTexture(VkCommandBuffer command_buffer) {
+  ImGuiIO& io = ImGui::GetIO();
+
+  unsigned char* pixels;
+  int width, height;
+  io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
+  size_t upload_size = width*height * 4 * sizeof(char);
+
+  // Create the Image:
+  {
+    VkImageCreateInfo info = {};
+    info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+    info.imageType = VK_IMAGE_TYPE_2D;
+    info.format = VK_FORMAT_R8G8B8A8_UNORM;
+    info.extent.width = width;
+    info.extent.height = height;
+    info.extent.depth = 1;
+    info.mipLevels = 1;
+    info.arrayLayers = 1;
+    info.samples = VK_SAMPLE_COUNT_1_BIT;
+    info.tiling = VK_IMAGE_TILING_OPTIMAL;
+    info.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+    info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    VK_CHECK(vkCreateImage(g_Device, &info, g_Allocator, &g_FontImage));
+    VkMemoryRequirements req;
+    vkGetImageMemoryRequirements(g_Device, g_FontImage, &req);
+    VkMemoryAllocateInfo alloc_info = {};
+    alloc_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    alloc_info.allocationSize = req.size;
+    alloc_info.memoryTypeIndex = ImGui_ImplSDLVulkan_MemoryType(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, req.memoryTypeBits);
+    VK_CHECK(vkAllocateMemory(g_Device, &alloc_info, g_Allocator, &g_FontMemory));
+    VK_CHECK(vkBindImageMemory(g_Device, g_FontImage, g_FontMemory, 0));
+  }
+
+  // Create the Image View:
+  {
+    VkImageViewCreateInfo info = {};
+    info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    info.image = g_FontImage;
+    info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+    info.format = VK_FORMAT_R8G8B8A8_UNORM;
+    info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    info.subresourceRange.levelCount = 1;
+    info.subresourceRange.layerCount = 1;
+    VK_CHECK(vkCreateImageView(g_Device, &info, g_Allocator, &g_FontView));
+  }
+
+  // Update the Descriptor Set:
+  {
+    VkDescriptorImageInfo desc_image[1] = {};
+    desc_image[0].sampler = g_FontSampler;
+    desc_image[0].imageView = g_FontView;
+    desc_image[0].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    VkWriteDescriptorSet write_desc[1] = {};
+    write_desc[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    write_desc[0].dstSet = g_DescriptorSet;
+    write_desc[0].descriptorCount = 1;
+    write_desc[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    write_desc[0].pImageInfo = desc_image;
+    vkUpdateDescriptorSets(g_Device, 1, write_desc, 0, NULL);
+  }
+
+  // Create the Upload Buffer:
+  {
+    VkBufferCreateInfo buffer_info = {};
+    buffer_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    buffer_info.size = upload_size;
+    buffer_info.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+    buffer_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    VK_CHECK(vkCreateBuffer(g_Device, &buffer_info, g_Allocator, &g_UploadBuffer));
+    VkMemoryRequirements req;
+    vkGetBufferMemoryRequirements(g_Device, g_UploadBuffer, &req);
+    g_BufferMemoryAlignment = (g_BufferMemoryAlignment > req.alignment) ? g_BufferMemoryAlignment : req.alignment;
+    VkMemoryAllocateInfo alloc_info = {};
+    alloc_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    alloc_info.allocationSize = req.size;
+    alloc_info.memoryTypeIndex = ImGui_ImplSDLVulkan_MemoryType(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, req.memoryTypeBits);
+    VK_CHECK(vkAllocateMemory(g_Device, &alloc_info, g_Allocator, &g_UploadBufferMemory));
+    VK_CHECK(vkBindBufferMemory(g_Device, g_UploadBuffer, g_UploadBufferMemory, 0));
+  }
+
+  // Upload to Buffer:
+  {
+    char* map = NULL;
+    VK_CHECK(vkMapMemory(g_Device, g_UploadBufferMemory, 0, upload_size, 0, (void**) (&map)));
+    memcpy(map, pixels, upload_size);
+    VkMappedMemoryRange range[1] = {};
+    range[0].sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
+    range[0].memory = g_UploadBufferMemory;
+    range[0].size = upload_size;
+    VK_CHECK(vkFlushMappedMemoryRanges(g_Device, 1, range));
+    vkUnmapMemory(g_Device, g_UploadBufferMemory);
+  }
+  // Copy to Image:
+  {
+    VkImageMemoryBarrier copy_barrier[1] = {};
+    copy_barrier[0].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    copy_barrier[0].dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+    copy_barrier[0].oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    copy_barrier[0].newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+    copy_barrier[0].srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    copy_barrier[0].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    copy_barrier[0].image = g_FontImage;
+    copy_barrier[0].subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    copy_barrier[0].subresourceRange.levelCount = 1;
+    copy_barrier[0].subresourceRange.layerCount = 1;
+    vkCmdPipelineBarrier(command_buffer, VK_PIPELINE_STAGE_HOST_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, NULL, 0, NULL, 1, copy_barrier);
+
+    VkBufferImageCopy region = {};
+    region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    region.imageSubresource.layerCount = 1;
+    region.imageExtent.width = width;
+    region.imageExtent.height = height;
+    region.imageExtent.depth = 1;
+    vkCmdCopyBufferToImage(command_buffer, g_UploadBuffer, g_FontImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
+
+    VkImageMemoryBarrier use_barrier[1] = {};
+    use_barrier[0].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    use_barrier[0].srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+    use_barrier[0].dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+    use_barrier[0].oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+    use_barrier[0].newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    use_barrier[0].srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    use_barrier[0].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    use_barrier[0].image = g_FontImage;
+    use_barrier[0].subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    use_barrier[0].subresourceRange.levelCount = 1;
+    use_barrier[0].subresourceRange.layerCount = 1;
+    vkCmdPipelineBarrier(command_buffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, NULL, 0, NULL, 1, use_barrier);
+  }
+
+  // Store our identifier
+  io.Fonts->TexID = (void *) (intptr_t) g_FontImage;
+}
+
+void ImGui_ImplSDLVulkan_InvalidateFontUploadObjects() {
+  if (g_UploadBuffer) {
+    vkDestroyBuffer(g_Device, g_UploadBuffer, g_Allocator);
+    g_UploadBuffer = VK_NULL_HANDLE;
+  }
+  if (g_UploadBufferMemory) {
+    vkFreeMemory(g_Device, g_UploadBufferMemory, g_Allocator);
+    g_UploadBufferMemory = VK_NULL_HANDLE;
+  }
+}
+
 bool ImGui_ImplSDLVulkan_CreateDeviceObjects() {
   VkResult err;
   VkShaderModule vert_module;
@@ -464,7 +611,7 @@ bool ImGui_ImplSDLVulkan_CreateDeviceObjects() {
   return true;
 }
 
-bool ImGui_ImplSDLVulkan_Init(SDL_Window* window, ImGui_ImplSDLVulkan_Init_Data *init_data) {
+void ImGui_ImplSDLVulkan_Init(SDL_Window* window, ImGui_ImplSDLVulkan_Init_Data *init_data) {
   g_Allocator = init_data->allocator;
   g_Gpu = init_data->gpu;
   g_Device = init_data->device;
@@ -505,9 +652,10 @@ bool ImGui_ImplSDLVulkan_Init(SDL_Window* window, ImGui_ImplSDLVulkan_Init_Data 
   io.ImeWindowHandle = windowInfo.info.win.window;
 #endif
 
-  ImGui_ImplSDLVulkan_CreateDeviceObjects();
+  io.DisplaySize.x = init_data->viewportSize.width;
+  io.DisplaySize.y = init_data->viewportSize.height;
 
-  return true;
+  ImGui_ImplSDLVulkan_CreateDeviceObjects();
 }
 
 void ImGui_ImplSDLVulkan_Shutdown() {
@@ -519,28 +667,31 @@ void ImGui_ImplSDLVulkan_NewFrame() {
 
   // Setup display size (every frame to accommodate for window resizing)
   int w, h;
+  int display_w, display_h;
   SDL_GetWindowSize(g_Window, &w, &h);
-  io.DisplaySize = ImVec2((float)w, (float)h);
-  io.DisplayFramebufferScale = ImVec2(1, 1);
+  SDL_GL_GetDrawableSize(g_Window, &display_w, &display_h);
+  io.DisplaySize = ImVec2((float) w, (float) h);
+  io.DisplayFramebufferScale = ImVec2(w > 0 ? ((float) display_w / w) : 0, h > 0 ? ((float) display_h / h) : 0);
 
   // Setup time step
-  double current_time = (double)SDL_GetPerformanceCounter() / SDL_GetPerformanceFrequency();
-  io.DeltaTime = g_Time > 0.0 ? (float)(current_time - g_Time) : (float)(1.0f / 60.0f);
+  Uint32	time = SDL_GetTicks();
+  double current_time = time / 1000.0;
+  io.DeltaTime = g_Time > 0.0 ? (float) (current_time - g_Time) : (float) (1.0f / 60.0f);
   g_Time = current_time;
 
   // Setup inputs
-  if (SDL_GetWindowFlags(g_Window) & SDL_WINDOW_INPUT_FOCUS) {
-    int mouse_x, mouse_y;
-    SDL_GetMouseState(&mouse_x, &mouse_y);
-    io.MousePos = ImVec2((float)mouse_x, (float)mouse_y);
-  } else {
-    io.MousePos = ImVec2(-1, -1);
-  }
+  // (we already got mouse wheel, keyboard keys & characters from SDL_PollEvent())
+  int mx, my;
+  Uint32 mouseMask = SDL_GetMouseState(&mx, &my);
+  if (SDL_GetWindowFlags(g_Window) & SDL_WINDOW_MOUSE_FOCUS)
+    io.MousePos = ImVec2((float) mx, (float) my);   // Mouse position, in pixels (set to -1,-1 if no mouse / on another screen, etc.)
+  else
+    io.MousePos = ImVec2(-FLT_MAX, -FLT_MAX);
 
-  for (int i = 0; i < 3; i++) {
-    io.MouseDown[i] = g_MousePressed[i];
-    g_MousePressed[i] = false;
-  }
+  io.MouseDown[0] = g_MousePressed[0] || (mouseMask & SDL_BUTTON(SDL_BUTTON_LEFT)) != 0;		// If a mouse press event came, always pass it as "mouse held this frame", so we don't miss click-release events that are shorter than 1 frame.
+  io.MouseDown[1] = g_MousePressed[1] || (mouseMask & SDL_BUTTON(SDL_BUTTON_RIGHT)) != 0;
+  io.MouseDown[2] = g_MousePressed[2] || (mouseMask & SDL_BUTTON(SDL_BUTTON_MIDDLE)) != 0;
+  g_MousePressed[0] = g_MousePressed[1] = g_MousePressed[2] = false;
 
   io.MouseWheel = g_MouseWheel;
   g_MouseWheel = 0.0f;

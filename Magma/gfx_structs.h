@@ -131,7 +131,7 @@ struct MVKPipeline {
   VkPipeline                                   handle;
 };
 
-typedef std::map<std::string, std::map<std::string, std::vector<char>>> MVkShaderMap;
+typedef std::map<std::string, std::map<std::string, std::vector<uint32_t>>> MVkShaderMap;
 
 extern const VkClearValue                                   MVkClearValueColorWhite;
 extern const VkClearValue                                   MVkClearValueDepthStencilOneZero;

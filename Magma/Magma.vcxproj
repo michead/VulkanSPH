@@ -86,13 +86,13 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;SDL_VIDEO_DRIVER_WINDOWS;VK_USE_PLATFORM_WIN32_KHR;VK_SDK_BIN=R"($(VULKAN_SDK)\bin32\)";VK_LAYER_PATH=R"($(VULKAN_SDK)\Source\lib32\)";SHADER_PATH=LR"($(ProjectDir)shaders\)";_DEBUG;_CONSOLE;_LIB;MAGMA_ROOT_DIR="$(ProjectDir)";%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Third-Party\Include;$(FLEX_PATH)\include;$(SolutionDir)ext\glm;$(SolutionDir)ext\json;$(SolutionDir)ext\spdlog;$(SolutionDir)ext;$(BOOST_PATH)\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Third-Party\Include;$(FLEX_PATH)\include;$(SolutionDir)ext\glm;$(SolutionDir)ext\json;$(SolutionDir)ext\spdlog;$(SolutionDir)ext;$(BOOST_PATH)\;$(SolutionDir)ext\spirv-cross</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>vulkan-1.lib;SDL2.lib;imgui.lib;NvFlexDebugCUDA_x86.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib32;$(VULKAN_SDK)\Third-Party\Bin32;$(FLEX_PATH)\lib\win32;%(AdditionalLibraryDirectories);$(IMGUI_LIB_PATH);$(IMGUI_LIB_PATH)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vulkan-1.lib;SDL2.lib;NvFlexDebugCUDA_x86.lib;spirv_cross.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib32;$(VULKAN_SDK)\Third-Party\Bin32;$(FLEX_PATH)\lib\win32;%(AdditionalLibraryDirectories);$(IMGUI_LIB_PATH);$(SPIRV_CROSS_LIB_PATH)</AdditionalLibraryDirectories>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
       <AdditionalOptions>/SUBSYSTEM:CONSOLE /NODEFAULTLIB:LIBCMT %(AdditionalOptions)</AdditionalOptions>
     </Link>
@@ -162,6 +162,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\ext\imgui\imgui.cpp" />
+    <ClCompile Include="..\ext\imgui\imgui_demo.cpp" />
+    <ClCompile Include="..\ext\imgui\imgui_draw.cpp" />
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="fluid_gbuffer_subpass.cpp" />
     <ClCompile Include="fluid.cpp" />
@@ -169,6 +172,7 @@
     <ClCompile Include="fluid_simulation.cpp" />
     <ClCompile Include="hud.cpp" />
     <ClCompile Include="imgui_sdl_vulkan_bindings.cpp" />
+    <ClCompile Include="layout_reflection.cpp" />
     <ClCompile Include="light.cpp" />
     <ClCompile Include="magma.cpp" />
     <ClCompile Include="main.cpp" />
@@ -192,6 +196,7 @@
     <ClInclude Include="fluid_simulation.h" />
     <ClInclude Include="hud.h" />
     <ClInclude Include="imgui_sdl_vulkan_bindings.h" />
+    <ClInclude Include="layout_reflection.h" />
     <ClInclude Include="light.h" />
     <ClInclude Include="magma.h" />
     <ClInclude Include="magma_context.h" />
@@ -241,7 +246,7 @@ $(LocalDebuggerEnvironment)</LocalDebuggerEnvironment>
 $(LocalDebuggerEnvironment)</LocalDebuggerEnvironment>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <IncludePath>$(IncludePath)</IncludePath>
-    <SourcePath>$(SourcePath)</SourcePath>
+    <SourcePath>$(SolutionDir)ext\imgui;$(SourcePath)</SourcePath>
     <LibraryPath>$(FLEX_PATH)\lib\win32;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

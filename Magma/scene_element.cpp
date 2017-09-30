@@ -33,17 +33,7 @@ void SceneElement::update() {
 
 void SceneElement::render() {
   if (pipeline) {
-    VkCommandBuffer drawCmd = pipeline->getDrawCmdBuffer();
-    VkPipelineStageFlags stageFlags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-
-    GfxWrap::submitCommandBuffer(
-      context->graphics->graphicsQueue,
-      1,
-      &drawCmd,
-      1,
-      &context->graphics->imageAcquiredSemaphore,
-      &stageFlags,
-      context->graphics->drawFences[context->graphics->currentImageIndex]);
+    pipeline->draw();
   }
 
   for (const auto& child : children) {

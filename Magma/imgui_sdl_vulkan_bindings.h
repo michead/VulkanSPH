@@ -15,10 +15,13 @@ struct ImGui_ImplSDLVulkan_Init_Data {
   VkRenderPass           render_pass;
   VkPipelineCache        pipeline_cache;
   VkDescriptorPool       descriptor_pool;
+  VkExtent2D             viewportSize;
   void(*check_vk_result)(VkResult err);
 };
 
-bool ImGui_ImplSDLVulkan_Init(SDL_Window* window, ImGui_ImplSDLVulkan_Init_Data *init_data);
+void ImGui_ImplSDLVulkan_Init(SDL_Window* window, ImGui_ImplSDLVulkan_Init_Data *init_data);
 void ImGui_ImplSDLVulkan_Shutdown();
+void ImGui_ImplSDLVulkan_CreateFontsTexture(VkCommandBuffer command_buffer);
+void ImGui_ImplSDLVulkan_InvalidateFontUploadObjects();
 void ImGui_ImplSDLVulkan_NewFrame();
 void ImGui_ImplSDLVulkan_Render(VkCommandBuffer command_buffer);

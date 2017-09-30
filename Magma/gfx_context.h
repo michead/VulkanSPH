@@ -33,13 +33,20 @@ public:
     return &context;
   }
 
+  void            postInit();
   void            setPipeline(Pipeline* pipeline);
   void            setScene(Scene* scene);
 
-  Pipeline*       getPipeline()      const;
-  VkRenderPass    getRenderPass()    const;
-  VkPipelineCache getPipelineCache() const;
-  Scene*          getScene()         const;
+  Pipeline*                    getPipeline()           const;
+  VkRenderPass                 getRenderPass()         const;
+  VkPipelineCache              getPipelineCache()      const;
+  Scene*                       getScene()              const;
+  std::vector<VkCommandBuffer> getCmdBuffers()         const;
+  VkCommandBuffer              getCurrentCmdBuffer()   const;
+  std::vector<VkCommandPool>   getCmdPools()           const;
+  VkCommandPool                getCurrentCmdPool()     const;
+  std::vector<VkFramebuffer>   getFramebuffers()       const;
+  VkFramebuffer                getCurrentFramebuffer() const;
 
   VkInstance               instance;
   VkSurfaceKHR             surface;
@@ -48,7 +55,6 @@ public:
   VkDevice                 device;
   VkSemaphore              imageAcquiredSemaphore;
   uint32_t                 currentImageIndex;
-  VkCommandPool            commandPool;
   VkDescriptorPool         descriptorPool;
   uint32_t                 graphicsQueueFamilyIndex;
   uint32_t                 presentQueueFamilyIndex;
@@ -71,6 +77,9 @@ public:
   std::vector<VkQueueFamilyProperties> queueFamilyProps;
   std::vector<const char*>             validationLayers;
   std::vector<VkFence>                 drawFences;
+  std::vector<VkCommandBuffer>         drawCmds;
+  std::vector<VkCommandPool>           cmdPools;
+  std::vector<VkFramebuffer>           framebuffers;
 
 private:
   GfxContext() {}
@@ -81,12 +90,14 @@ private:
   void initInstance(const char* appName, uint32_t appVersion);
   void selectPhysicalDevice();
   void initDevice();
-  void initCommandPool();
+  void initCommandPools();
   void initSurface(HWND hwnd);
   void initSwapchain(glm::ivec2 resolution);
   void initDepthBuffer();
   void initDescriptorPool();
   void initViewport();
+  void initFramebuffers();
+  void initCommandBuffers();
   void loadShaders();
 
   // Has context been initialized?

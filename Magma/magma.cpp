@@ -46,15 +46,21 @@ void Magma::init() {
   fluidSimulation = new FluidSimulation();
 
   // Set context object
-  context.graphics = mvkContext;
+  context.graphics        = mvkContext;
   context.fluidSimulation = fluidSimulation;
+  context.hud             = hud;
 
   // Load scene attributes and bind graphics context
   scene = new Scene("data/scene.json", &context);
 
+  // Initialize ImGui
+  hud = new HUD(mvkContext, window);
+  context.hud = hud;
+
   // Set scene in physics and graphics modules
   context.fluidSimulation->initCollision(scene);
   context.graphics->setScene(scene);
+  context.graphics->postInit();
   context.graphics->getPipeline()->postInit();
 }
 
@@ -72,6 +78,8 @@ void Magma::update(double deltaTime) {
 }
 
 void Magma::render(double deltaTime) {
+  hud->setupNewFrame();
+
   bool shouldResize;
   GfxWrap::prepareFrame(
     mvkContext->device,
@@ -90,7 +98,41 @@ void Magma::render(double deltaTime) {
     1,
     &mvkContext->drawFences[mvkContext->currentImageIndex]));
 
+  VkCommandBuffer drawCmd                 = mvkContext->getCurrentCmdBuffer();
+  VkPipelineStageFlags stageFlags         = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+  std::array<VkClearValue, 2> clearValues = GfxWrap::clearValues();
+
+  vkResetCommandPool(
+    mvkContext->device,
+    mvkContext->getCurrentCmdPool(),
+    0);
+  GfxWrap::beginCommandBuffer(
+    mvkContext->getCurrentCmdBuffer(),
+    VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
+  GfxWrap::beginRenderPass(
+    drawCmd,
+    mvkContext->getRenderPass(),
+    mvkContext->getCurrentFramebuffer(),
+    mvkContext->swapchain.extent,
+    clearValues.data());
+
+  vkCmdSetViewport(drawCmd, 0, 1, &mvkContext->viewport);
+  vkCmdSetScissor( drawCmd, 0, 1, &mvkContext->scissor);
+
   scene->render();
+  hud->render();
+
+  vkCmdEndRenderPass(drawCmd);
+  VK_CHECK(vkEndCommandBuffer(drawCmd));
+
+  GfxWrap::submitCommandBuffer(
+    mvkContext->graphicsQueue,
+    1,
+    &drawCmd,
+    1,
+    &mvkContext->imageAcquiredSemaphore,
+    &stageFlags,
+    mvkContext->drawFences[mvkContext->currentImageIndex]);
 
   VkResult res;
   do {

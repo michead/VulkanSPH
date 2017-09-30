@@ -10,7 +10,7 @@
 Fluid::Fluid(Scene* scene, const ConfigNode& fluidObj, const MagmaContext* context)
   : SceneElement(scene, fluidObj, context), fluidSimulation(context->fluidSimulation) {
   fromJSON(fluidObj);
-  pipeline = new FluidPipeline(context->graphics, scene, this);
+  pipeline = new FluidPipeline(context, scene, this);
 
   // TODO: Pipeline should be set downstream
   context->graphics->setPipeline(pipeline);

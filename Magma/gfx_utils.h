@@ -5,6 +5,7 @@
 #include "gfx_context.h"
 #include "gfx_structs.h"
 #include "gfx_wrap.h"
+#include "layout_reflection.h"
 #include "logger.h"
 
 #define shader(context, shaderName, shaderStage) context->shaderMap[shaderName][shaderStage]
@@ -66,18 +67,21 @@ namespace GfxUtils {
     MVkShaderProgram program;
 
     if (has_vert_shader(context, shaderName)) {
+      LayoutReflection reflect(vert_shader(context, shaderName));
       GfxWrap::createShaderModule(context->device, vert_shader(context, shaderName), moduleVert);
       GfxWrap::shaderStage(moduleVert, VK_SHADER_STAGE_VERTEX_BIT, createInfoVert);
       program.setVert({ createInfoVert, MVkDescriptorSetLayoutBindingUniformBufferVS });
     }
 
     if (has_geom_shader(context, shaderName)) {
+      LayoutReflection reflect(geom_shader(context, shaderName));
       GfxWrap::createShaderModule(context->device, geom_shader(context, shaderName), moduleGeom);
       GfxWrap::shaderStage(moduleFrag, VK_SHADER_STAGE_GEOMETRY_BIT, createInfoGeom);
       program.setGeom({ { }, { } }); /* Placeholder */
     }
 
     if (has_frag_shader(context, shaderName)) {
+      LayoutReflection reflect(frag_shader(context, shaderName));
       GfxWrap::createShaderModule(context->device, frag_shader(context, shaderName), moduleFrag);
       GfxWrap::shaderStage(moduleFrag, VK_SHADER_STAGE_FRAGMENT_BIT, createInfoFrag);
       program.setFrag({ createInfoFrag, MVkDescriptorSetLayoutBindingUniformBufferFS });

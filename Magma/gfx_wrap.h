@@ -235,12 +235,12 @@ namespace GfxWrap {
     std::vector<VkPresentModeKHR> presentModes(presentModeCount);
     VK_CHECK(vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &presentModeCount, presentModes.data()));
   }
-  inline void beginCommandBuffer(VkCommandBuffer commandBuffer) {
+  inline void beginCommandBuffer(VkCommandBuffer commandBuffer, VkCommandBufferUsageFlags flags = 0) {
     VkCommandBufferBeginInfo beginInfo = {};
     beginInfo.sType            = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     beginInfo.pNext            = nullptr;
     beginInfo.pInheritanceInfo = nullptr;
-    beginInfo.flags            = 0;
+    beginInfo.flags            = flags;
     VK_CHECK(vkBeginCommandBuffer(commandBuffer, &beginInfo));
   }
   inline void createSwapchain(VkDevice device,
@@ -646,13 +646,13 @@ namespace GfxWrap {
     renderPassInfo.pDependencies   = dependencies.data();
     VK_CHECK(vkCreateRenderPass(device, &renderPassInfo, nullptr, &renderPass));
   }
-  inline void createShaderModule(VkDevice device, const std::vector<char>& spirV, VkShaderModule& shaderModule) {
+  inline void createShaderModule(VkDevice device, const std::vector<uint32_t>& spirV, VkShaderModule& shaderModule) {
     VkShaderModuleCreateInfo moduleCreateInfo;
     moduleCreateInfo.sType    = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
     moduleCreateInfo.pNext    = nullptr;
     moduleCreateInfo.flags    = 0;
-    moduleCreateInfo.codeSize = spirV.size();
-    moduleCreateInfo.pCode    = (uint32_t*) spirV.data();
+    moduleCreateInfo.codeSize = spirV.size() * sizeof(uint32_t);
+    moduleCreateInfo.pCode    = spirV.data();
     VK_CHECK(vkCreateShaderModule(device, &moduleCreateInfo, nullptr, &shaderModule));
   }
   inline void shaderStage(const VkShaderModule& module, VkShaderStageFlagBits stage, VkPipelineShaderStageCreateInfo& shaderStage) {
@@ -737,15 +737,16 @@ namespace GfxWrap {
       nullptr,
       &pipeline));
   }
-  inline void clearValues(std::array<VkClearValue, 2>& clearValues,
-                          const VkClearColorValue& clearColor = {0, 0, 0, 1},
-                          const VkClearDepthStencilValue& clearDepthStencil = { 1.f, 0 }) {
+  inline std::array<VkClearValue, 2> clearValues(const VkClearColorValue& clearColor               = {0, 0, 0, 1},
+                                                 const VkClearDepthStencilValue& clearDepthStencil = { 1.f, 0 }) {
+    std::array<VkClearValue, 2> clearValues;
     clearValues[0].color.float32[0]     = clearColor.float32[0];
     clearValues[0].color.float32[1]     = clearColor.float32[1];
     clearValues[0].color.float32[2]     = clearColor.float32[2];
     clearValues[0].color.float32[3]     = clearColor.float32[3];
     clearValues[1].depthStencil.depth   = clearDepthStencil.depth;
     clearValues[1].depthStencil.stencil = clearDepthStencil.stencil;
+    return clearValues;
   }
   inline void beginRenderPass(const VkCommandBuffer& commandBuffer,
                               const VkRenderPass& renderPass,

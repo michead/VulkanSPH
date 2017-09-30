@@ -6,6 +6,7 @@
 #include "event_handler.h"
 #include "fluid_simulation.h"
 #include "perf.h"
+#include "hud.h"
 #include "scene.h"
 #include "gfx_context.h"
 #include "pipeline.h"
@@ -34,6 +35,7 @@ public:
   EventHandler*    eventHandler;
   FluidSimulation* fluidSimulation;
   Perf*            perf;
+  HUD*             hud;
   bool             shouldQuit = false;
 
 private:
