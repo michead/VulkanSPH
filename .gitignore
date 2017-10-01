@@ -265,3 +265,6 @@ ext
 
 # SPIR-V
 *.spv
+
+#ImGui config
+imgui.ini
