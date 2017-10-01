@@ -53,21 +53,51 @@ void HUD::setupNewFrame() {
 void HUD::render() {
   for each (auto drawFn in drawFns) {
     ImGui::Begin(drawFn.first);
+    ImGui::BeginGroup();
     drawFn.second();
+    ImGui::EndGroup();
     ImGui::End();
   }
 
   ImGui_ImplSDLVulkan_Render(context->getCurrentCmdBuffer());
 }
 
-void HUD::registerWindow(const char* name, std::function<void()> drawFn) {
-  drawFns.push_back(std::make_pair(name, drawFn));
+void HUD::registerWindow(const char* label, std::function<void()> drawFn) {
+  drawFns.push_back(std::make_pair(label, drawFn));
 }
 
-void HUD::unregisterWindow(const char* name) {
+void HUD::unregisterWindow(const char* label) {
   for (auto it = drawFns.begin(); it != drawFns.end(); it++) {
-    if (strcmp((*it).first, name) == 0) {
+    if (strcmp((*it).first, label) == 0) {
       drawFns.erase(it);
     }
   }
+}
+
+void HUD::group(const char* label, std::function<void()> drawInnerFn, bool isCollapsed, bool isIndented) {
+  if (isIndented) {
+    ImGui::Indent();
+  }
+
+  ImGui::PushID(label);
+
+  static bool isFirstRun = true;
+  if (isFirstRun && !isCollapsed) {
+    isFirstRun = false;
+    ImGui::SetNextTreeNodeOpen(true);
+  }
+  
+  if (ImGui::CollapsingHeader(label)) {
+    drawInnerFn();
+  }
+  
+  ImGui::PopID();
+
+  if (isIndented) {
+    ImGui::Unindent();
+  }
+}
+
+void HUD::vec3Slider(const char* label, float* val, float minVal, float maxVal, const char* format) {
+  ImGui::SliderFloat3(label, val, minVal, maxVal, format);
 }

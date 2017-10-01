@@ -13,9 +13,12 @@ public:
   ~HUD();
 
   void setupNewFrame();
-  void registerWindow(const char* name, std::function<void()> drawFn);
-  void unregisterWindow(const char* name);
+  void registerWindow(const char* label, std::function<void()> drawFn);
+  void unregisterWindow(const char* label);
   void render();
+
+  void group(const char* label, std::function<void()> drawInnerFn, bool isCollapsed = true, bool isIndented = false);
+  void vec3Slider(const char* label, float* val, float minVal = -1000, float maxVal = 1000, const char* format = "%.1f");
 
 private:
   const GfxContext*                                          context;

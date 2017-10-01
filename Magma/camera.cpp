@@ -22,14 +22,6 @@ void Camera::onViewportChange(const Viewport& viewport) {
   ratio = viewport.width / viewport.height;
 }
 
-glm::mat4 Camera::getViewMatrix() const {
-  return view;
-}
-
-glm::mat4 Camera::getProjectionMatrix() const {
-  return proj;
-}
-
 void Camera::rotate(float dx, float dy) {
   yaw += dx;
   pitch = glm::clamp<float>(pitch + dy, -89, 89);
@@ -61,4 +53,12 @@ void Camera::updateViewMatrix() {
   // TODO: Yaw and pitch are unused
   glm::vec3 direction = Math::direction(yaw, pitch);
   view = glm::lookAt(pos, glm::vec3(0), CAMERA_UP);
+}
+
+glm::mat4 Camera::getViewMatrix() const {
+  return view;
+}
+
+glm::mat4 Camera::getProjectionMatrix() const {
+  return proj;
 }

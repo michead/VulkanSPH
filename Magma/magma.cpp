@@ -63,6 +63,9 @@ void Magma::init() {
   context.graphics->postInit();
   context.graphics->getPipeline()->postInit();
 
+  // Build HUD for debugging
+  registerHUDExtensions();
+
   // Register input callbacks for camera movement
   registerCameraMovement();
 }
@@ -80,6 +83,14 @@ void Magma::update(double deltaTime) {
   fluidSimulation->update();
 }
 
+void Magma::registerHUDExtensions() {
+  hud->registerWindow("Scene Explorer", [this]() {
+    hud->group("Camera", [this]() {
+      hud->vec3Slider("Position", &scene->camera->pos.x);
+    }, false);
+  });
+}
+
 void Magma::registerCameraMovement() {
   eventHandler->addListener(EVT_MOUSE_DOWN_LEFT_BTN,  [this](Event evt) {
     // No binding yet
@@ -89,14 +100,14 @@ void Magma::registerCameraMovement() {
   });
   eventHandler->addListener(EVT_MOUSE_DRAG_LEFT_BTN,  [this](Event evt) {
     if (evt.key.keysym.mod & KMOD_ALT) {
-      scene->camera->orbit(glm::vec3(0), evt.motion.xrel, evt.motion.yrel);
+      scene->camera->orbit(glm::vec3(0), (float)evt.motion.xrel, (float)evt.motion.yrel);
     }
   });
   eventHandler->addListener(EVT_MOUSE_DRAG_RIGHT_BTN, [this](Event evt) {
-    scene->camera->rotate(evt.motion.xrel, evt.motion.yrel);
+    scene->camera->rotate((float)evt.motion.xrel, (float)evt.motion.yrel);
   });
   eventHandler->addListener(EVT_MOUSE_WHEEL_SCROLL,   [this](Event evt) {
-    scene->camera->dolly(evt.wheel.y);
+    scene->camera->dolly((float)evt.wheel.y);
   });
 }
 

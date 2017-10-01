@@ -21,7 +21,7 @@ public:
   
   void onViewportChange(const Viewport& viewport);
   
-  glm::mat4 getViewMatrix() const;
+  glm::mat4 getViewMatrix()       const;
   glm::mat4 getProjectionMatrix() const;
 
   void dolly(float delta);
@@ -29,15 +29,15 @@ public:
   void pan(float dx, float dy);
   void orbit(glm::vec3 target, float dx, float dy);
 
+  glm::vec3  pos;
+  float      yaw = 0;
+  float      pitch = 0;
+
 private:
   void updateProjMatrix();
   void updateViewMatrix();
 
   float ratio = CAMERA_RATIO;
-  
-  glm::vec3  pos;
-  float      yaw   = 0;
-  float      pitch = 0;
   
   glm::mat4 proj;
   glm::mat4 view;

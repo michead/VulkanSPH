@@ -45,5 +45,6 @@ private:
   void render(double deltaTime);
   void presentFrame();
   void cleanup();
+  void registerHUDExtensions();
   void registerCameraMovement();
 };

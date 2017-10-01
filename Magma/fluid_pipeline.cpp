@@ -78,6 +78,10 @@ void FluidPipeline::initVertexBuffer() {
 
 void FluidPipeline::update() {
   updateBuffers();
+
+  for each(const auto& subpass in subpasses) {
+    subpass->update();
+  }
 }
 
 void FluidPipeline::updateBuffers() {
