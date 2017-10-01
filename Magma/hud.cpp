@@ -1,7 +1,6 @@
 #define SDL_MAIN_HANDLED
 #include <SDL2\SDL.h>
 #include <SDL2\SDL_syswm.h>
-#include <imgui\imgui.h>
 #include "hud.h"
 #include "imgui_sdl_vulkan_bindings.h"
 #include "gfx_context.h"
@@ -51,10 +50,24 @@ void HUD::setupNewFrame() {
   ImGui_ImplSDLVulkan_NewFrame();
 }
 
-void HUD::immediateText(const char* text) {
-  ImGui::Text(text);
+void HUD::render() {
+  for each (auto drawFn in drawFns) {
+    ImGui::Begin(drawFn.first);
+    drawFn.second();
+    ImGui::End();
+  }
+
+  ImGui_ImplSDLVulkan_Render(context->getCurrentCmdBuffer());
 }
 
-void HUD::render() {
-  ImGui_ImplSDLVulkan_Render(context->getCurrentCmdBuffer());
+void HUD::registerWindow(const char* name, std::function<void()> drawFn) {
+  drawFns.push_back(std::make_pair(name, drawFn));
+}
+
+void HUD::unregisterWindow(const char* name) {
+  for (auto it = drawFns.begin(); it != drawFns.end(); it++) {
+    if (strcmp((*it).first, name) == 0) {
+      drawFns.erase(it);
+    }
+  }
 }

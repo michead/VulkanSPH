@@ -1,4 +1,8 @@
 #pragma once
+#include <functional>
+#include <utility>
+#include <vector>
+#include <imgui\imgui.h>
 
 struct SDL_Window;
 class GfxContext;
@@ -9,9 +13,11 @@ public:
   ~HUD();
 
   void setupNewFrame();
-  void immediateText(const char* text);
+  void registerWindow(const char* name, std::function<void()> drawFn);
+  void unregisterWindow(const char* name);
   void render();
 
 private:
-  const GfxContext*     context;
+  const GfxContext*                                          context;
+  std::vector<std::pair<const char*, std::function<void()>>> drawFns;
 };
