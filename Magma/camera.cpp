@@ -37,6 +37,11 @@ void Camera::rotate(float dx, float dy) {
   updateViewMatrix();
 }
 
+void Camera::dolly(float delta) {
+  // TODO
+  updateViewMatrix();
+}
+
 void Camera::pan(float dx, float dy) {
   // TODO
   updateViewMatrix();

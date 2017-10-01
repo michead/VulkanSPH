@@ -62,6 +62,9 @@ void Magma::init() {
   context.graphics->setScene(scene);
   context.graphics->postInit();
   context.graphics->getPipeline()->postInit();
+
+  // Register input callbacks for camera movement
+  registerCameraMovement();
 }
 
 void Magma::cleanup() {
@@ -77,7 +80,27 @@ void Magma::update(double deltaTime) {
   fluidSimulation->update();
 }
 
-void Magma::render(double deltaTime) {
+void Magma::registerCameraMovement() {
+  eventHandler->addListener(EVT_MOUSE_DOWN_LEFT_BTN,  [this](Event evt) {
+    // No binding yet
+  });
+  eventHandler->addListener(EVT_MOUSE_DOWN_RIGHT_BTN, [this](Event evt) {
+    // No binding yet
+  });
+  eventHandler->addListener(EVT_MOUSE_DRAG_LEFT_BTN,  [this](Event evt) {
+    if (evt.key.keysym.mod & KMOD_ALT) {
+      scene->camera->orbit(glm::vec3(0), evt.motion.xrel, evt.motion.yrel);
+    }
+  });
+  eventHandler->addListener(EVT_MOUSE_DRAG_RIGHT_BTN, [this](Event evt) {
+    scene->camera->rotate(evt.motion.xrel, evt.motion.yrel);
+  });
+  eventHandler->addListener(EVT_MOUSE_WHEEL_SCROLL,   [this](Event evt) {
+    scene->camera->dolly(evt.wheel.y);
+  });
+}
+
+void Magma::prepareFrame() {
   hud->setupNewFrame();
 
   bool shouldResize;
@@ -98,8 +121,7 @@ void Magma::render(double deltaTime) {
     1,
     &mvkContext->drawFences[mvkContext->currentImageIndex]));
 
-  VkCommandBuffer drawCmd                 = mvkContext->getCurrentCmdBuffer();
-  VkPipelineStageFlags stageFlags         = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+  VkCommandBuffer drawCmd = mvkContext->getCurrentCmdBuffer();
   std::array<VkClearValue, 2> clearValues = GfxWrap::clearValues();
 
   vkResetCommandPool(
@@ -117,10 +139,12 @@ void Magma::render(double deltaTime) {
     clearValues.data());
 
   vkCmdSetViewport(drawCmd, 0, 1, &mvkContext->viewport);
-  vkCmdSetScissor( drawCmd, 0, 1, &mvkContext->scissor);
+  vkCmdSetScissor(drawCmd, 0, 1, &mvkContext->scissor);
+}
 
-  scene->render();
-  hud->render();
+void Magma::presentFrame() {
+  VkCommandBuffer drawCmd = mvkContext->getCurrentCmdBuffer();
+  VkPipelineStageFlags stageFlags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 
   vkCmdEndRenderPass(drawCmd);
   VK_CHECK(vkEndCommandBuffer(drawCmd));
@@ -150,6 +174,15 @@ void Magma::render(double deltaTime) {
     &mvkContext->currentImageIndex);
 
   vkQueueWaitIdle(mvkContext->presentQueue);
+}
+
+void Magma::render(double deltaTime) {
+  prepareFrame();
+
+  scene->render();
+  hud->render();
+
+  presentFrame();
 }
 
 void Magma::mainLoop() {

@@ -39,6 +39,8 @@ void EventHandler::handle(Event evt) {
       notifyListeners(EVT_MOUSE_DRAG_RIGHT_BTN, evt);
     }
     break;
+  case SDL_MOUSEWHEEL:
+    notifyListeners(EVT_MOUSE_WHEEL_SCROLL, evt);
   default:
     break;
   }

@@ -24,6 +24,7 @@ public:
   glm::mat4 getViewMatrix() const;
   glm::mat4 getProjectionMatrix() const;
 
+  void dolly(float delta);
   void rotate(float dx, float dy);
   void pan(float dx, float dy);
   void orbit(glm::vec3 target, float dx, float dy);

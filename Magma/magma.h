@@ -41,6 +41,9 @@ public:
 private:
   void init();
   void update(double deltaTime);
+  void prepareFrame();
   void render(double deltaTime);
+  void presentFrame();
   void cleanup();
+  void registerCameraMovement();
 };
