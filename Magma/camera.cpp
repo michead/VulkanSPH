@@ -25,23 +25,18 @@ void Camera::onViewportChange(const Viewport& viewport) {
 void Camera::rotate(float dx, float dy) {
   yaw += dx;
   pitch = glm::clamp<float>(pitch + dy, -89, 89);
-  
-  updateViewMatrix();
 }
 
 void Camera::dolly(float delta) {
   // TODO
-  updateViewMatrix();
 }
 
 void Camera::pan(float dx, float dy) {
   // TODO
-  updateViewMatrix();
 }
 
 void Camera::orbit(glm::vec3 target, float dx, float dy) {
   // TODO
-  updateViewMatrix();
 }
 
 void Camera::updateProjMatrix() {
@@ -50,15 +45,16 @@ void Camera::updateProjMatrix() {
 }
 
 void Camera::updateViewMatrix() {
-  // TODO: Yaw and pitch are unused
-  glm::vec3 direction = Math::direction(yaw, pitch);
+  // TODO: Yaw and pitch are left unused
   view = glm::lookAt(pos, glm::vec3(0), CAMERA_UP);
 }
 
-glm::mat4 Camera::getViewMatrix() const {
+glm::mat4 Camera::getViewMatrix() {
+  updateViewMatrix();
   return view;
 }
 
-glm::mat4 Camera::getProjectionMatrix() const {
+glm::mat4 Camera::getProjectionMatrix() {
+  updateProjMatrix();
   return proj;
 }

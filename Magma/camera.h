@@ -6,11 +6,11 @@
 #include <glm\gtc\matrix_transform.hpp>
 #include "magma_types.h"
 
-#define CAMERA_FOV      45.f
+#define CAMERA_FOV     45.f
 #define CAMERA_UP      { 0, 1, 0 }
 #define CAMERA_FORWARD { 0, 0, -1 }
-#define CAMERA_NEAR      0.1f
-#define CAMERA_FAR    1000.f
+#define CAMERA_NEAR     0.1f
+#define CAMERA_FAR      1000.f
 #define CAMERA_RATIO    16 / 9.f
 
 struct Camera {
@@ -21,8 +21,8 @@ public:
   
   void onViewportChange(const Viewport& viewport);
   
-  glm::mat4 getViewMatrix()       const;
-  glm::mat4 getProjectionMatrix() const;
+  glm::mat4 getViewMatrix();
+  glm::mat4 getProjectionMatrix();
 
   void dolly(float delta);
   void rotate(float dx, float dy);
