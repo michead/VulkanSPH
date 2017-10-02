@@ -86,7 +86,7 @@ void Magma::update(double deltaTime) {
 void Magma::registerHUDExtensions() {
   hud->registerWindow("Scene Explorer", [this]() {
     hud->group("Camera", [this]() {
-      hud->vec3Slider("Position", &scene->camera->pos.x);
+      hud->vec3Slider("Position", &scene->camera->pos.x, -10.f, 10.f);
     }, false);
   });
 }

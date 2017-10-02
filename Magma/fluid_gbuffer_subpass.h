@@ -12,4 +12,6 @@ public:
 private:
   MVkVertexShaderUniformParticle   uniformsVS;
   MVkFragmentShaderUniformParticle uniformsFS;
+  VkCommandBuffer                  copyStagingVSBufferCmd;
+  VkCommandBuffer                  copyStagingFSBufferCmd;
 };

@@ -40,16 +40,14 @@ void FluidGBufferSubpass::postInit() {
   uniformsVS.proj = scene->camera->getProjectionMatrix();
   uniformsVS.particleSize = to_fluid(elem)->radius * 1000;
 
-  GfxWrap::createBuffer(context->graphics->physicalDevice,
+  GfxWrap::createStagingBuffer(
+    context->graphics->physicalDevice,
     context->graphics->device,
     VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
     &uniformsVS,
     sizeof(MVkVertexShaderUniformParticle),
-    uniformBufferVSDesc.buffer,
-    &uniformBufferVSDesc.allocSize,
-    uniformBufferVSDesc.deviceMemory,
-    &uniformBufferVSDesc.mappedMemory,
-    &uniformBufferVSDesc.bufferInfo);
+    &stagingUniformBufferVSDesc,
+    &uniformBufferVSDesc);
 
   uniformsFS.particleSize = uniformsVS.particleSize;
   uniformsFS.ambientColor = glm::vec4(0.5f, 0.5f, 0.5, 1.f);
@@ -64,16 +62,14 @@ void FluidGBufferSubpass::postInit() {
     viewport.width,
     viewport.height };
 
-  GfxWrap::createBuffer(context->graphics->physicalDevice,
+  GfxWrap::createStagingBuffer(
+    context->graphics->physicalDevice,
     context->graphics->device,
     VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
     &uniformsFS,
     sizeof(MVkFragmentShaderUniformParticle),
-    uniformBufferFSDesc.buffer,
-    &uniformBufferFSDesc.allocSize,
-    uniformBufferFSDesc.deviceMemory,
-    &uniformBufferFSDesc.mappedMemory,
-    &uniformBufferFSDesc.bufferInfo);
+    &stagingUniformBufferFSDesc,
+    &uniformBufferFSDesc);
 
   // Update descriptor sets
   GfxWrap::updateDescriptorSet(device, descriptorSet, 0, uniformBufferVSDesc.bufferInfo);
@@ -104,6 +100,10 @@ void FluidGBufferSubpass::postInit() {
     *renderPass,
     pipelineCache,
     pipeline);
+
+
+  GfxWrap::createCommandBuffers(device, context->graphics->getCurrentCmdPool(), 1, &copyStagingVSBufferCmd);
+  GfxWrap::createCommandBuffers(device, context->graphics->getCurrentCmdPool(), 1, &copyStagingFSBufferCmd);
 }
 
 void FluidGBufferSubpass::update() {
@@ -118,12 +118,24 @@ void FluidGBufferSubpass::update() {
     device,
     sizeof(MVkVertexShaderUniformParticle),
     &uniformsVS,
-    uniformBufferVSDesc.allocSize,
-    uniformBufferFSDesc.deviceMemory,
-    &uniformBufferFSDesc.mappedMemory);
+    stagingUniformBufferVSDesc.allocSize,
+    stagingUniformBufferVSDesc.deviceMemory,
+    &stagingUniformBufferVSDesc.mappedMemory);
 
-  uniformsFS.proj     = scene->camera->getProjectionMatrix();
-  uniformsFS.invProj  = glm::inverse(scene->camera->getProjectionMatrix());
+  GfxWrap::registerCopyCmd(
+    copyStagingVSBufferCmd,
+    sizeof(MVkVertexShaderUniformParticle),
+    context->graphics->graphicsQueue,
+    stagingUniformBufferVSDesc.buffer,
+    uniformBufferVSDesc.buffer);
+
+  GfxWrap::submitCmdBuffer(
+    context->graphics->device,
+    context->graphics->graphicsQueue,
+    copyStagingVSBufferCmd);
+
+  uniformsFS.proj     = uniformsVS.proj;
+  uniformsFS.invProj  = glm::inverse(uniformsVS.proj);
   uniformsFS.viewport = {
     viewport.x,
     viewport.y,
@@ -134,7 +146,19 @@ void FluidGBufferSubpass::update() {
     device,
     sizeof(MVkFragmentShaderUniformParticle),
     &uniformsFS,
-    uniformBufferFSDesc.allocSize,
-    uniformBufferFSDesc.deviceMemory,
-    &uniformBufferFSDesc.mappedMemory);
+    stagingUniformBufferFSDesc.allocSize,
+    stagingUniformBufferFSDesc.deviceMemory,
+    &stagingUniformBufferFSDesc.mappedMemory);
+
+  GfxWrap::registerCopyCmd(
+    copyStagingFSBufferCmd,
+    sizeof(MVkFragmentShaderUniformParticle),
+    context->graphics->graphicsQueue,
+    stagingUniformBufferFSDesc.buffer,
+    uniformBufferFSDesc.buffer);
+
+  GfxWrap::submitCmdBuffer(
+    context->graphics->device,
+    context->graphics->graphicsQueue,
+    copyStagingFSBufferCmd);
 }

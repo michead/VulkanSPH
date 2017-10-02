@@ -3,6 +3,7 @@
 #include <vulkan\vulkan.hpp>
 #include <iostream>
 #include <vector>
+#include "gfx_structs.h"
 #include "logger.h"
 
 #define VK_VER_MAJOR(X)   ((((uint32_t)(X)) >> 22) & 0x3FF)
@@ -183,7 +184,9 @@ namespace GfxWrap {
     info.flags = 0;
     VK_CHECK(vkCreateCommandPool(device, &info, nullptr, &commandPool));
   }
-  inline void createCommandBuffers(VkDevice device, VkCommandPool commandPool, uint32_t bufferCount,
+  inline void createCommandBuffers(VkDevice device,
+                                   VkCommandPool commandPool,
+                                   uint32_t bufferCount,
                                    VkCommandBuffer* commandBuffers) {
     VkCommandBufferAllocateInfo info = {};
     info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -235,7 +238,8 @@ namespace GfxWrap {
     std::vector<VkPresentModeKHR> presentModes(presentModeCount);
     VK_CHECK(vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &presentModeCount, presentModes.data()));
   }
-  inline void beginCommandBuffer(VkCommandBuffer commandBuffer, VkCommandBufferUsageFlags flags = 0) {
+  inline void beginCommandBuffer(VkCommandBuffer commandBuffer,
+                                 VkCommandBufferUsageFlags flags = 0) {
     VkCommandBufferBeginInfo beginInfo = {};
     beginInfo.sType            = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     beginInfo.pNext            = nullptr;
@@ -442,13 +446,16 @@ namespace GfxWrap {
                                    VkDevice device,
                                    VkBuffer buffer,
                                    VkDeviceSize* allocSize,
-                                   VkDeviceMemory& deviceMemory) {
+                                   VkDeviceMemory& deviceMemory,
+                                   VkMemoryPropertyFlags memProps) {
     VkMemoryRequirements memReqs;
     vkGetBufferMemoryRequirements(device, buffer, &memReqs);
 
     uint32_t memoryTypeIndex;
-    getMemTypeIndexFromMemProps(physicalDevice, memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-      VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &memoryTypeIndex);
+    getMemTypeIndexFromMemProps(
+      physicalDevice, memReqs.memoryTypeBits,
+      memProps,
+      &memoryTypeIndex);
 
     VkMemoryAllocateInfo allocateInfo = {};
     allocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
@@ -470,32 +477,120 @@ namespace GfxWrap {
     vkUnmapMemory(device, deviceMemory);
   }
   inline void createBuffer(VkPhysicalDevice physicalDevice,
-                           VkDevice device, 
+                           VkDevice device,
                            VkBufferUsageFlags usage,
                            void* data,
                            size_t size,
-                           VkBuffer& buffer,
-                           VkDeviceSize* allocSize,
-                           VkDeviceMemory& deviceMemory,
-                           void** mappedMemory,
-                           VkDescriptorBufferInfo* outBufferInfo) {
+                           MVkBufferDesc* bufferDesc) {
     VkBufferCreateInfo bufferInfo = {};
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     bufferInfo.pNext = nullptr;
     bufferInfo.usage = usage;
-    bufferInfo.size  = size;
+    bufferInfo.size = size;
     bufferInfo.flags = 0;
-    VK_CHECK(vkCreateBuffer(device, &bufferInfo, nullptr, &buffer));
+    VK_CHECK(vkCreateBuffer(device, &bufferInfo, nullptr, &bufferDesc->buffer));
 
-    GfxWrap::allocateDeviceMemory(physicalDevice, device, buffer, allocSize, deviceMemory);
-    GfxWrap::updateBuffer(device, size, data, *allocSize, deviceMemory, mappedMemory);
-    VK_CHECK(vkBindBufferMemory(device, buffer, deviceMemory, 0));
+    GfxWrap::allocateDeviceMemory(
+      physicalDevice,
+      device,
+      bufferDesc->buffer,
+      &bufferDesc->allocSize,
+      bufferDesc->deviceMemory,
+      VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    
+    GfxWrap::updateBuffer(
+      device,
+      size,
+      data,
+      bufferDesc->allocSize,
+      bufferDesc->deviceMemory,
+      &bufferDesc->mappedMemory);
+    
+    VK_CHECK(vkBindBufferMemory(device, bufferDesc->buffer, bufferDesc->deviceMemory, 0));
 
-    if (outBufferInfo) {
-      outBufferInfo->buffer = buffer;
-      outBufferInfo->offset = 0;
-      outBufferInfo->range  = size;
-    }
+    bufferDesc->bufferInfo.buffer = bufferDesc->buffer;
+    bufferDesc->bufferInfo.offset = 0;
+    bufferDesc->bufferInfo.range = size;
+  }
+  inline void submitCmdBuffer(VkDevice device,
+                              VkQueue queue,
+                              VkCommandBuffer cmdBuffer) {
+                              VkSubmitInfo submitInfo = {};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &cmdBuffer;
+
+    VK_CHECK(vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE));
+    VK_CHECK(vkQueueWaitIdle(queue));
+  }
+  inline void registerCopyCmd(VkCommandBuffer cmdBuffer,
+                              VkDeviceSize size,
+                              VkQueue queue,
+                              VkBuffer src,
+                              VkBuffer dst) {
+    beginCommandBuffer(cmdBuffer);
+    VkBufferCopy copyRegion = { 0, 0, size };
+    vkCmdCopyBuffer(cmdBuffer, src, dst, 1, &copyRegion);
+    VK_CHECK(vkEndCommandBuffer(cmdBuffer));
+  }
+  inline void createStagingBuffer(VkPhysicalDevice physicalDevice,
+                                  VkDevice device,
+                                  VkBufferUsageFlags usage,
+                                  void* data,
+                                  size_t size,
+                                  MVkBufferDesc* hostBuffer,
+                                  MVkBufferDesc* deviceBuffer) {
+    VkBufferCreateInfo hostBufferInfo = {};
+    hostBufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    hostBufferInfo.pNext = nullptr;
+    hostBufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+    hostBufferInfo.size = size;
+    hostBufferInfo.flags = 0;
+    VK_CHECK(vkCreateBuffer(device, &hostBufferInfo, nullptr, &hostBuffer->buffer));
+
+    GfxWrap::allocateDeviceMemory(
+      physicalDevice,
+      device,
+      hostBuffer->buffer,
+      &hostBuffer->allocSize,
+      hostBuffer->deviceMemory,
+      VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+    GfxWrap::updateBuffer(
+      device,
+      size,
+      data,
+      hostBuffer->allocSize,
+      hostBuffer->deviceMemory,
+      &hostBuffer->mappedMemory);
+
+    VK_CHECK(vkBindBufferMemory(device, hostBuffer->buffer, hostBuffer->deviceMemory, 0));
+
+    hostBuffer->bufferInfo.buffer = hostBuffer->buffer;
+    hostBuffer->bufferInfo.offset = 0;
+    hostBuffer->bufferInfo.range = size;
+
+    VkBufferCreateInfo deviceBufferInfo = {};
+    deviceBufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    deviceBufferInfo.pNext = nullptr;
+    deviceBufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | usage;
+    deviceBufferInfo.size = size;
+    deviceBufferInfo.flags = 0;
+    VK_CHECK(vkCreateBuffer(device, &deviceBufferInfo, nullptr, &deviceBuffer->buffer));
+
+    GfxWrap::allocateDeviceMemory(
+      physicalDevice,
+      device,
+      deviceBuffer->buffer,
+      &deviceBuffer->allocSize,
+      deviceBuffer->deviceMemory,
+      VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+    VK_CHECK(vkBindBufferMemory(device, deviceBuffer->buffer, deviceBuffer->deviceMemory, 0));
+
+    deviceBuffer->bufferInfo.buffer = deviceBuffer->buffer;
+    deviceBuffer->bufferInfo.offset = 0;
+    deviceBuffer->bufferInfo.range = size;
   }
   inline void createDescriptorSetLayout(VkDevice device,
                                         const std::vector<VkDescriptorSetLayoutBinding>& bindings,

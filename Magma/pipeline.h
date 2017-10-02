@@ -33,10 +33,6 @@ protected:
   Scene*         scene;
   SceneElement*  elem;
 
-  VkBuffer       vertexBuffer;
-  VkDeviceMemory vertexBufferMemory;
-  void*          vertexBufferMappedMemory;
-
   VkRenderPass renderPass;
 
   std::vector<VkImageView>             colorAttachments;

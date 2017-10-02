@@ -18,7 +18,7 @@ public:
   virtual void draw()     override;
 
 protected:
-  virtual void initRenderPass()       override;
-  virtual void initVertexBuffer()     override;
-  virtual void updateBuffers()        override;
+  virtual void initRenderPass()   override;
+  virtual void initVertexBuffer() override;
+  virtual void updateBuffers()    override;
 };

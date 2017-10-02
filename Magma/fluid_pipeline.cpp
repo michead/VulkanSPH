@@ -37,7 +37,7 @@ void FluidPipeline::draw() {
     subpass->bind(cmdBuffer);
 
     VkDeviceSize offset = 0;
-    vkCmdBindVertexBuffers(cmdBuffer, 0, 1, &vertexBuffer, &offset);
+    vkCmdBindVertexBuffers(cmdBuffer, 0, 1, &vertexBufferDesc.buffer, &offset);
     vkCmdDraw(cmdBuffer, to_fluid(elem)->particleCount, 1, 0, 0);
 
     // TODO: Handle rendering to fullscreen quad
@@ -69,11 +69,7 @@ void FluidPipeline::initVertexBuffer() {
     VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
     to_fluid(elem)->positions,
     size,
-    vertexBuffer,
-    &vertexBufferDesc.allocSize,
-    vertexBufferDesc.deviceMemory,
-    &vertexBufferDesc.mappedMemory,
-    &vertexBufferDesc.bufferInfo);
+    &vertexBufferDesc);
 }
 
 void FluidPipeline::update() {
@@ -91,5 +87,5 @@ void FluidPipeline::updateBuffers() {
     to_fluid(elem)->positions,
     vertexBufferDesc.allocSize,
     vertexBufferDesc.deviceMemory,
-    &vertexBufferMappedMemory);
+    &vertexBufferDesc.mappedMemory);
 }

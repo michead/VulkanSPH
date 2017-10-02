@@ -39,6 +39,9 @@ protected:
   VkPipeline                   pipeline;
   VkPipelineCache              pipelineCache = VK_NULL_HANDLE;
   MVkShaderProgram             shaderProgram;
+  MVkBufferDesc                stagingUniformBufferVSDesc;
+  MVkBufferDesc                stagingUniformBufferGSDesc;
+  MVkBufferDesc                stagingUniformBufferFSDesc;
   MVkBufferDesc                uniformBufferVSDesc;
   MVkBufferDesc                uniformBufferGSDesc;
   MVkBufferDesc                uniformBufferFSDesc;
