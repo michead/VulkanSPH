@@ -355,7 +355,7 @@ void ImGui_ImplSDLVulkan_CreateFontsTexture(VkCommandBuffer command_buffer) {
     VK_CHECK(vkCreateBuffer(g_Device, &buffer_info, g_Allocator, &g_UploadBuffer));
     VkMemoryRequirements req;
     vkGetBufferMemoryRequirements(g_Device, g_UploadBuffer, &req);
-    g_BufferMemoryAlignment = (g_BufferMemoryAlignment > req.alignment) ? g_BufferMemoryAlignment : req.alignment;
+    g_BufferMemoryAlignment = (g_BufferMemoryAlignment > (size_t)req.alignment) ? g_BufferMemoryAlignment : (size_t)req.alignment;
     VkMemoryAllocateInfo alloc_info = {};
     alloc_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     alloc_info.allocationSize = req.size;
@@ -652,8 +652,8 @@ void ImGui_ImplSDLVulkan_Init(SDL_Window* window, ImGui_ImplSDLVulkan_Init_Data 
   io.ImeWindowHandle = windowInfo.info.win.window;
 #endif
 
-  io.DisplaySize.x = init_data->viewportSize.width;
-  io.DisplaySize.y = init_data->viewportSize.height;
+  io.DisplaySize.x = (float)init_data->viewportSize.width;
+  io.DisplaySize.y = (float)init_data->viewportSize.height;
 
   ImGui_ImplSDLVulkan_CreateDeviceObjects();
 }
