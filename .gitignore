@@ -266,5 +266,14 @@ ext
 # SPIR-V
 *.spv
 
-#ImGui config
+# ImGui config
 imgui.ini
+
+# VSCode C++ extension config
+c_cpp_properties.json
+
+# VSCode settings
+.vscode
+
+# Test/demo assets
+data
