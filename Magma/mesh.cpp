@@ -1,3 +1,5 @@
+#define TINYOBJLOADER_IMPLEMENTATION
+#include <tiny_obj_loader.h>
 #include <fstream>
 #include "mesh.h"
 #include "magma_context.h"
@@ -56,35 +58,30 @@ void Mesh::loadVertices(const ConfigNode& meshObj) {
 
 void Mesh::loadOBJFile(const ConfigNode& elemObj) {
   std::string path = OBJ_PATH_NODE(elemObj);
-  std::ifstream file(path.c_str());
+  tinyobj::attrib_t                attrib;
+  std::vector<tinyobj::shape_t>    shapes;
+  std::vector<tinyobj::material_t> materials;
 
-  if (!file) {
-    logger->error("OBJ file at {0} cannot be found.", path.c_str());
+  std::string err;
+  bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &err, path.c_str());
+
+  if (!err.empty()) {
+    logger->warn(err);
+  }
+
+  if (!ret) {
+    logger->error(".obj file {0} could not be parsed.", path.c_str());
     exit(EXIT_FAILURE);
   }
 
-  char buffer[1024];
+  vertices.clear();
+  indices.clear();
 
-  while (file) {
-    file >> buffer;
-
-    if (buffer[0] == 'v') {
-      float x, y, z;
-      file >> x >> y >> z;
-
-      vertices.push_back(x);
-      vertices.push_back(y);
-      vertices.push_back(z);
-    } else if (buffer[0] == 'f') {
-      unsigned int x, y, z;
-      file >> x >> y >> z;
-
-      indices.push_back(x - 1);
-      indices.push_back(y - 1);
-      indices.push_back(z - 1);
-    }
+  for each (auto& vert in attrib.vertices) {
+    vertices.push_back(vert);
   }
 
-  assert(vertices.size() % 3 == 0);
-  assert(indices.size() % 3 == 0);
+  for each (auto& index in shapes[0].mesh.indices) {
+    indices.push_back(index.vertex_index);
+  }
 }

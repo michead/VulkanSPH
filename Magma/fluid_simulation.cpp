@@ -1,6 +1,6 @@
 #include "fluid_simulation.h"
+#include "fluid.h"
 #include "scene.h"
-#include "scene_graph.h"
 #include "scene_element.h"
 #include "mesh.h"
 #include "logger.h"
@@ -49,7 +49,7 @@ void FluidSimulation::initCollision(Scene* scene) {
   rotations->map();
   prevRotations->map();
 
-  for (auto& elem : scene->graph->root->children) {
+  for (auto& elem : scene->root->children) {
     Mesh* mesh;
     if (mesh = dynamic_cast<Mesh*>(elem)) {
       size_t vertexCount = mesh->getVertices().size() / 3;
@@ -105,7 +105,7 @@ void FluidSimulation::initCollision(Scene* scene) {
   rotations->unmap();
   prevRotations->unmap();
 
-  for (auto& elem : scene->graph->root->children) {
+  for (auto& elem : scene->root->children) {
     Fluid* fluid;
     if (fluid = dynamic_cast<Fluid*>(elem)) {
       NvFlexSetShapes(

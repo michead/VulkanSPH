@@ -74,18 +74,17 @@ void HUD::unregisterWindow(const char* label) {
   }
 }
 
+void HUD::label(const char* label) {
+  ImGui::Text(label);
+}
+
 void HUD::group(const char* label, std::function<void()> drawInnerFn, bool isCollapsed, bool isIndented) {
   if (isIndented) {
     ImGui::Indent();
   }
 
   ImGui::PushID(label);
-
-  static bool isFirstRun = true;
-  if (isFirstRun && !isCollapsed) {
-    isFirstRun = false;
-    ImGui::SetNextTreeNodeOpen(true);
-  }
+  ImGui::SetNextTreeNodeOpen(!isCollapsed);
   
   if (ImGui::CollapsingHeader(label)) {
     drawInnerFn();

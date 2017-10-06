@@ -1,6 +1,6 @@
 #include <fstream>
 #include "scene.h"
-#include "scene_graph.h"
+#include "scene_element.h"
 #include "fluid.h"
 #include "fluid_simulation.h"
 #include "magma_types.h"
@@ -18,23 +18,23 @@ void Scene::loadJSON(const char* filename) {
   ConfigNode j;
   i >> j;
 
+  root   = new SceneElement(this, ROOT_NODE(j), context);
   camera = new Camera(CAMERA_NODE(j));
   lights = parseLights(LIGHTS_NODE(j));
-  graph  = new SceneGraph(this, ROOT_NODE(j), context);
 }
 
 void Scene::update() {
-  graph->root->update();
+  root->update();
 }
 
 void Scene::render() {
-  graph->root->render();
+  root->render();
 }
 
-std::vector<Light> Scene::parseLights(const ConfigNode& lightsNode) {
-  std::vector<Light> lights;
+std::vector<Light*> Scene::parseLights(const ConfigNode& lightsNode) {
+  std::vector<Light*> lights;
   for (size_t i = 0; i < lightsNode.size(); i++) {
-    lights.push_back(Light(lightsNode[i]));
+    lights.push_back(new Light(lightsNode[i]));
   }
   return lights;
 }

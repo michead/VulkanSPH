@@ -134,6 +134,12 @@ void FluidGBufferSubpass::update() {
     context->graphics->graphicsQueue,
     copyStagingVSBufferCmd);
 
+  std::vector<Light> lights;
+  std::transform(scene->lights.begin(), scene->lights.end(), std::back_inserter(lights), [](Light* light) {
+    return *light;
+  });
+  memcpy(&uniformsFS, lights.data(), sizeof(Light) * lights.size());
+  uniformsFS.lightCount = lights.size();
   uniformsFS.proj     = uniformsVS.proj;
   uniformsFS.invProj  = glm::inverse(uniformsVS.proj);
   uniformsFS.viewport = {

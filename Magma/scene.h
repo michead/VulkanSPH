@@ -13,18 +13,18 @@
 #define OBJ_PATH_NODE(j)  j["source"]
 #define HAS_CHILDREN(j)   j.find("children") != j.end()
 #define IS_VERTEX_LIST(j) j.find("vertices") != j.end()
-#define IS_OBJ_FILE(j)    j.find("source") != j.end()
+#define IS_OBJ_FILE(j)    j.find("source")   != j.end()
 
-struct SceneGraph;
 struct MagmaContext;
+struct SceneElement;
 class FluidSimulation;
 
 struct Scene {
   Scene(const char* filename, const MagmaContext* context);
 
-  Camera*             camera;
-  std::vector<Light>  lights;
-  SceneGraph*         graph;
+  SceneElement*        root;
+  Camera*              camera;
+  std::vector<Light*>  lights;
 
   const MagmaContext* context;
 
@@ -33,5 +33,5 @@ struct Scene {
   void update();
   void render();
 
-  static std::vector<Light> parseLights(const ConfigNode& lightsNode);
+  static std::vector<Light*> parseLights(const ConfigNode& lightsNode);
 };

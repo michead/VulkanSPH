@@ -114,9 +114,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="scene_graph.h">
-      <Filter>Source Files\scene</Filter>
-    </ClInclude>
     <ClInclude Include="scene_element.h">
       <Filter>Source Files\scene</Filter>
     </ClInclude>
@@ -128,9 +125,6 @@
     </ClInclude>
     <ClInclude Include="logger.h">
       <Filter>Source Files\logger</Filter>
-    </ClInclude>
-    <ClInclude Include="config.h">
-      <Filter>Source Files\config</Filter>
     </ClInclude>
     <ClInclude Include="magma.h">
       <Filter>Source Files</Filter>
@@ -198,6 +192,9 @@
     <ClInclude Include="layout_reflection.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="config.h">
+      <Filter>Source Files\config</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="data\scene.json">
@@ -208,6 +205,9 @@
     </None>
     <None Include="shaders\fluid_gbuffer.vert">
       <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="data\bowl.mtl">
+      <Filter>Source Files\data</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

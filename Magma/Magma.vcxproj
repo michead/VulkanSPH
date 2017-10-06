@@ -86,7 +86,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;SDL_VIDEO_DRIVER_WINDOWS;VK_USE_PLATFORM_WIN32_KHR;VK_SDK_BIN=R"($(VULKAN_SDK)\bin32\)";VK_LAYER_PATH=R"($(VULKAN_SDK)\Source\lib32\)";SHADER_PATH=LR"($(ProjectDir)shaders\)";_DEBUG;_CONSOLE;_LIB;MAGMA_ROOT_DIR="$(ProjectDir)";%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Third-Party\Include;$(FLEX_PATH)\include;$(SolutionDir)ext\glm;$(SolutionDir)ext\json;$(SolutionDir)ext\spdlog;$(SolutionDir)ext;$(BOOST_PATH)\;$(SolutionDir)ext\spirv-cross</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Third-Party\Include;$(FLEX_PATH)\include;$(SolutionDir)ext\glm;$(SolutionDir)ext\json;$(SolutionDir)ext\spdlog;$(SolutionDir)ext;$(BOOST_PATH)\;$(SolutionDir)ext\spirv-cross;$(SolutionDir)ext\tinyobjloader</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -209,7 +209,6 @@
     <ClInclude Include="pipeline.h" />
     <ClInclude Include="scene.h" />
     <ClInclude Include="scene_element.h" />
-    <ClInclude Include="scene_graph.h" />
     <ClInclude Include="gfx_context.h" />
     <ClInclude Include="logger.h" />
     <ClInclude Include="fluid_pipeline.h" />
@@ -219,6 +218,9 @@
     <ClInclude Include="subpass.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="data\bowl.mtl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </None>
     <None Include="data\scene.json" />
     <None Include="shaders\fluid_gbuffer.frag" />
     <None Include="shaders\fluid_gbuffer.vert" />

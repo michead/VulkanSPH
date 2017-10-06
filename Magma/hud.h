@@ -18,7 +18,8 @@ public:
   void render();
 
   void group(const char* label, std::function<void()> drawInnerFn, bool isCollapsed = true, bool isIndented = false);
-  void vec3Slider(const char* label, float* val, float minVal = -1000, float maxVal = 1000, const char* format = "%.1f");
+  void label(const char* label);
+  void vec3Slider(const char* label, float* val, float minVal = -10.f, float maxVal = 10.f, const char* format = "%.1f");
 
 private:
   const GfxContext*                                          context;
