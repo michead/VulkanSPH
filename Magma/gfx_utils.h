@@ -8,6 +8,13 @@
 #include "layout_reflection.h"
 #include "logger.h"
 
+const std::array<glm::vec4, 4> fsQuadVertices = {
+  glm::vec4(0.f, 0.f, 0.f, 1.f),
+  glm::vec4(0.f, 1.f, 0.f, 1.f),
+  glm::vec4(1.f, 1.f, 0.f, 1.f),
+  glm::vec4(1.f, 0.f, 0.f, 1.f)
+};
+
 #define shader(context, shaderName, shaderStage) context->shaderMap[shaderName][shaderStage]
 #define vert_shader(context, shaderName) shader(context, shaderName, "vert")
 #define geom_shader(context, shaderName) shader(context, shaderName, "geom")

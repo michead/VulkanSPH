@@ -38,8 +38,7 @@ void main() {
 
   vec3 ndcPos;
   ndcPos.xy = (2.0 * gl_FragCoord.xy) / (uniforms.viewport.zw) - 1.0;
-  ndcPos.z  = (2.0 * gl_FragCoord.z - DEPTH_RANGE_NEAR - DEPTH_RANGE_FAR)
-                                    / (DEPTH_RANGE_FAR - DEPTH_RANGE_NEAR);
+  ndcPos.z  = (2.0 * gl_FragCoord.z - DEPTH_RANGE_NEAR - DEPTH_RANGE_FAR) / (DEPTH_RANGE_FAR  - DEPTH_RANGE_NEAR);
 
   vec4 clipPos;
   clipPos.w   = uniforms.proj[3][2] / (ndcPos.z - (uniforms.proj[2][2] / uniforms.proj[2][3]));

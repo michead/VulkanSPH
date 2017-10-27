@@ -97,9 +97,6 @@
     <ClCompile Include="subpass.cpp">
       <Filter>Source Files\gfx</Filter>
     </ClCompile>
-    <ClCompile Include="fluid_gbuffer_subpass.cpp">
-      <Filter>Source Files\gfx</Filter>
-    </ClCompile>
     <ClCompile Include="layout_reflection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -111,6 +108,12 @@
     </ClCompile>
     <ClCompile Include="..\ext\imgui\imgui_draw.cpp">
       <Filter>Source Files\ext\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="fluid_subpass_0.cpp">
+      <Filter>Source Files\gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="fluid_subpass_1.cpp">
+      <Filter>Source Files\gfx</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -186,28 +189,37 @@
     <ClInclude Include="subpass.h">
       <Filter>Source Files\gfx</Filter>
     </ClInclude>
-    <ClInclude Include="fluid_gbuffer_subpass.h">
-      <Filter>Source Files\gfx</Filter>
-    </ClInclude>
     <ClInclude Include="layout_reflection.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="config.h">
       <Filter>Source Files\config</Filter>
     </ClInclude>
+    <ClInclude Include="fluid_subpass_0.h">
+      <Filter>Source Files\gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="fluid_subpass_1.h">
+      <Filter>Source Files\gfx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="data\scene.json">
       <Filter>Source Files\data</Filter>
     </None>
-    <None Include="shaders\fluid_gbuffer.frag">
-      <Filter>Source Files\shaders</Filter>
-    </None>
-    <None Include="shaders\fluid_gbuffer.vert">
-      <Filter>Source Files\shaders</Filter>
-    </None>
     <None Include="data\bowl.mtl">
       <Filter>Source Files\data</Filter>
+    </None>
+    <None Include="shaders\fluid_0.frag">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="shaders\fluid_0.vert">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="fluid_1.vert">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="fluid_1.frag">
+      <Filter>Source Files\shaders</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

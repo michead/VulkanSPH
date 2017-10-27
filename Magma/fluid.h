@@ -36,9 +36,9 @@ struct Fluid : public SceneElement {
 
   virtual void fromJSON(const nlohmann::json& jsonObj) override;
   virtual void update() override;
-
+  virtual size_t getVertexCount() const override { return particleCount; }
+  
   NvFlexSolver* getSolver();
-
   static uint32_t countParticlesInGrid(glm::vec3 min, glm::vec3 max, float radius);
   void createParticleGrid(glm::vec3 min, glm::vec3 max, float radius);
 

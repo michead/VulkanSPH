@@ -12,13 +12,13 @@ class FluidPipeline : public Pipeline {
 public:
   FluidPipeline(const MagmaContext* context, Scene* scene, Fluid* elem);
 
-  virtual void init()     override;
-  virtual void postInit() override;
-  virtual void update()   override;
-  virtual void draw()     override;
+  virtual void init()              override;
+  virtual void registerSubpasses() override;
+  virtual void postInit()          override;
+  virtual void update()            override;
 
 protected:
-  virtual void initRenderPass()   override;
-  virtual void initVertexBuffer() override;
-  virtual void updateBuffers()    override;
+  virtual void initRenderPass()    override;
+  virtual void initVertexBuffers() override;
+  virtual void updateBuffers()     override;
 };

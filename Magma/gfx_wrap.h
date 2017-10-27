@@ -390,7 +390,8 @@ namespace GfxWrap {
   }
   inline void createDepthBuffer(VkPhysicalDevice physicalDevice, VkDevice device, VkExtent2D renderArea,
                                 VkSampleCountFlagBits numSamples, VkImage& depthImage, 
-                                VkDeviceMemory& deviceMemory, VkImageView& depthImageView) {
+                                VkDeviceMemory& deviceMemory, VkImageView& depthImageView,
+                                VkImageLayout& depthImageLayout, VkSampler& depthImageSampler) {
     VkImageCreateInfo imageInfo = {};
     imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
     imageInfo.pNext = nullptr;
@@ -441,6 +442,25 @@ namespace GfxWrap {
     imageViewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
     imageViewInfo.flags = 0;
     VK_CHECK(vkCreateImageView(device, &imageViewInfo, nullptr, &depthImageView));
+
+    VkSamplerCreateInfo samplerInfo = {};
+    samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+    samplerInfo.pNext = nullptr;
+    samplerInfo.magFilter = VK_FILTER_LINEAR;
+    samplerInfo.minFilter = VK_FILTER_LINEAR;
+    samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+    samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+    samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+    samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+    samplerInfo.mipLodBias = 0.0f;
+    samplerInfo.compareOp = VK_COMPARE_OP_NEVER;
+    samplerInfo.minLod = 0.0f;
+    samplerInfo.maxLod = 0.0f;
+    samplerInfo.anisotropyEnable = VK_FALSE;
+    samplerInfo.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
+    VK_CHECK(vkCreateSampler(device, &samplerInfo, nullptr, &depthImageSampler));
+
+    depthImageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
   }
   inline void allocateDeviceMemory(VkPhysicalDevice physicalDevice,
                                    VkDevice device,
@@ -468,7 +488,7 @@ namespace GfxWrap {
   }
   inline void updateBuffer(VkDevice device,
                            size_t size,
-                           void* data,
+                           const void* data,
                            VkDeviceSize allocSize,
                            VkDeviceMemory deviceMemory,
                            void** mappedMemory) {
@@ -479,7 +499,7 @@ namespace GfxWrap {
   inline void createBuffer(VkPhysicalDevice physicalDevice,
                            VkDevice device,
                            VkBufferUsageFlags usage,
-                           void* data,
+                           const void* data,
                            size_t size,
                            MVkBufferDesc* bufferDesc) {
     VkBufferCreateInfo bufferInfo = {};

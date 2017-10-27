@@ -1,6 +1,7 @@
 #include "pipeline.h"
 #include "magma_context.h"
 #include "subpass.h"
+#include "gfx_utils.h"
 
 Pipeline::Pipeline(const MagmaContext* context, Scene* scene, SceneElement* elem) : context(context), scene(scene), elem(elem) {
   init();
@@ -8,13 +9,43 @@ Pipeline::Pipeline(const MagmaContext* context, Scene* scene, SceneElement* elem
 }
 
 void Pipeline::init() {
+  registerSubpasses();
   initPipelineState();
   initRenderPass();
-  initVertexBuffer();
+  initVertexBuffers();
 }
 
 void Pipeline::postInit() {
   // TODO: Consider removing postInit hook
+}
+
+void Pipeline::initVertexBuffers() {
+  GfxWrap::createBuffer(context->graphics->physicalDevice,
+    context->graphics->device,
+    VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+    fsQuadVertices.data(),
+    4 * sizeof(glm::vec4),
+    &fsQuadBufferDesc);
+}
+
+void Pipeline::draw() {
+  VkCommandBuffer cmdBuffer = context->graphics->getCurrentCmdBuffer();
+  VkDeviceSize offset = 0;
+
+  uint8_t i = 0;
+  std::for_each(subpasses.begin(), subpasses.end(), [&](Subpass* subpass) {
+    subpass->bind(cmdBuffer);
+
+    if (!i) {
+      vkCmdBindVertexBuffers(cmdBuffer, 0, 1, &vertexBufferDesc.buffer, &offset);
+      vkCmdDraw(cmdBuffer, elem->getVertexCount(), 1, 0, 0);
+    } else {
+      vkCmdBindVertexBuffers(cmdBuffer, 0, 1, &fsQuadBufferDesc.buffer, &offset);
+      vkCmdDraw(cmdBuffer, 4, 1, 0, 0);
+    }
+
+    i++;
+  });
 }
 
 VkRenderPass Pipeline::getRenderPass() const {

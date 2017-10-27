@@ -17,9 +17,9 @@ struct SceneElement {
   virtual void fromJSON(const ConfigNode& elemObj);
   virtual void update();
   virtual void render();
+  virtual size_t getVertexCount() const { return 0; }
 
   SceneElement* parseSceneElem(const ConfigNode& jsonObj);
-
   glm::mat4 getModelMatrix() const;
 
   std::vector<SceneElement*> children;

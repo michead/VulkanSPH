@@ -101,7 +101,9 @@ void GfxContext::initDepthBuffer() {
     VK_NUM_IMAGE_SAMPLES,
     depthBuffer.image,
     deviceMemory,
-    depthBuffer.imageView);
+    depthBuffer.imageView,
+    depthBuffer.imageLayout,
+    depthBuffer.sampler);
 }
 
 void GfxContext::loadShaders() {
