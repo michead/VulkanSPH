@@ -57,6 +57,21 @@ void FluidSubpass0::update() {
   Subpass::update();
 }
 
+void FluidSubpass0::updateDescriptorSets() {
+  GfxWrap::updateDescriptorSet(
+    device,
+    descriptorSet,
+    VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+    0,
+    uniformBufferVSDesc.bufferInfo);
+  GfxWrap::updateDescriptorSet(
+    device,
+    descriptorSet,
+    VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+    1,
+    uniformBufferFSDesc.bufferInfo);
+}
+
 void FluidSubpass0::updateUniformBuffers() {
   uniformsVS.view = scene->camera->getViewMatrix();
   uniformsVS.proj = scene->camera->getProjectionMatrix();

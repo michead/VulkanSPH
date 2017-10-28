@@ -16,6 +16,7 @@ public:
   virtual void postInit();
   virtual void initUniformBuffers() {}
   virtual void update();
+  virtual void updateDescriptorSets() {}
   virtual void updateUniformBuffers() {}
   virtual void bind(VkCommandBuffer cmd);
 

@@ -657,6 +657,7 @@ namespace GfxWrap {
   }
   inline void updateDescriptorSet(const VkDevice& device,
                                   VkDescriptorSet descriptorSet,
+                                  VkDescriptorType descriptorType,
                                   uint32_t binding,
                                   const VkDescriptorBufferInfo& bufferInfo) {
     VkWriteDescriptorSet writes = {};
@@ -664,7 +665,7 @@ namespace GfxWrap {
     writes.pNext           = nullptr;
     writes.dstSet          = descriptorSet;
     writes.descriptorCount = 1;
-    writes.descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    writes.descriptorType  = descriptorType;
     writes.pBufferInfo     = &bufferInfo;
     writes.dstArrayElement = 0;
     writes.dstBinding      = binding;

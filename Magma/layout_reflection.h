@@ -7,16 +7,20 @@ typedef std::vector<uint32_t> SpirV;
 
 class LayoutReflection {
 public:
-  LayoutReflection(SpirV spirv);
+  LayoutReflection(SpirV spirv, VkShaderStageFlags stageFlags);
 
-  spirv_cross::ShaderResources fromSpirV(SpirV spirv);
-  std::vector<VkDescriptorSetLayoutCreateInfo> extractUniformBufferDescSetLayouts();
+  void extractResourcesfromSpirV();
+  void extractUniformBufferDescSetLayout();
 
 private:
-  VkDescriptorSetLayoutCreateInfo descSetLayoutFromUniformBuffer(spirv_cross::Resource resource);
+  VkDescriptorSetLayoutBinding    descSetLayoutBindingFromResource(spirv_cross::Resource resource, VkDescriptorType descType);
+  VkDescriptorSetLayoutCreateInfo descSetLayoutFromBindings(std::vector<VkDescriptorSetLayoutBinding> bindings);
 
+  spirv_cross::CompilerGLSL    glsl;
+  VkShaderStageFlags           stageFlags;
   SpirV                        spirv;
   spirv_cross::ShaderResources resources;
 
-  std::vector<VkDescriptorSetLayoutCreateInfo> descSetLayouts;
+  VkDescriptorSetLayoutCreateInfo           descSetLayout;
+  std::vector<VkDescriptorSetLayoutBinding> descSetLayoutBindings;
 };

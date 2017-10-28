@@ -1,31 +1,43 @@
 #include "layout_reflection.h"
 #include "logger.h"
 
-LayoutReflection::LayoutReflection(SpirV spirv) : spirv(spirv) {
-  resources      = fromSpirV(spirv);
-  descSetLayouts = extractUniformBufferDescSetLayouts();
+LayoutReflection::LayoutReflection(SpirV spirv, VkShaderStageFlags stageFlags) : spirv(spirv), stageFlags(stageFlags), glsl(std::move(spirv)) {
+  extractResourcesfromSpirV();
+  extractUniformBufferDescSetLayout();
 }
 
-spirv_cross::ShaderResources LayoutReflection::fromSpirV(SpirV spirv) {
-  spirv_cross::CompilerGLSL glsl(std::move(spirv));
-  return glsl.get_shader_resources();
+void LayoutReflection::extractResourcesfromSpirV() {
+  resources = glsl.get_shader_resources();
 }
 
-VkDescriptorSetLayoutCreateInfo LayoutReflection::descSetLayoutFromUniformBuffer(spirv_cross::Resource resource) {
+VkDescriptorSetLayoutBinding LayoutReflection::descSetLayoutBindingFromResource(spirv_cross::Resource resource, VkDescriptorType descType) {
   return {
-    VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO, // sType
-    nullptr,                                             // pNext
-    0,                                                   // flags
-    0,                                                   // bindingCount
-    nullptr                                              // pBindings
+    glsl.get_decoration(resource.id, spv::DecorationBinding),
+    descType,
+    1,
+    stageFlags,
+    nullptr
   };
 }
 
-std::vector<VkDescriptorSetLayoutCreateInfo> LayoutReflection::extractUniformBufferDescSetLayouts() {
-  std::vector<VkDescriptorSetLayoutCreateInfo> descSetLayouts;
+VkDescriptorSetLayoutCreateInfo LayoutReflection::descSetLayoutFromBindings(std::vector<VkDescriptorSetLayoutBinding> bindings) {
+  return {
+    VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+    nullptr,
+    0,
+    bindings.size(),
+    bindings.data()
+  };
+}
+
+void LayoutReflection::extractUniformBufferDescSetLayout() {
   for (auto &resource : resources.uniform_buffers) {
-    logger->info("Extrapolating descriptor set layout for uniform {0}", resource.name);
-    descSetLayouts.push_back(descSetLayoutFromUniformBuffer(resource));
+    logger->info("Extrapolating descriptor set layout binding for uniform buffer {0}", resource.name);
+    descSetLayoutBindings.push_back(descSetLayoutBindingFromResource(resource, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER));
   }
-  return descSetLayouts;
+  for (auto &resource : resources.sampled_images) {
+    logger->info("Extrapolating descriptor set layout binding for sampled image {0}", resource.name);
+    descSetLayoutBindings.push_back(descSetLayoutBindingFromResource(resource, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE));
+  }
+  descSetLayout = descSetLayoutFromBindings(descSetLayoutBindings);
 }

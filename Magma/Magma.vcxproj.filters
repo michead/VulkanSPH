@@ -215,10 +215,10 @@
     <None Include="shaders\fluid_0.vert">
       <Filter>Source Files\shaders</Filter>
     </None>
-    <None Include="fluid_1.vert">
+    <None Include="shaders\fluid_1.frag">
       <Filter>Source Files\shaders</Filter>
     </None>
-    <None Include="fluid_1.frag">
+    <None Include="shaders\fluid_1.vert">
       <Filter>Source Files\shaders</Filter>
     </None>
   </ItemGroup>

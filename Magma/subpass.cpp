@@ -31,10 +31,7 @@ void Subpass::postInit() {
   scissor  = context->graphics->scissor;
 
   initUniformBuffers();
-
-  // Update descriptor sets
-  GfxWrap::updateDescriptorSet(device, descriptorSet, 0, uniformBufferVSDesc.bufferInfo);
-  GfxWrap::updateDescriptorSet(device, descriptorSet, 1, uniformBufferFSDesc.bufferInfo);
+  updateDescriptorSets();
 
   // Init pipeline
   vertexInputState = MVkPipelineVertexInputStateSPH;
