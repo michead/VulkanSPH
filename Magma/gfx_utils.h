@@ -8,11 +8,13 @@
 #include "layout_reflection.h"
 #include "logger.h"
 
-const std::array<glm::vec4, 4> fsQuadVertices = {
-  glm::vec4(0.f, 0.f, 0.f, 1.f),
-  glm::vec4(0.f, 1.f, 0.f, 1.f),
-  glm::vec4(1.f, 1.f, 0.f, 1.f),
-  glm::vec4(1.f, 0.f, 0.f, 1.f)
+
+
+const std::vector<MVkQuadVertexAttribute> fsQuadVertices = {
+  { glm::vec4(0.f, 0.f, 0.f, 1.f), glm::vec2(0, 0) },
+  { glm::vec4(0.f, 1.f, 0.f, 1.f), glm::vec2(0, 1) },
+  { glm::vec4(1.f, 1.f, 0.f, 1.f), glm::vec2(1, 1) },
+  { glm::vec4(1.f, 0.f, 0.f, 1.f), glm::vec2(1, 0) }
 };
 
 #define shader(context, shaderName, shaderStage) context->shaderMap[shaderName][shaderStage]
@@ -74,24 +76,34 @@ namespace GfxUtils {
     MVkShaderProgram program;
 
     if (has_vert_shader(context, shaderName)) {
-      LayoutReflection reflect(vert_shader(context, shaderName), VK_SHADER_STAGE_VERTEX_BIT);
+      LayoutReflection reflect(context->device, vert_shader(context, shaderName), VK_SHADER_STAGE_VERTEX_BIT);
       GfxWrap::createShaderModule(context->device, vert_shader(context, shaderName), moduleVert);
       GfxWrap::shaderStage(moduleVert, VK_SHADER_STAGE_VERTEX_BIT, createInfoVert);
-      program.setVert({ createInfoVert, MVkDescriptorSetLayoutBindingUniformBufferVS });
+      program.setVert({
+        createInfoVert,
+        reflect.getDescriptorSetLayoutBindings(),
+        reflect.getVertexInputBindingDescriptions(),
+        reflect.getVertexInputAttributeDescriptions()
+      });
     }
 
     if (has_geom_shader(context, shaderName)) {
-      LayoutReflection reflect(geom_shader(context, shaderName), VK_SHADER_STAGE_GEOMETRY_BIT);
+      LayoutReflection reflect(context->device, geom_shader(context, shaderName), VK_SHADER_STAGE_GEOMETRY_BIT);
       GfxWrap::createShaderModule(context->device, geom_shader(context, shaderName), moduleGeom);
       GfxWrap::shaderStage(moduleFrag, VK_SHADER_STAGE_GEOMETRY_BIT, createInfoGeom);
       program.setGeom({ { }, { } }); /* Placeholder */
     }
 
     if (has_frag_shader(context, shaderName)) {
-      LayoutReflection reflect(frag_shader(context, shaderName), VK_SHADER_STAGE_FRAGMENT_BIT);
+      LayoutReflection reflect(context->device, frag_shader(context, shaderName), VK_SHADER_STAGE_FRAGMENT_BIT);
       GfxWrap::createShaderModule(context->device, frag_shader(context, shaderName), moduleFrag);
       GfxWrap::shaderStage(moduleFrag, VK_SHADER_STAGE_FRAGMENT_BIT, createInfoFrag);
-      program.setFrag({ createInfoFrag, MVkDescriptorSetLayoutBindingUniformBufferFS });
+      program.setFrag({
+        createInfoFrag,
+        reflect.getDescriptorSetLayoutBindings(),
+        reflect.getVertexInputBindingDescriptions(),
+        reflect.getVertexInputAttributeDescriptions()
+      });
     }
 
     return program;

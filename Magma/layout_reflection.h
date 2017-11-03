@@ -7,20 +7,30 @@ typedef std::vector<uint32_t> SpirV;
 
 class LayoutReflection {
 public:
-  LayoutReflection(SpirV spirv, VkShaderStageFlags stageFlags);
+  LayoutReflection(VkDevice device, SpirV spirv, VkShaderStageFlags stageFlags);
 
   void extractResourcesfromSpirV();
   void extractUniformBufferDescSetLayout();
 
-private:
-  VkDescriptorSetLayoutBinding    descSetLayoutBindingFromResource(spirv_cross::Resource resource, VkDescriptorType descType);
-  VkDescriptorSetLayoutCreateInfo descSetLayoutFromBindings(std::vector<VkDescriptorSetLayoutBinding> bindings);
+  VkDescriptorSetLayout                          getDescriptorSetLayout()              const { return descSetLayout; }
+  std::vector<VkDescriptorSetLayoutBinding>      getDescriptorSetLayoutBindings()      const { return descSetLayoutBindings; }
+  std::vector<VkVertexInputBindingDescription>   getVertexInputBindingDescriptions()   const { return vertInputBindingDescs; }
+  std::vector<VkVertexInputAttributeDescription> getVertexInputAttributeDescriptions() const { return vertInputAttrDescs; }
 
+private:
+  VkDescriptorSetLayoutBinding      descSetLayoutBindingFromResource(spirv_cross::Resource resource, VkDescriptorType descType);
+  VkVertexInputBindingDescription   vertInputBindingDescFromResource(uint32_t binding, uint32_t stride);
+  VkVertexInputAttributeDescription vertInputAttrDescFromResource(spirv_cross::Resource resource, size_t offset);
+  void                              descSetLayoutFromBindings(std::vector<VkDescriptorSetLayoutBinding> bindings);
+
+  VkDevice                     device;
   spirv_cross::CompilerGLSL    glsl;
   VkShaderStageFlags           stageFlags;
   SpirV                        spirv;
   spirv_cross::ShaderResources resources;
 
-  VkDescriptorSetLayoutCreateInfo           descSetLayout;
-  std::vector<VkDescriptorSetLayoutBinding> descSetLayoutBindings;
+  VkDescriptorSetLayout                          descSetLayout;
+  std::vector<VkDescriptorSetLayoutBinding>      descSetLayoutBindings;
+  std::vector<VkVertexInputBindingDescription>   vertInputBindingDescs;
+  std::vector<VkVertexInputAttributeDescription> vertInputAttrDescs;
 };

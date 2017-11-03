@@ -24,7 +24,7 @@ void Pipeline::initVertexBuffers() {
     context->graphics->device,
     VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
     fsQuadVertices.data(),
-    4 * sizeof(glm::vec4),
+    4 * sizeof(MVkQuadVertexAttribute),
     &fsQuadBufferDesc);
 }
 
@@ -48,8 +48,24 @@ void Pipeline::draw() {
   });
 }
 
+const MagmaContext* Pipeline::getContext() const {
+  return context;
+}
+
 VkRenderPass Pipeline::getRenderPass() const {
   return renderPass;
+}
+
+std::vector<VkImageView> Pipeline::getColorAttachments() const {
+  return colorAttachments;
+}
+
+VkImageView Pipeline::getDepthAttachment() const {
+  return depthAttachment;
+}
+
+std::vector<Subpass*> Pipeline::getSubpasses() const {
+  return subpasses;
 }
 
 const MVkPipelineParams BasePipeline = { 1 };

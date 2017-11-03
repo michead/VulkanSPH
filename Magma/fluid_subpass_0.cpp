@@ -22,8 +22,8 @@ void FluidSubpass0::initUniformBuffers() {
   uniformsVS.particleSize = to_fluid(elem)->radius * 1000;
 
   GfxWrap::createStagingBuffer(
-    context->graphics->physicalDevice,
-    context->graphics->device,
+    gfxContext->physicalDevice,
+    gfxContext->device,
     VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
     &uniformsVS,
     sizeof(MVkVert0),
@@ -38,14 +38,14 @@ void FluidSubpass0::initUniformBuffers() {
   uniformsFS.proj = scene->camera->getProjectionMatrix();
   uniformsFS.invProj = glm::inverse(scene->camera->getProjectionMatrix());
   uniformsFS.viewport = {
-    viewport.x,
-    viewport.y,
-    viewport.width,
-    viewport.height };
+    gfxContext->viewport.x,
+    gfxContext->viewport.y,
+    gfxContext->viewport.width,
+    gfxContext->viewport.height };
 
   GfxWrap::createStagingBuffer(
-    context->graphics->physicalDevice,
-    context->graphics->device,
+    gfxContext->physicalDevice,
+    gfxContext->device,
     VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
     &uniformsFS,
     sizeof(MVkFrag0),
@@ -59,13 +59,13 @@ void FluidSubpass0::update() {
 
 void FluidSubpass0::updateDescriptorSets() {
   GfxWrap::updateDescriptorSet(
-    device,
+    gfxContext->device,
     descriptorSet,
     VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
     0,
     uniformBufferVSDesc.bufferInfo);
   GfxWrap::updateDescriptorSet(
-    device,
+    gfxContext->device,
     descriptorSet,
     VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
     1,
@@ -77,7 +77,7 @@ void FluidSubpass0::updateUniformBuffers() {
   uniformsVS.proj = scene->camera->getProjectionMatrix();
 
   GfxWrap::updateBuffer(
-    device,
+    gfxContext->device,
     sizeof(MVkVert0),
     &uniformsVS,
     stagingUniformBufferVSDesc.allocSize,
@@ -87,13 +87,13 @@ void FluidSubpass0::updateUniformBuffers() {
   GfxWrap::registerCopyCmd(
     copyStagingVSBufferCmd,
     sizeof(MVkVert0),
-    context->graphics->graphicsQueue,
+    gfxContext->graphicsQueue,
     stagingUniformBufferVSDesc.buffer,
     uniformBufferVSDesc.buffer);
 
   GfxWrap::submitCmdBuffer(
-    context->graphics->device,
-    context->graphics->graphicsQueue,
+    gfxContext->device,
+    gfxContext->graphicsQueue,
     copyStagingVSBufferCmd);
 
   std::vector<Light> lights;
@@ -105,13 +105,13 @@ void FluidSubpass0::updateUniformBuffers() {
   uniformsFS.proj = uniformsVS.proj;
   uniformsFS.invProj = glm::inverse(uniformsVS.proj);
   uniformsFS.viewport = {
-    viewport.x,
-    viewport.y,
-    viewport.width,
-    viewport.height };
+    gfxContext->viewport.x,
+    gfxContext->viewport.y,
+    gfxContext->viewport.width,
+    gfxContext->viewport.height };
 
   GfxWrap::updateBuffer(
-    device,
+    gfxContext->device,
     sizeof(MVkFrag0),
     &uniformsFS,
     stagingUniformBufferFSDesc.allocSize,
@@ -121,12 +121,12 @@ void FluidSubpass0::updateUniformBuffers() {
   GfxWrap::registerCopyCmd(
     copyStagingFSBufferCmd,
     sizeof(MVkFrag0),
-    context->graphics->graphicsQueue,
+    gfxContext->graphicsQueue,
     stagingUniformBufferFSDesc.buffer,
     uniformBufferFSDesc.buffer);
 
   GfxWrap::submitCmdBuffer(
-    context->graphics->device,
-    context->graphics->graphicsQueue,
+    gfxContext->device,
+    gfxContext->graphicsQueue,
     copyStagingFSBufferCmd);
 }

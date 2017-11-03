@@ -14,6 +14,7 @@ HUD::HUD(const GfxContext* context, SDL_Window* window) : context(context) {
   init_data.render_pass     = context->getRenderPass();
   init_data.pipeline_cache  = context->getPipelineCache();
   init_data.descriptor_pool = context->descriptorPool;
+  init_data.num_subpasses   = context->getPipeline()->getSubpasses().size();
   init_data.viewportSize = {
     (uint32_t)context->viewport.width,
     (uint32_t)context->viewport.height

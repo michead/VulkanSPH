@@ -16,35 +16,43 @@ void Subpass::init() {
   dependency.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
 
   // Set shader program name
-  shaderProgram = GfxUtils::buildShaderProgram(context->graphics, shaderName);
+  shaderProgram = GfxUtils::buildShaderProgram(gfxContext, shaderName);
 
   // Set pipeline layout
-  GfxWrap::createDescriptorSetLayout(context->graphics->device, shaderProgram.getLayoutBindings(), descriptorSetLayout);
-  GfxWrap::createDescriptorSet(context->graphics->device, context->graphics->descriptorPool, descriptorSetLayout, descriptorSet);
-  GfxWrap::createPipelineLayout(context->graphics->device, 1, &descriptorSetLayout, layout);
+  GfxWrap::createDescriptorSetLayout(gfxContext->device, shaderProgram.getLayoutBindings(), descriptorSetLayout);
+  GfxWrap::createDescriptorSet(gfxContext->device, gfxContext->descriptorPool, descriptorSetLayout, descriptorSet);
+  GfxWrap::createPipelineLayout(gfxContext->device, 1, &descriptorSetLayout, layout);
 }
 
 void Subpass::postInit() {
-  scene    = context->graphics->scene;
-  device   = context->graphics->device;
-  viewport = context->graphics->viewport;
-  scissor  = context->graphics->scissor;
+  scene = gfxContext->scene;
 
   initUniformBuffers();
   updateDescriptorSets();
 
+  std::vector<VkVertexInputBindingDescription> bindings = shaderProgram.getVertexInputBindings();
+  std::vector<VkVertexInputAttributeDescription> attributes = shaderProgram.getVertexInputAttributes();
+
   // Init pipeline
-  vertexInputState = MVkPipelineVertexInputStateSPH;
+  vertexInputState = {
+    VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
+    nullptr,
+    0,
+    bindings.size(),
+    bindings.data(),
+    attributes.size(),
+    attributes.data()
+  };
   inputAssemblyState = MVkPipelineInputAssemblyStateSPH;
   rasterizationState = MVkPipelineRasterizationStateSPH;
   colorBlendState = MVkPipelineColorBlendStateSPH;
   multisampleState = MVkPipelineMultisampleStateSPH;
   dynamicState = MVkPipelineDynamicStateSPH;
-  viewportState = GfxUtils::viewportState(&viewport, &scissor);
+  viewportState = GfxUtils::viewportState(&gfxContext->viewport, &gfxContext->scissor);
   depthStencilState = MVkPipelineDepthStencilStateSPH;
 
   GfxWrap::createGraphicsPipeline(
-    device,
+    gfxContext->device,
     layout,
     vertexInputState,
     inputAssemblyState,
@@ -55,17 +63,16 @@ void Subpass::postInit() {
     viewportState,
     depthStencilState,
     shaderProgram.getStages(),
-    *renderPass,
+    mvkPipeline->getRenderPass(),
     pipelineCache,
+    index,
     pipeline);
 
-  GfxWrap::createCommandBuffers(device, context->graphics->getCurrentCmdPool(), 1, &copyStagingVSBufferCmd);
-  GfxWrap::createCommandBuffers(device, context->graphics->getCurrentCmdPool(), 1, &copyStagingFSBufferCmd);
+  GfxWrap::createCommandBuffers(gfxContext->device, gfxContext->getCurrentCmdPool(), 1, &copyStagingVSBufferCmd);
+  GfxWrap::createCommandBuffers(gfxContext->device, gfxContext->getCurrentCmdPool(), 1, &copyStagingFSBufferCmd);
 }
 
 void Subpass::update() {
-  viewport = context->graphics->viewport;
-
   updateUniformBuffers();
 }
 

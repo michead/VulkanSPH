@@ -404,7 +404,7 @@ namespace GfxWrap {
     imageInfo.arrayLayers = 1;
     imageInfo.samples = numSamples;
     imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    imageInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+    imageInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
     imageInfo.queueFamilyIndexCount = 0;
     imageInfo.pQueueFamilyIndices = nullptr;
     imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
@@ -659,7 +659,8 @@ namespace GfxWrap {
                                   VkDescriptorSet descriptorSet,
                                   VkDescriptorType descriptorType,
                                   uint32_t binding,
-                                  const VkDescriptorBufferInfo& bufferInfo) {
+                                  const VkDescriptorBufferInfo& bufferInfo = {},
+                                  const VkDescriptorImageInfo& imageInfo = {}) {
     VkWriteDescriptorSet writes = {};
     writes.sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
     writes.pNext           = nullptr;
@@ -667,6 +668,7 @@ namespace GfxWrap {
     writes.descriptorCount = 1;
     writes.descriptorType  = descriptorType;
     writes.pBufferInfo     = &bufferInfo;
+    writes.pImageInfo      = &imageInfo;
     writes.dstArrayElement = 0;
     writes.dstBinding      = binding;
     vkUpdateDescriptorSets(device, 1, &writes, 0, nullptr);
@@ -681,8 +683,8 @@ namespace GfxWrap {
     VkImageMemoryBarrier imageMemoryBarrier = {};
     imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
     imageMemoryBarrier.pNext = nullptr;
-    imageMemoryBarrier.srcAccessMask = 0;
-    imageMemoryBarrier.dstAccessMask = 0;
+    imageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+    imageMemoryBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
     imageMemoryBarrier.oldLayout = oldImageLayout;
     imageMemoryBarrier.newLayout = newImageLayout;
     imageMemoryBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
@@ -696,6 +698,9 @@ namespace GfxWrap {
     switch (oldImageLayout) {
     case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:
       imageMemoryBarrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+      break;
+    case VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL:
+      imageMemoryBarrier.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
       break;
     case VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL:
       imageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
@@ -714,6 +719,7 @@ namespace GfxWrap {
       imageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
       break;
     case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
+    case VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL:
       imageMemoryBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
       break;
     case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:
@@ -824,6 +830,7 @@ namespace GfxWrap {
                                      std::vector<VkPipelineShaderStageCreateInfo>& shaderStages,
                                      VkRenderPass renderPass,
                                      VkPipelineCache pipelineCache,
+                                     uint32_t subpass,
                                      VkPipeline& pipeline) {
     VkGraphicsPipelineCreateInfo pipelineCreateInfo;
     pipelineCreateInfo.sType               = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -844,7 +851,7 @@ namespace GfxWrap {
     pipelineCreateInfo.pStages             = shaderStages.data();
     pipelineCreateInfo.stageCount          = shaderStages.size();
     pipelineCreateInfo.renderPass          = renderPass;
-    pipelineCreateInfo.subpass             = 0;
+    pipelineCreateInfo.subpass             = subpass;
     VK_CHECK(vkCreateGraphicsPipelines(
       device,
       pipelineCache,

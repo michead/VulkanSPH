@@ -4,11 +4,13 @@
 #include "magma_context.h"
 #include "gfx_structs.h"
 #include "scene_element.h"
+#include "pipeline.h"
+
 
 class Subpass {
 public:
-  Subpass(const MagmaContext* context, VkRenderPass *renderPass, SceneElement* elem, const char* shaderName, uint8_t index) :
-    context(context), renderPass(renderPass), elem(elem), shaderName(shaderName), index(index) {
+  Subpass(const Pipeline* pipeline, const char* shaderName, uint8_t index, SceneElement* elem) :
+      gfxContext(pipeline->getContext()->graphics), mvkPipeline(pipeline), shaderName(shaderName), index(index), elem(elem) {
     init();
   }
 
@@ -29,11 +31,8 @@ public:
   }
 
 protected:
-  const MagmaContext*          context;
-  VkDevice                     device;
-  VkViewport                   viewport;
-  VkRect2D                     scissor;
-  VkRenderPass*                renderPass;
+  GfxContext*                  gfxContext;
+  const Pipeline*              mvkPipeline;
   SceneElement*                elem;
   VkSubpassDescription         description;
   VkSubpassDependency          dependency;

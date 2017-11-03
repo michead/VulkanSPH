@@ -16,6 +16,7 @@ struct ImGui_ImplSDLVulkan_Init_Data {
   VkPipelineCache        pipeline_cache;
   VkDescriptorPool       descriptor_pool;
   VkExtent2D             viewportSize;
+  uint32_t               num_subpasses;
   void(*check_vk_result)(VkResult err);
 };
 

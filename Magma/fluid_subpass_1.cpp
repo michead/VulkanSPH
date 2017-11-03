@@ -10,11 +10,11 @@ void FluidSubpass1::postInit() {
 }
 
 void FluidSubpass1::initUniformBuffers() {
-  uniformsFS.depthBuffer = context->graphics->depthBuffer;
+  uniformsFS.depthBuffer = gfxContext->depthBuffer;
 
   GfxWrap::createStagingBuffer(
-    context->graphics->physicalDevice,
-    context->graphics->device,
+    gfxContext->physicalDevice,
+    gfxContext->device,
     VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
     &uniformsFS,
     sizeof(MVkFrag1),
@@ -26,9 +26,25 @@ void FluidSubpass1::update() {
   Subpass::update();
 }
 
+void FluidSubpass1::updateDescriptorSets() {
+  VkDescriptorImageInfo imageInfo = {};
+  // TODO: Transition image layout to VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL
+  imageInfo.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+  imageInfo.imageView = gfxContext->depthBuffer.imageView;
+  imageInfo.sampler = gfxContext->depthBuffer.sampler;
+
+  GfxWrap::updateDescriptorSet(
+    gfxContext->device,
+    descriptorSet,
+    VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+    0,
+    uniformBufferFSDesc.bufferInfo,
+    imageInfo);
+}
+
 void FluidSubpass1::updateUniformBuffers() {
   GfxWrap::updateBuffer(
-    device,
+    gfxContext->device,
     sizeof(MVkFrag1),
     &uniformsFS,
     stagingUniformBufferFSDesc.allocSize,
@@ -38,12 +54,12 @@ void FluidSubpass1::updateUniformBuffers() {
   GfxWrap::registerCopyCmd(
     copyStagingFSBufferCmd,
     sizeof(MVkFrag1),
-    context->graphics->graphicsQueue,
+    gfxContext->graphicsQueue,
     stagingUniformBufferFSDesc.buffer,
     uniformBufferFSDesc.buffer);
 
   GfxWrap::submitCmdBuffer(
-    context->graphics->device,
-    context->graphics->graphicsQueue,
+    gfxContext->device,
+    gfxContext->graphicsQueue,
     copyStagingFSBufferCmd);
 }

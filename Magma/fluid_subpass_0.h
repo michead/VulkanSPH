@@ -3,8 +3,7 @@
 
 class FluidSubpass0 : public Subpass {
 public:
-  FluidSubpass0(const MagmaContext* context, VkRenderPass* renderPass, SceneElement* elem, uint8_t index)
-    : Subpass(context, renderPass, elem, "fluid_0", index) { }
+  FluidSubpass0(const Pipeline* pipeline, uint8_t index, SceneElement* elem) : Subpass(pipeline, "fluid_0", index, elem) { }
 
   virtual void init()                 override;
   virtual void postInit()             override;

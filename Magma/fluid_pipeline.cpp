@@ -19,8 +19,8 @@ void FluidPipeline::init() {
 
 void FluidPipeline::registerSubpasses() {
   subpasses.clear();
-  subpasses.push_back(new FluidSubpass0(context, &renderPass, elem, 0));
-  // subpasses.push_back(new FluidSubpass1(context, &renderPass, elem, 1));
+  subpasses.push_back(new FluidSubpass0(this, 0, elem));
+  subpasses.push_back(new FluidSubpass1(this, 1, elem));
 
   std::for_each(subpasses.begin(), subpasses.end(), [](Subpass* subpass) {
     subpass->init();
@@ -51,8 +51,6 @@ void FluidPipeline::initRenderPass() {
 }
 
 void FluidPipeline::initVertexBuffers() {
-  Pipeline::initVertexBuffers();
-
   size_t size = to_fluid(elem)->particleCount * sizeof(glm::vec4);
 
   GfxWrap::createBuffer(context->graphics->physicalDevice,

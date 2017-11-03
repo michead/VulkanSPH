@@ -38,17 +38,35 @@ struct MVkWsi {
 
 struct MVkShaderStage {
   VkPipelineShaderStageCreateInfo info;
-  VkDescriptorSetLayoutBinding layout;
+  std::vector<VkDescriptorSetLayoutBinding> layoutBindings;
+  std::vector<VkVertexInputBindingDescription> vertexInputBindings;
+  std::vector<VkVertexInputAttributeDescription> vertexInputAttributes;
 };
 
 struct MVkShaderProgram {
 public:
   std::vector<VkDescriptorSetLayoutBinding> getLayoutBindings() const {
     std::vector<VkDescriptorSetLayoutBinding> layoutBindings;
-    if (bVert) layoutBindings.push_back(vert.layout);
-    if (bGeom) layoutBindings.push_back(geom.layout);
-    if (bFrag) layoutBindings.push_back(frag.layout);
+    if (bVert) layoutBindings.insert(layoutBindings.end(), vert.layoutBindings.begin(), vert.layoutBindings.end());
+    if (bGeom) layoutBindings.insert(layoutBindings.end(), geom.layoutBindings.begin(), geom.layoutBindings.end());
+    if (bFrag) layoutBindings.insert(layoutBindings.end(), frag.layoutBindings.begin(), frag.layoutBindings.end());
     return layoutBindings;
+  }
+
+  std::vector<VkVertexInputBindingDescription> getVertexInputBindings() const {
+    std::vector<VkVertexInputBindingDescription> vertexInputBindings;
+    if (bVert) vertexInputBindings.insert(vertexInputBindings.end(), vert.vertexInputBindings.begin(), vert.vertexInputBindings.end());
+    // if (bGeom) vertexInputBindings.insert(vertexInputBindings.end(), geom.vertexInputBindings.begin(), geom.vertexInputBindings.end());
+    // if (bFrag) vertexInputBindings.insert(vertexInputBindings.end(), frag.vertexInputBindings.begin(), frag.vertexInputBindings.end());
+    return vertexInputBindings;
+  }
+
+  std::vector<VkVertexInputAttributeDescription> getVertexInputAttributes() const {
+    std::vector<VkVertexInputAttributeDescription> vertexInputAttributes;
+    if (bVert) vertexInputAttributes.insert(vertexInputAttributes.end(), vert.vertexInputAttributes.begin(), vert.vertexInputAttributes.end());
+    // if (bGeom) vertexInputAttributes.insert(vertexInputAttributes.end(), geom.vertexInputAttributes.begin(), geom.vertexInputAttributes.end());
+    // if (bFrag) vertexInputAttributes.insert(vertexInputAttributes.end(), frag.vertexInputAttributes.begin(), frag.vertexInputAttributes.end());
+    return vertexInputAttributes;
   }
 
   std::vector<VkPipelineShaderStageCreateInfo> getStages() const {
@@ -57,6 +75,18 @@ public:
     if (bGeom) stages.push_back(geom.info);
     if (bFrag) stages.push_back(frag.info);
     return stages;
+  }
+
+  VkPipelineVertexInputStateCreateInfo getVertexInputState() const {
+    return {
+      VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
+        nullptr,
+        0,
+        getVertexInputBindings().size(),
+        getVertexInputBindings().data(),
+        getVertexInputAttributes().size(),
+        getVertexInputAttributes().data()
+    };
   }
 
   void setVert(MVkShaderStage vert) {
@@ -113,6 +143,11 @@ struct MVkVert1 {
 
 struct MVkFrag1 {
   MVkAttachment depthBuffer;
+};
+
+struct MVkQuadVertexAttribute {
+  glm::vec4 pos;
+  glm::vec2 texCoord;
 };
 
 struct MVkBufferDesc {

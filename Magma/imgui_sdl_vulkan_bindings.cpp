@@ -19,6 +19,7 @@ static VkDevice               g_Device = VK_NULL_HANDLE;
 static VkRenderPass           g_RenderPass = VK_NULL_HANDLE;
 static VkPipelineCache        g_PipelineCache = VK_NULL_HANDLE;
 static VkDescriptorPool       g_DescriptorPool = VK_NULL_HANDLE;
+static uint32_t               g_NumSubpasses = 1;
 
 static VkCommandBuffer        g_CommandBuffer = VK_NULL_HANDLE;
 static size_t                 g_BufferMemoryAlignment = 256;
@@ -602,6 +603,7 @@ bool ImGui_ImplSDLVulkan_CreateDeviceObjects() {
   info.pDynamicState = &dynamic_state;
   info.layout = g_PipelineLayout;
   info.renderPass = g_RenderPass;
+  info.subpass = g_NumSubpasses - 1;
   err = vkCreateGraphicsPipelines(g_Device, g_PipelineCache, 1, &info, g_Allocator, &g_Pipeline);
   VK_CHECK(err);
 
@@ -618,6 +620,7 @@ void ImGui_ImplSDLVulkan_Init(SDL_Window* window, ImGui_ImplSDLVulkan_Init_Data 
   g_RenderPass = init_data->render_pass;
   g_PipelineCache = init_data->pipeline_cache;
   g_DescriptorPool = init_data->descriptor_pool;
+  g_NumSubpasses = init_data->num_subpasses;
 
   g_Window = window;
 

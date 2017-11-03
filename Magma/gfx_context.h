@@ -2,6 +2,7 @@
 
 #include <Windows.h>
 #include <vulkan\vulkan.hpp>
+#include "pipeline.h"
 #include "gfx_structs.h"
 
 #define VK_VER_MAJOR(X)   ((((uint32_t)(X)) >> 22) & 0x3FF)
@@ -19,7 +20,6 @@
 
 struct Config;
 struct Scene;
-class Pipeline;
 
 class GfxContext {
 public:

@@ -21,7 +21,11 @@ public:
   virtual void update() {}
   virtual void draw();
 
-  VkRenderPass getRenderPass() const;
+  const MagmaContext*      getContext() const;
+  VkRenderPass             getRenderPass() const;
+  std::vector<VkImageView> getColorAttachments() const;
+  VkImageView              getDepthAttachment() const;
+  std::vector<Subpass*>    getSubpasses() const;
 
 protected:
   virtual void initPipelineState() {}
