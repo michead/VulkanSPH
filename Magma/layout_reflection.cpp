@@ -34,7 +34,6 @@ VkVertexInputBindingDescription LayoutReflection::vertInputBindingDescFromResour
 
 VkVertexInputAttributeDescription LayoutReflection::vertInputAttrDescFromResource(spirv_cross::Resource resource, size_t offset) {
   VkFormat format = VK_FORMAT_UNDEFINED;
-
   switch (resource.type_id) {
   case 13:
     format = VK_FORMAT_R32G32B32_SFLOAT;
@@ -46,13 +45,11 @@ VkVertexInputAttributeDescription LayoutReflection::vertInputAttrDescFromResourc
   case 30:
     format = VK_FORMAT_R32G32B32A32_SFLOAT;
     break;
+  case VK_FORMAT_UNDEFINED:
   default:
-    break;
-  }
-
-  if (format == VK_FORMAT_UNDEFINED) {
     logger->error("Shader resource type with id {0} not unrecognized", resource.type_id);
     exit(EXIT_FAILURE);
+    break;
   }
 
   return {
@@ -83,7 +80,25 @@ void LayoutReflection::extractUniformBufferDescSetLayout() {
   for (const auto& k : bindingToTypesMap) {
     std::vector<int> widths(k.second.size());
     std::transform(k.second.begin(), k.second.end(), widths.begin(), [&](uint32_t typeId) -> int {
-      return static_cast<int>(glsl.get_type(typeId).width);
+      size_t width = 0;
+      switch (typeId) {
+      case 13:
+        width = sizeof(glm::vec3);
+        break;
+      case 15:
+      case 21:
+        width = sizeof(glm::vec2);
+        break;
+      case 30:
+        width = sizeof(glm::vec4);
+        break;
+      default:
+        logger->error("Shader resource type with id {0} not unrecognized", typeId);
+        exit(EXIT_FAILURE);
+        break;
+      }
+
+      return width;
     });
     uint32_t stride = std::accumulate(widths.begin(), widths.end(), 0, std::plus<int>());
     vertInputBindingDescs.push_back(vertInputBindingDescFromResource(k.first, stride));

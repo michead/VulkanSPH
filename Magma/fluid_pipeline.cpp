@@ -51,13 +51,11 @@ void FluidPipeline::initRenderPass() {
 }
 
 void FluidPipeline::initVertexBuffers() {
-  size_t size = to_fluid(elem)->particleCount * sizeof(glm::vec4);
-
   GfxWrap::createBuffer(context->graphics->physicalDevice,
     context->graphics->device,
     VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
     to_fluid(elem)->positions,
-    size,
+    to_fluid(elem)->particleCount * sizeof(glm::vec4),
     &vertexBufferDesc);
 }
 
