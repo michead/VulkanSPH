@@ -10,10 +10,6 @@
 
 layout(location = 0) out vec4 color;
 
-struct Light {
-  vec3 pos;
-};
-
 layout(binding = 1, std140) uniform globals {
   vec4  fluidDiffuse;
   vec4  ambientColor;
@@ -22,7 +18,7 @@ layout(binding = 1, std140) uniform globals {
   ivec4 viewport;
   float particleSize;
   uint  lightCount;
-  Light lights[MAX_NUM_LIGHTS];
+  vec4  lightPos[MAX_NUM_LIGHTS];
 } uniforms;
 
 void main() {
@@ -52,8 +48,8 @@ void main() {
   color = uniforms.ambientColor;
 
   for (uint i = 0; i < uniforms.lightCount; i++) {
-    Light light = uniforms.lights[i];
-    vec3 lightDir = normalize(light.pos - eyePos.xyz);
+    vec3 lightPos = uniforms.lightPos[i].xyz;
+    vec3 lightDir = normalize(lightPos - eyePos.xyz);
     color += max(0, dot(normal, lightDir)) * uniforms.fluidDiffuse;
   }
 }

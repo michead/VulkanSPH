@@ -115,6 +115,9 @@
     <ClCompile Include="fluid_subpass_1.cpp">
       <Filter>Source Files\gfx</Filter>
     </ClCompile>
+    <ClCompile Include="gizmo_pipeline.cpp">
+      <Filter>Source Files\gfx</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="scene_element.h">
@@ -199,6 +202,9 @@
       <Filter>Source Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="fluid_subpass_1.h">
+      <Filter>Source Files\gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="gizmo_pipeline.h">
       <Filter>Source Files\gfx</Filter>
     </ClInclude>
   </ItemGroup>

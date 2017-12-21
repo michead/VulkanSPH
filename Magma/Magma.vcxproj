@@ -171,6 +171,7 @@
     <ClCompile Include="event_handler.cpp" />
     <ClCompile Include="fluid_simulation.cpp" />
     <ClCompile Include="fluid_subpass_1.cpp" />
+    <ClCompile Include="gizmo_pipeline.cpp" />
     <ClCompile Include="hud.cpp" />
     <ClCompile Include="imgui_sdl_vulkan_bindings.cpp" />
     <ClCompile Include="layout_reflection.cpp" />
@@ -196,6 +197,7 @@
     <ClInclude Include="event_handler.h" />
     <ClInclude Include="fluid_simulation.h" />
     <ClInclude Include="fluid_subpass_1.h" />
+    <ClInclude Include="gizmo_pipeline.h" />
     <ClInclude Include="hud.h" />
     <ClInclude Include="imgui_sdl_vulkan_bindings.h" />
     <ClInclude Include="layout_reflection.h" />

@@ -134,7 +134,7 @@ struct MVkFrag0 {
   glm::ivec4         viewport;
   float              particleSize;
   unsigned int       lightCount;
-  Light              lights[MAX_NUM_LIGHTS];
+  glm::vec4          lightPos[MAX_NUM_LIGHTS];
 };
 
 struct MVkVert1 {

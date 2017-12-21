@@ -34,7 +34,11 @@ void FluidSubpass0::initUniformBuffers() {
   uniformsFS.ambientColor = glm::vec4(0.5f, 0.5f, 0.5, 1.f);
   uniformsFS.fluidDiffuse = glm::vec4(0.0f, 0.0f, 1.f, 1.f);
   uniformsFS.lightCount = scene->lights.size();
-  memcpy(uniformsFS.lights, scene->lights.data(), sizeof(Light) * uniformsFS.lightCount);
+  std::vector<glm::vec4> lights;
+  std::transform(scene->lights.begin(), scene->lights.end(), std::back_inserter(lights), [](Light* light) -> glm::vec4 {
+    return glm::vec4(light->pos, 1);
+  });
+  memcpy(uniformsFS.lightPos, lights.data(), sizeof(glm::vec4) * lights.size());
   uniformsFS.proj = scene->camera->getProjectionMatrix();
   uniformsFS.invProj = glm::inverse(scene->camera->getProjectionMatrix());
   uniformsFS.viewport = {
@@ -96,11 +100,11 @@ void FluidSubpass0::updateUniformBuffers() {
     gfxContext->graphicsQueue,
     copyStagingVSBufferCmd);
 
-  std::vector<Light> lights;
-  std::transform(scene->lights.begin(), scene->lights.end(), std::back_inserter(lights), [](Light* light) {
-    return *light;
+  std::vector<glm::vec4> lights;
+  std::transform(scene->lights.begin(), scene->lights.end(), std::back_inserter(lights), [](Light* light) -> glm::vec4 {
+    return glm::vec4(light->pos, 1);
   });
-  memcpy(&uniformsFS + offsetof(MVkFrag0, lights), lights.data(), sizeof(Light) * lights.size());
+  memcpy(uniformsFS.lightPos, lights.data(), sizeof(glm::vec4) * lights.size());
   uniformsFS.lightCount = lights.size();
   uniformsFS.proj = uniformsVS.proj;
   uniformsFS.invProj = glm::inverse(uniformsVS.proj);

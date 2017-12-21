@@ -54,7 +54,7 @@ void Magma::init() {
   scene = new Scene("data/scene.json", &context);
 
   // Initialize ImGui
-  hud = new HUD(mvkContext, window);
+  hud = new HUD(&context, window);
   context.hud = hud;
 
   // Set scene in physics and graphics modules

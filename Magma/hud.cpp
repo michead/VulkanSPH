@@ -3,10 +3,11 @@
 #include <SDL2\SDL_syswm.h>
 #include "hud.h"
 #include "imgui_sdl_vulkan_bindings.h"
+#include "magma_context.h"
 #include "gfx_context.h"
 #include "gfx_wrap.h"
 
-HUD::HUD(const GfxContext* context, SDL_Window* window) : context(context) {
+HUD::HUD(const MagmaContext* _context, SDL_Window* window) : context(_context->graphics) {
   ImGui_ImplSDLVulkan_Init_Data init_data = {};
   init_data.allocator       = nullptr;
   init_data.gpu             = context->physicalDevice;
@@ -41,6 +42,8 @@ HUD::HUD(const GfxContext* context, SDL_Window* window) : context(context) {
 
   VK_CHECK(vkDeviceWaitIdle(context->device));
   ImGui_ImplSDLVulkan_InvalidateFontUploadObjects();
+
+  gizmoPipeline = new GizmoPipeline(_context, context->getScene());
 }
 
 HUD::~HUD() {
@@ -51,7 +54,19 @@ void HUD::setupNewFrame() {
   ImGui_ImplSDLVulkan_NewFrame();
 }
 
+void HUD::toggleGizmo(bool bEnabled) {
+  bDrawGizmo = bEnabled;
+}
+
+void HUD::drawGizmo() {
+  gizmoPipeline->draw();
+}
+
 void HUD::render() {
+  if (bDrawGizmo) {
+    drawGizmo();
+  }
+
   for each (auto drawFn in drawFns) {
     ImGui::Begin(drawFn.first);
     ImGui::BeginGroup();
