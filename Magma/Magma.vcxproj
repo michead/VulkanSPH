@@ -92,7 +92,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>vulkan-1.lib;SDL2.lib;NvFlexDebugCUDA_x86.lib;spirv_cross.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib32;$(VULKAN_SDK)\Third-Party\Bin32;$(FLEX_PATH)\lib\win32;%(AdditionalLibraryDirectories);$(IMGUI_LIB_PATH);$(SPIRV_CROSS_LIB_PATH)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib32;$(VULKAN_SDK)\Third-Party\Bin32;$(FLEX_PATH)\lib\win32;%(AdditionalLibraryDirectories);$(IMGUI_LIB_PATH);$(SPIRV_CROSS_LIB_PATH)\Debug</AdditionalLibraryDirectories>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
       <AdditionalOptions>/SUBSYSTEM:CONSOLE /NODEFAULTLIB:LIBCMT %(AdditionalOptions)</AdditionalOptions>
     </Link>
@@ -126,16 +126,16 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;SDL_VIDEO_DRIVER_WINDOWS;VK_USE_PLATFORM_WIN32_KHR;VK_SDK_BIN=R"($(VULKAN_SDK)\bin\)";VK_LAYER_PATH=R"($(VULKAN_SDK)\Source\lib\)";SHADER_PATH=LR"($(ProjectDir))";NDEBUG;_CONSOLE;_LIB;VK_USE_PLATFORM_WIN32_KHR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Third-Party\Include</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;SDL_VIDEO_DRIVER_WINDOWS;VK_USE_PLATFORM_WIN32_KHR;VK_SDK_BIN=R"($(VULKAN_SDK)\bin32\)";VK_LAYER_PATH=R"($(VULKAN_SDK)\Source\lib32\)";SHADER_PATH=LR"($(ProjectDir)shaders\)";_NDEBUG;_CONSOLE;_LIB;MAGMA_ROOT_DIR="$(ProjectDir)";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Third-Party\Include;$(FLEX_PATH)\include;$(SolutionDir)ext\glm;$(SolutionDir)ext\json;$(SolutionDir)ext\spdlog;$(SolutionDir)ext;$(BOOST_PATH)\;$(SolutionDir)ext\spirv-cross;$(SolutionDir)ext\tinyobjloader</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>vulkan-1.lib;SDL2.lib;imgui.lib;shaderc_combined.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib32;$(VULKAN_SDK)\Third-Party\Bin32;%(AdditionalLibraryDirectories);$(SolutionDir)\ext\glslang;$(SolutionDir)ext\glslang;$(IMGUI_LIB_PATH);$(IMGUI_LIB_PATH)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vulkan-1.lib;SDL2.lib;NvFlexReleaseCUDA_x86.lib;spirv_cross.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib32;$(VULKAN_SDK)\Third-Party\Bin32;%(AdditionalLibraryDirectories);$(IMGUI_LIB_PATH);$(SPIRV_CROSS_LIB_PATH)\Release</AdditionalLibraryDirectories>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
       <AdditionalOptions>/SUBSYSTEM:CONSOLE %(AdditionalOptions)</AdditionalOptions>
     </Link>
@@ -222,8 +222,11 @@
   <ItemGroup>
     <None Include="data\bowl.mtl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </None>
-    <None Include="data\scene.json" />
+    <None Include="data\scene.json">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </None>
     <None Include="shaders\fluid_0.frag">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </None>
@@ -240,6 +243,7 @@
   <ItemGroup>
     <Object Include="data\bowl.obj">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </Object>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
@@ -267,8 +271,8 @@ $(LocalDebuggerEnvironment)</LocalDebuggerEnvironment>
     <LocalDebuggerEnvironment>PATH=$(VULKAN_SDK)\Third-Party\Bin32
 $(LocalDebuggerEnvironment)</LocalDebuggerEnvironment>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <IncludePath>$(VK_SDK_PATH)\shaderc\third_party\glslang;$(SolutionDir)ext\libshaderc\include;$(IncludePath)</IncludePath>
-    <SourcePath>$(SourcePath)</SourcePath>
-    <LibraryPath>$(SolutionDir)ext\libshaderc\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(IncludePath)</IncludePath>
+    <SourcePath>$(SolutionDir)ext\imgui;$(SourcePath)</SourcePath>
+    <LibraryPath>$(FLEX_PATH)\lib\win32;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
 </Project>
