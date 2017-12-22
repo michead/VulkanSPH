@@ -37,15 +37,17 @@ VkVertexInputAttributeDescription LayoutReflection::vertInputAttrDescFromResourc
   switch (resource.type_id) {
   case 15:
   case 21:
+  case 24:
     format = VK_FORMAT_R32G32_SFLOAT;
     break;
   case 13:
+  case 16:
   case 30:
     format = VK_FORMAT_R32G32B32A32_SFLOAT;
     break;
   case VK_FORMAT_UNDEFINED:
   default:
-    logger->error("Shader resource type with id {0} not unrecognized", resource.type_id);
+    logger->error("Shader resource type with id {0} unrecognized", resource.type_id);
     exit(EXIT_FAILURE);
     break;
   }
@@ -66,14 +68,16 @@ size_t LayoutReflection::sizeOfType(uint32_t typeId) {
   switch (typeId) {
   case 15:
   case 21:
+  case 24:
     width = sizeof(glm::vec2);
     break;
   case 13:
+  case 16:
   case 30:
     width = sizeof(glm::vec4);
     break;
   default:
-    logger->error("Shader resource type with id {0} not unrecognized", typeId);
+    logger->error("Shader resource type with id {0} unrecognized", typeId);
     exit(EXIT_FAILURE);
     break;
   }
