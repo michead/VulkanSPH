@@ -12,20 +12,10 @@ void Pipeline::init() {
   registerSubpasses();
   initPipelineState();
   initRenderPass();
-  initVertexBuffers();
 }
 
 void Pipeline::postInit() {
   // TODO: Consider removing postInit hook
-}
-
-void Pipeline::initVertexBuffers() {
-  GfxWrap::createBuffer(context->graphics->physicalDevice,
-    context->graphics->device,
-    VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-    fsQuadVertices.data(),
-    4 * sizeof(MVkQuadVertexAttribute),
-    &fsQuadBufferDesc);
 }
 
 void Pipeline::draw() {
@@ -36,12 +26,16 @@ void Pipeline::draw() {
   std::for_each(subpasses.begin(), subpasses.end(), [&](Subpass* subpass) {
     subpass->bind(cmdBuffer);
 
+    VkBuffer indexBuffer  = subpass->getIndexBuffer();
+    VkBuffer vertexBuffer = subpass->getVertexBuffer();
+
     if (!i) {
-      vkCmdBindVertexBuffers(cmdBuffer, 0, 1, &vertexBufferDesc.buffer, &offset);
+      vkCmdBindVertexBuffers(cmdBuffer, 0, 1, &vertexBuffer, &offset);
       vkCmdDraw(cmdBuffer, elem->getVertexCount(), 1, 0, 0);
     } else {
-      vkCmdBindVertexBuffers(cmdBuffer, 0, 1, &fsQuadBufferDesc.buffer, &offset);
-      vkCmdDraw(cmdBuffer, 4, 1, 0, 0);
+      vkCmdBindVertexBuffers(cmdBuffer, 0, 1, &vertexBuffer, &offset);
+      vkCmdBindIndexBuffer(cmdBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+      vkCmdDrawIndexed(cmdBuffer, 6, 1, 0, 0, 0);
     }
 
     i++;

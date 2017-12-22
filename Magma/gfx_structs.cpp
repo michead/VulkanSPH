@@ -115,11 +115,19 @@ const VkPipelineVertexInputStateCreateInfo  MVkPipelineVertexInputStateSPH = {
   MVkVertexAttributeDescriptionsSPH.data()
 };
 
-const VkPipelineInputAssemblyStateCreateInfo MVkPipelineInputAssemblyStateSPH = {
+const VkPipelineInputAssemblyStateCreateInfo MVkPipelineInputAssemblyStatePointList = {
   VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
   nullptr,
   0,
   VK_PRIMITIVE_TOPOLOGY_POINT_LIST,
+  VK_FALSE
+};
+
+const VkPipelineInputAssemblyStateCreateInfo MVkPipelineInputAssemblyStateTriangleList = {
+  VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
+  nullptr,
+  0,
+  VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
   VK_FALSE
 };
 

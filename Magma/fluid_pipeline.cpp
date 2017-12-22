@@ -50,29 +50,8 @@ void FluidPipeline::initRenderPass() {
     renderPass);
 }
 
-void FluidPipeline::initVertexBuffers() {
-  GfxWrap::createBuffer(context->graphics->physicalDevice,
-    context->graphics->device,
-    VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-    to_fluid(elem)->positions,
-    to_fluid(elem)->particleCount * sizeof(glm::vec4),
-    &vertexBufferDesc);
-}
-
 void FluidPipeline::update() {
-  updateBuffers();
-
   for each(const auto& subpass in subpasses) {
     subpass->update();
   }
-}
-
-void FluidPipeline::updateBuffers() {
-  GfxWrap::updateBuffer(
-    context->graphics->device,
-    to_fluid(elem)->particleCount * sizeof(glm::vec4),
-    to_fluid(elem)->positions,
-    vertexBufferDesc.allocSize,
-    vertexBufferDesc.deviceMemory,
-    &vertexBufferDesc.mappedMemory);
 }

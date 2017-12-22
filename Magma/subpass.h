@@ -17,17 +17,27 @@ public:
   virtual void init();
   virtual void postInit();
   virtual void initUniformBuffers() {}
+  virtual void initVertexBuffers();
+  virtual void initGraphicsPipeline() = 0;
   virtual void update();
   virtual void updateDescriptorSets() {}
   virtual void updateUniformBuffers() {}
   virtual void bind(VkCommandBuffer cmd);
 
-  VkSubpassDescription getSubpassDescription() {
+  VkSubpassDescription getSubpassDescription() const {
     return description;
   }
 
-  VkSubpassDependency getSubpassDependency() {
+  VkSubpassDependency getSubpassDependency() const {
     return dependency;
+  }
+
+  VkBuffer getIndexBuffer() const {
+    return indexBufferDesc.buffer;
+  }
+
+  VkBuffer getVertexBuffer() const {
+    return vertexBufferDesc.buffer;
   }
 
 protected:
@@ -44,6 +54,8 @@ protected:
   VkPipeline                   pipeline;
   VkPipelineCache              pipelineCache = VK_NULL_HANDLE;
   MVkShaderProgram             shaderProgram;
+  MVkBufferDesc                indexBufferDesc;
+  MVkBufferDesc                vertexBufferDesc;
   MVkBufferDesc                stagingUniformBufferVSDesc;
   MVkBufferDesc                stagingUniformBufferGSDesc;
   MVkBufferDesc                stagingUniformBufferFSDesc;

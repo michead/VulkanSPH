@@ -57,8 +57,65 @@ void FluidSubpass0::initUniformBuffers() {
     &uniformBufferFSDesc);
 }
 
+void FluidSubpass0::initGraphicsPipeline() {
+  std::vector<VkVertexInputBindingDescription> bindings     = shaderProgram.getVertexInputBindings();
+  std::vector<VkVertexInputAttributeDescription> attributes = shaderProgram.getVertexInputAttributes();
+
+  vertexInputState = {
+    VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
+    nullptr,
+    0,
+    bindings.size(),
+    bindings.data(),
+    attributes.size(),
+    attributes.data()
+  };
+  inputAssemblyState = MVkPipelineInputAssemblyStatePointList;
+  rasterizationState = MVkPipelineRasterizationStateSPH;
+  colorBlendState = MVkPipelineColorBlendStateSPH;
+  multisampleState = MVkPipelineMultisampleStateSPH;
+  dynamicState = MVkPipelineDynamicStateSPH;
+  viewportState = GfxUtils::viewportState(&gfxContext->viewport, &gfxContext->scissor);
+  depthStencilState = MVkPipelineDepthStencilStateSPH;
+
+  GfxWrap::createGraphicsPipeline(
+    gfxContext->device,
+    layout,
+    vertexInputState,
+    inputAssemblyState,
+    rasterizationState,
+    colorBlendState,
+    multisampleState,
+    dynamicState,
+    viewportState,
+    depthStencilState,
+    shaderProgram.getStages(),
+    mvkPipeline->getRenderPass(),
+    pipelineCache,
+    index,
+    pipeline);
+}
+
+void FluidSubpass0::initVertexBuffers() {
+  GfxWrap::createBuffer(
+    gfxContext->physicalDevice,
+    gfxContext->device,
+    VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+    to_fluid(elem)->positions,
+    to_fluid(elem)->particleCount * sizeof(glm::vec4),
+    &vertexBufferDesc);
+}
+
 void FluidSubpass0::update() {
   Subpass::update();
+
+  GfxWrap::updateBuffer(
+    gfxContext->device,
+    to_fluid(elem)->particleCount * sizeof(glm::vec4),
+    to_fluid(elem)->positions,
+    vertexBufferDesc.allocSize,
+    vertexBufferDesc.deviceMemory,
+    &vertexBufferDesc.mappedMemory);
 }
 
 void FluidSubpass0::updateDescriptorSets() {

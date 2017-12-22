@@ -23,6 +23,8 @@ private:
   VkVertexInputAttributeDescription vertInputAttrDescFromResource(spirv_cross::Resource resource, size_t offset);
   void                              descSetLayoutFromBindings(std::vector<VkDescriptorSetLayoutBinding> bindings);
 
+  static size_t sizeOfType(uint32_t typeId);
+
   VkDevice                     device;
   spirv_cross::CompilerGLSL    glsl;
   VkShaderStageFlags           stageFlags;

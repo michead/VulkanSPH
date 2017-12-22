@@ -30,8 +30,6 @@ public:
 protected:
   virtual void initPipelineState() {}
   virtual void initRenderPass() {}
-  virtual void initVertexBuffers();
-  virtual void updateBuffers() {}
 
   const MagmaContext* context;
 
@@ -41,8 +39,6 @@ protected:
   VkRenderPass renderPass;
 
   std::vector<VkImageView>             colorAttachments;
-  MVkBufferDesc                        vertexBufferDesc;
-  MVkBufferDesc                        fsQuadBufferDesc;
   VkImageView                          depthAttachment;
   std::vector<VkAttachmentDescription> attachments = MVkBaseAttachments;
   std::vector<Subpass*>                subpasses;

@@ -19,6 +19,4 @@ public:
 
 protected:
   virtual void initRenderPass()    override;
-  virtual void initVertexBuffers() override;
-  virtual void updateBuffers()     override;
 };
