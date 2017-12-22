@@ -55,17 +55,17 @@ public:
 
   std::vector<VkVertexInputBindingDescription> getVertexInputBindings() const {
     std::vector<VkVertexInputBindingDescription> vertexInputBindings;
-    if (bVert) vertexInputBindings.insert(vertexInputBindings.end(), vert.vertexInputBindings.begin(), vert.vertexInputBindings.end());
-    // if (bGeom) vertexInputBindings.insert(vertexInputBindings.end(), geom.vertexInputBindings.begin(), geom.vertexInputBindings.end());
-    // if (bFrag) vertexInputBindings.insert(vertexInputBindings.end(), frag.vertexInputBindings.begin(), frag.vertexInputBindings.end());
+    if (bVert) {
+      vertexInputBindings.insert(vertexInputBindings.end(), vert.vertexInputBindings.begin(), vert.vertexInputBindings.end());
+    }
     return vertexInputBindings;
   }
 
   std::vector<VkVertexInputAttributeDescription> getVertexInputAttributes() const {
     std::vector<VkVertexInputAttributeDescription> vertexInputAttributes;
-    if (bVert) vertexInputAttributes.insert(vertexInputAttributes.end(), vert.vertexInputAttributes.begin(), vert.vertexInputAttributes.end());
-    // if (bGeom) vertexInputAttributes.insert(vertexInputAttributes.end(), geom.vertexInputAttributes.begin(), geom.vertexInputAttributes.end());
-    // if (bFrag) vertexInputAttributes.insert(vertexInputAttributes.end(), frag.vertexInputAttributes.begin(), frag.vertexInputAttributes.end());
+    if (bVert) {
+      vertexInputAttributes.insert(vertexInputAttributes.end(), vert.vertexInputAttributes.begin(), vert.vertexInputAttributes.end());
+    }
     return vertexInputAttributes;
   }
 

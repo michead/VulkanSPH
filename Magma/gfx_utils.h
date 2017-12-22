@@ -104,8 +104,7 @@ namespace GfxUtils {
       program.setFrag({
         createInfoFrag,
         reflect.getDescriptorSetLayoutBindings(),
-        reflect.getVertexInputBindingDescriptions(),
-        reflect.getVertexInputAttributeDescriptions()
+        reflect.getVertexInputBindingDescriptions()
       });
     }
 
