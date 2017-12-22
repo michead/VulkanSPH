@@ -11,7 +11,6 @@ public:
   virtual void initGraphicsPipeline() override;
   virtual void update()               override;
   virtual void updateDescriptorSets() override;
-  virtual void updateUniformBuffers() override;
 
 private:
   MVkFrag1 uniformsFS;

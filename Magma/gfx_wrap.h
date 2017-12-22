@@ -655,22 +655,36 @@ namespace GfxWrap {
     allocateInfo.pSetLayouts        = &descriptorSetLayout;
     VK_CHECK(vkAllocateDescriptorSets(device, &allocateInfo, &descriptorSet));
   }
-  inline void updateDescriptorSet(const VkDevice& device,
-                                  VkDescriptorSet descriptorSet,
-                                  VkDescriptorType descriptorType,
-                                  uint32_t binding,
-                                  const VkDescriptorBufferInfo& bufferInfo = {},
-                                  const VkDescriptorImageInfo& imageInfo = {}) {
+  inline void updateBufferDescriptorSet(const VkDevice& device,
+                                        VkDescriptorSet descriptorSet,
+                                        uint32_t binding,
+                                        const VkDescriptorBufferInfo& bufferInfo) {
     VkWriteDescriptorSet writes = {};
     writes.sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
     writes.pNext           = nullptr;
     writes.dstSet          = descriptorSet;
     writes.descriptorCount = 1;
-    writes.descriptorType  = descriptorType;
+    writes.descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     writes.pBufferInfo     = &bufferInfo;
-    writes.pImageInfo      = &imageInfo;
+    writes.pImageInfo      = nullptr;
     writes.dstArrayElement = 0;
     writes.dstBinding      = binding;
+    vkUpdateDescriptorSets(device, 1, &writes, 0, nullptr);
+  }
+  inline void updateImageDescriptorSet(const VkDevice& device,
+                                       VkDescriptorSet descriptorSet,
+                                       uint32_t binding,
+                                       const VkDescriptorImageInfo& imageInfo) {
+    VkWriteDescriptorSet writes = {};
+    writes.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    writes.pNext = nullptr;
+    writes.dstSet = descriptorSet;
+    writes.descriptorCount = 1;
+    writes.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    writes.pBufferInfo = nullptr;
+    writes.pImageInfo = &imageInfo;
+    writes.dstArrayElement = 0;
+    writes.dstBinding = binding;
     vkUpdateDescriptorSets(device, 1, &writes, 0, nullptr);
   }
   inline void setImageLayout(const VkCommandBuffer& commandBuffer,

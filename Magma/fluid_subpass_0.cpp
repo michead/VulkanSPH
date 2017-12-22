@@ -119,16 +119,15 @@ void FluidSubpass0::update() {
 }
 
 void FluidSubpass0::updateDescriptorSets() {
-  GfxWrap::updateDescriptorSet(
+  GfxWrap::updateBufferDescriptorSet(
     gfxContext->device,
     descriptorSet,
-    VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
     0,
     uniformBufferVSDesc.bufferInfo);
-  GfxWrap::updateDescriptorSet(
+
+  GfxWrap::updateBufferDescriptorSet(
     gfxContext->device,
     descriptorSet,
-    VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
     1,
     uniformBufferFSDesc.bufferInfo);
 }
