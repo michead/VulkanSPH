@@ -85,26 +85,28 @@ size_t LayoutReflection::sizeOfType(uint32_t typeId) {
 }
 
 void LayoutReflection::extractUniformBufferDescSetLayout() {
-  size_t offset = 0;
-  std::map<uint32_t, std::vector<uint32_t>> bindingToTypesMap;
-  for (auto &resource : resources.stage_inputs) {
-    logger->info("Extrapolating input attribute description {0}", resource.name);
-    vertInputAttrDescs.push_back(vertInputAttrDescFromResource(resource, offset));
-    uint32_t binding = glsl.get_decoration(resource.id, spv::DecorationBinding);
-    if (bindingToTypesMap.find(binding) != bindingToTypesMap.end()) {
-      bindingToTypesMap.at(binding).push_back(resource.type_id);
-    } else {
-      bindingToTypesMap.insert(std::pair<uint32_t, std::vector<uint32_t>>(binding, { resource.type_id }));
+  if (stageFlags & VK_SHADER_STAGE_VERTEX_BIT) {
+    size_t offset = 0;
+    std::map<uint32_t, std::vector<uint32_t>> bindingToTypesMap;
+    for (auto &resource : resources.stage_inputs) {
+      logger->info("Extrapolating input attribute description {0}", resource.name);
+      vertInputAttrDescs.push_back(vertInputAttrDescFromResource(resource, offset));
+      uint32_t binding = glsl.get_decoration(resource.id, spv::DecorationBinding);
+      if (bindingToTypesMap.find(binding) != bindingToTypesMap.end()) {
+        bindingToTypesMap.at(binding).push_back(resource.type_id);
+      } else {
+        bindingToTypesMap.insert(std::pair<uint32_t, std::vector<uint32_t>>(binding, { resource.type_id }));
+      }
+      offset += LayoutReflection::sizeOfType(resource.type_id);
     }
-    offset += LayoutReflection::sizeOfType(resource.type_id);
-  }
-  for (const auto& k : bindingToTypesMap) {
-    std::vector<int> widths(k.second.size());
-    std::transform(k.second.begin(), k.second.end(), widths.begin(), [&](uint32_t typeId) -> size_t {
-      return LayoutReflection::sizeOfType(typeId);
-    });
-    uint32_t stride = std::accumulate(widths.begin(), widths.end(), 0, std::plus<int>());
-    vertInputBindingDescs.push_back(vertInputBindingDescFromResource(k.first, stride));
+    for (const auto& k : bindingToTypesMap) {
+      std::vector<int> widths(k.second.size());
+      std::transform(k.second.begin(), k.second.end(), widths.begin(), [&](uint32_t typeId) -> size_t {
+        return LayoutReflection::sizeOfType(typeId);
+      });
+      uint32_t stride = std::accumulate(widths.begin(), widths.end(), 0, std::plus<int>());
+      vertInputBindingDescs.push_back(vertInputBindingDescFromResource(k.first, stride));
+    }
   }
   for (const auto &resource : resources.uniform_buffers) {
     logger->info("Extrapolating descriptor set layout binding for uniform buffer {0}", resource.name);

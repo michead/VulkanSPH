@@ -103,8 +103,7 @@ namespace GfxUtils {
       GfxWrap::shaderStage(moduleFrag, VK_SHADER_STAGE_FRAGMENT_BIT, createInfoFrag);
       program.setFrag({
         createInfoFrag,
-        reflect.getDescriptorSetLayoutBindings(),
-        reflect.getVertexInputBindingDescriptions()
+        reflect.getDescriptorSetLayoutBindings()
       });
     }
 

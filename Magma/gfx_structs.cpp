@@ -26,7 +26,7 @@ const VkAttachmentDescription MVkBaseAttachmentDepth = {
   VK_ATTACHMENT_LOAD_OP_LOAD,
   VK_ATTACHMENT_STORE_OP_STORE,
   VK_IMAGE_LAYOUT_UNDEFINED,
-  VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+  VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL
 };
 
 const std::vector<VkAttachmentDescription> MVkBaseAttachments = {
