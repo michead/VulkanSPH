@@ -102,7 +102,6 @@ void GfxContext::initDepthBuffer() {
     depthBuffer.image,
     deviceMemory,
     depthBuffer.imageView,
-    depthBuffer.imageLayout,
     depthBuffer.sampler);
 }
 

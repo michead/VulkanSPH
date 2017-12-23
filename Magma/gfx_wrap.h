@@ -391,7 +391,7 @@ namespace GfxWrap {
   inline void createDepthBuffer(VkPhysicalDevice physicalDevice, VkDevice device, VkExtent2D renderArea,
                                 VkSampleCountFlagBits numSamples, VkImage& depthImage, 
                                 VkDeviceMemory& deviceMemory, VkImageView& depthImageView,
-                                VkImageLayout& depthImageLayout, VkSampler& depthImageSampler) {
+                                VkSampler& depthImageSampler) {
     VkImageCreateInfo imageInfo = {};
     imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
     imageInfo.pNext = nullptr;
@@ -460,8 +460,6 @@ namespace GfxWrap {
     samplerInfo.maxAnisotropy    = 1.f;
     samplerInfo.borderColor      = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
     VK_CHECK(vkCreateSampler(device, &samplerInfo, nullptr, &depthImageSampler));
-
-    depthImageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
   }
   inline void allocateDeviceMemory(VkPhysicalDevice physicalDevice,
                                    VkDevice device,
