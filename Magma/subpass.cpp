@@ -4,17 +4,6 @@
 #include "gfx_wrap.h"
 
 void Subpass::init() {
-  description = MVkBaseSubpass;
-
-  // Set dependency
-  dependency.srcSubpass      = index > 0 ? index - 1 : VK_SUBPASS_EXTERNAL;
-  dependency.dstSubpass      = index > 0 ? index : 0;
-  dependency.srcStageMask    = index > 0 ? VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT : VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
-  dependency.dstStageMask    = index > 0 ? VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT : VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-  dependency.srcAccessMask   = index > 0 ? VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT : VK_ACCESS_MEMORY_READ_BIT;
-  dependency.dstAccessMask   = index > 0 ? VK_ACCESS_SHADER_READ_BIT : VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-  dependency.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
-
   // Set shader program name
   shaderProgram = GfxUtils::buildShaderProgram(gfxContext, shaderName);
 

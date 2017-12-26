@@ -404,7 +404,7 @@ namespace GfxWrap {
     imageInfo.arrayLayers = 1;
     imageInfo.samples = numSamples;
     imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    imageInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+    imageInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;
     imageInfo.queueFamilyIndexCount = 0;
     imageInfo.pQueueFamilyIndices = nullptr;
     imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
@@ -453,7 +453,6 @@ namespace GfxWrap {
     samplerInfo.addressModeV     = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
     samplerInfo.addressModeW     = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
     samplerInfo.mipLodBias       = 0.f;
-    samplerInfo.compareOp        = VK_COMPARE_OP_NEVER;
     samplerInfo.minLod           = 0.f;
     samplerInfo.maxLod           = 1.f;
     samplerInfo.anisotropyEnable = VK_FALSE;
@@ -656,6 +655,7 @@ namespace GfxWrap {
   }
   inline void updateBufferDescriptorSet(const VkDevice& device,
                                         VkDescriptorSet descriptorSet,
+                                        VkDescriptorType descriptorType,
                                         uint32_t binding,
                                         const VkDescriptorBufferInfo& bufferInfo) {
     VkWriteDescriptorSet writes = {};
@@ -663,7 +663,7 @@ namespace GfxWrap {
     writes.pNext           = nullptr;
     writes.dstSet          = descriptorSet;
     writes.descriptorCount = 1;
-    writes.descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    writes.descriptorType  = descriptorType;
     writes.pBufferInfo     = &bufferInfo;
     writes.pImageInfo      = nullptr;
     writes.dstArrayElement = 0;
@@ -672,6 +672,7 @@ namespace GfxWrap {
   }
   inline void updateImageDescriptorSet(const VkDevice& device,
                                        VkDescriptorSet descriptorSet,
+                                       VkDescriptorType descriptorType,
                                        uint32_t binding,
                                        const VkDescriptorImageInfo& imageInfo) {
     VkWriteDescriptorSet writes = {};
@@ -679,7 +680,7 @@ namespace GfxWrap {
     writes.pNext = nullptr;
     writes.dstSet = descriptorSet;
     writes.descriptorCount = 1;
-    writes.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    writes.descriptorType = descriptorType;
     writes.pBufferInfo = nullptr;
     writes.pImageInfo = &imageInfo;
     writes.dstArrayElement = 0;

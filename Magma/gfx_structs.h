@@ -185,8 +185,10 @@ extern const VkAttachmentDescription                        MVkBaseAttachmentDep
 extern const std::vector<VkAttachmentDescription>           MVkBaseAttachments;
 extern const VkAttachmentReference                          MVkBaseAttachmentColorReference;
 extern const VkAttachmentReference                          MVkBaseAttachmentDepthReference;
-extern const std::vector<VkAttachmentReference>             MVkBaseAttachmentReferences;
-extern const VkSubpassDescription                           MVkBaseSubpass;
+extern const VkAttachmentReference                          MVkBaseInputAttachmentReference;
+extern const VkSubpassDescription                           MVkBaseColorSubpass;
+extern const VkSubpassDescription                           MVkBaseDepthSubpass;
+extern const VkSubpassDescription                           MVkBaseColorDepthSubpass;
 extern const std::vector<VkSubpassDependency>               MVkBaseDependencies;
 extern const std::vector<VkVertexInputBindingDescription>   MVkVertexInputBindingDescriptionsSPH;
 extern const std::vector<VkVertexInputAttributeDescription> MVkVertexAttributeDescriptionsSPH;

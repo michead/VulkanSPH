@@ -116,5 +116,9 @@ void LayoutReflection::extractUniformBufferDescSetLayout() {
     logger->info("Extrapolating descriptor set layout binding for image sampler {0}", resource.name);
     descSetLayoutBindings.push_back(descSetLayoutBindingFromResource(resource, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER));
   }
+  for (const auto &resource : resources.subpass_inputs) {
+    logger->info("Extrapolating descriptor set layout binding for input attachment {0}", resource.name);
+    descSetLayoutBindings.push_back(descSetLayoutBindingFromResource(resource, VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT));
+  }
   descSetLayoutFromBindings(descSetLayoutBindings);
 }

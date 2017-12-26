@@ -23,8 +23,8 @@ const VkAttachmentDescription MVkBaseAttachmentDepth = {
   VK_SAMPLE_COUNT_1_BIT,
   VK_ATTACHMENT_LOAD_OP_CLEAR,
   VK_ATTACHMENT_STORE_OP_STORE,
-  VK_ATTACHMENT_LOAD_OP_LOAD,
-  VK_ATTACHMENT_STORE_OP_STORE,
+  VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+  VK_ATTACHMENT_STORE_OP_DONT_CARE,
   VK_IMAGE_LAYOUT_UNDEFINED,
   VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL
 };
@@ -44,12 +44,38 @@ const VkAttachmentReference MVkBaseAttachmentDepthReference = {
   VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
 };
 
-const std::vector<VkAttachmentReference> MVkBaseAttachmentReferences = {
-  MVkBaseAttachmentColorReference,
-  MVkBaseAttachmentDepthReference
+const VkAttachmentReference MVkBaseInputAttachmentReference = {
+  1,
+  VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
 };
 
-const VkSubpassDescription MVkBaseSubpass = {
+const VkSubpassDescription MVkBaseColorSubpass = {
+  0,
+  VK_PIPELINE_BIND_POINT_GRAPHICS,
+  0,
+  nullptr,
+  1,
+  &MVkBaseAttachmentColorReference,
+  nullptr,
+  nullptr,
+  0,
+  nullptr
+};
+
+const VkSubpassDescription MVkBaseDepthSubpass = {
+  0,
+  VK_PIPELINE_BIND_POINT_GRAPHICS,
+  0,
+  nullptr,
+  0,
+  nullptr,
+  nullptr,
+  &MVkBaseAttachmentDepthReference,
+  0,
+  nullptr
+};
+
+const VkSubpassDescription MVkBaseColorDepthSubpass = {
   0,
   VK_PIPELINE_BIND_POINT_GRAPHICS,
   0,

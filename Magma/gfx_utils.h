@@ -8,11 +8,11 @@
 #include "layout_reflection.h"
 #include "logger.h"
 
-const std::vector<MVkQuadVertexAttribute> fsQuadVertices = {
-  { glm::vec4(-1.f,  0.f, 0.f, 1.f), glm::vec2(0, 0) },
-  { glm::vec4(-1.f,  1.f, 0.f, 1.f), glm::vec2(0, 1) },
-  { glm::vec4( 1.f,  1.f, 0.f, 1.f), glm::vec2(1, 1) },
-  { glm::vec4( 1.f, -1.f, 0.f, 1.f), glm::vec2(1, 0) }
+const std::vector<glm::vec4> fsQuadVertices = {
+  glm::vec4(-1.f, -1.f, 0.f, 1.f),
+  glm::vec4(-1.f,  1.f, 0.f, 1.f),
+  glm::vec4( 1.f,  1.f, 0.f, 1.f),
+  glm::vec4( 1.f, -1.f, 0.f, 1.f)
 };
 
 const std::vector<uint32_t> fsQuadIndices = {

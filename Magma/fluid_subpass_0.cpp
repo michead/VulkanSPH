@@ -10,6 +10,17 @@
 
 void FluidSubpass0::init() {
   Subpass::init();
+
+  description = MVkBaseColorDepthSubpass;
+
+  // Set dependency
+  dependency.srcSubpass      = VK_SUBPASS_EXTERNAL;
+  dependency.dstSubpass      = 0;
+  dependency.srcStageMask    = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+  dependency.dstStageMask    = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+  dependency.srcAccessMask   = VK_ACCESS_MEMORY_READ_BIT;
+  dependency.dstAccessMask   = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+  dependency.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
 }
 
 void FluidSubpass0::postInit() {
@@ -122,12 +133,14 @@ void FluidSubpass0::updateDescriptorSets() {
   GfxWrap::updateBufferDescriptorSet(
     gfxContext->device,
     descriptorSet,
+    VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
     0,
     uniformBufferVSDesc.bufferInfo);
 
   GfxWrap::updateBufferDescriptorSet(
     gfxContext->device,
     descriptorSet,
+    VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
     1,
     uniformBufferFSDesc.bufferInfo);
 }
