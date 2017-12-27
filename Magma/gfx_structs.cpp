@@ -231,19 +231,34 @@ const VkStencilOpState MVkStencilOpStateFrontSPH,
   0
 };
 
-const VkPipelineDepthStencilStateCreateInfo MVkPipelineDepthStencilStateSPH = {
-  VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,
-  nullptr,
-  0,
-  VK_TRUE,
-  VK_TRUE,
-  VK_COMPARE_OP_LESS_OR_EQUAL,
-  VK_FALSE,
-  VK_FALSE,
-  MVkStencilOpStateFrontSPH,
-  MVkStencilOpStateBackSPH,
-  0.f,
-  1.f,
+const VkPipelineDepthStencilStateCreateInfo MVkPipelineDepthStencilStateOn = {
+  VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO, // sType
+  nullptr,                                                    // pNext
+  0,                                                          // flags
+  VK_TRUE,                                                    // depthTestEnable
+  VK_TRUE,                                                    // depthWriteEnable
+  VK_COMPARE_OP_LESS_OR_EQUAL,                                // depthCompareOp
+  VK_FALSE,                                                   // depthBoundsTestEnable
+  VK_FALSE,                                                   // stencilTestEnable
+  MVkStencilOpStateFrontSPH,                                  // front
+  MVkStencilOpStateBackSPH,                                   // back
+  0.f,                                                        // minDepthBounds
+  1.f,                                                        // maxDepthBounds
+};
+
+const VkPipelineDepthStencilStateCreateInfo MVkPipelineDepthStencilStateOff = {
+  VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO, // sType
+  nullptr,                                                    // pNext
+  0,                                                          // flags
+  VK_FALSE,                                                   // depthTestEnable
+  VK_FALSE,                                                   // depthWriteEnable
+  VK_COMPARE_OP_NEVER,                                        // depthCompareOp
+  VK_FALSE,                                                   // depthBoundsTestEnable
+  VK_FALSE,                                                   // stencilTestEnable
+  MVkStencilOpStateFrontSPH,                                  // front
+  MVkStencilOpStateBackSPH,                                   // back
+  0.f,                                                        // minDepthBounds
+  1.f,                                                        // maxDepthBounds
 };
 
 const VkDescriptorSetLayoutBinding MVkDescriptorSetLayoutBindingUniformBufferVS = {

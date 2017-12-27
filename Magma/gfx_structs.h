@@ -203,6 +203,7 @@ extern const std::vector<VkDynamicState>                    MVkDynamicStatesSPH;
 extern const VkPipelineDynamicStateCreateInfo               MVkPipelineDynamicStateSPH;
 extern const VkStencilOpState                               MVkStencilOpStateFrontSPH;
 extern const VkStencilOpState                               MVkStencilOpStateBackSPH;
-extern const VkPipelineDepthStencilStateCreateInfo          MVkPipelineDepthStencilStateSPH;
+extern const VkPipelineDepthStencilStateCreateInfo          MVkPipelineDepthStencilStateOn;
+extern const VkPipelineDepthStencilStateCreateInfo          MVkPipelineDepthStencilStateOff;
 extern const VkDescriptorSetLayoutBinding                   MVkDescriptorSetLayoutBindingUniformBufferVS;
 extern const VkDescriptorSetLayoutBinding                   MVkDescriptorSetLayoutBindingUniformBufferFS;

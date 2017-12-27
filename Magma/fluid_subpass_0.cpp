@@ -87,7 +87,7 @@ void FluidSubpass0::initGraphicsPipeline() {
   multisampleState = MVkPipelineMultisampleStateSPH;
   dynamicState = MVkPipelineDynamicStateSPH;
   viewportState = GfxUtils::viewportState(&gfxContext->viewport, &gfxContext->scissor);
-  depthStencilState = MVkPipelineDepthStencilStateSPH;
+  depthStencilState = MVkPipelineDepthStencilStateOn;
 
   GfxWrap::createGraphicsPipeline(
     gfxContext->device,
