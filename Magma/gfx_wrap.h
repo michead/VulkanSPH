@@ -25,6 +25,7 @@ namespace GfxWrap {
     extensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
 #endif
   }
+
   inline void createInstance(const char* appName, uint32_t appVersion, VkInstance& instance) {
     std::vector<const char*> extensions;
     queryAvailableWSIExtensions(extensions);
@@ -52,18 +53,21 @@ namespace GfxWrap {
     
     VK_CHECK(vkCreateInstance(&instanceInfo, nullptr, &instance));
   }
+
   inline void queryDevices(VkInstance instance, std::vector<VkPhysicalDevice>& physicalDevices) {
     uint32_t deviceCount;
     VK_CHECK(vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr));
     physicalDevices.resize(deviceCount);
     VK_CHECK(vkEnumeratePhysicalDevices(instance, &deviceCount, physicalDevices.data()));
   }
+
   inline void queryQueueFamilyProps(VkPhysicalDevice physicalDevice, std::vector<VkQueueFamilyProperties>& queueFamilyProps) {
     uint32_t familyCount;
     vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &familyCount, nullptr);
     queueFamilyProps.resize(familyCount);
     vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &familyCount, queueFamilyProps.data());
   }
+
   inline void queryQueueFamilyIndices(VkPhysicalDevice physicalDevice,
                                       VkSurfaceKHR surface,
                                       uint32_t* graphicsQueueFamilyIndex,
@@ -108,9 +112,11 @@ namespace GfxWrap {
       exit(EXIT_FAILURE);
     }
   }
+
   inline void queryDeviceFeatures(VkPhysicalDevice physicalDevice, VkPhysicalDeviceFeatures* deviceFeatures) {
     vkGetPhysicalDeviceFeatures(physicalDevice, deviceFeatures);
   }
+
   inline void createSemaphore(VkDevice device, VkSemaphore& semaphore) {
     VkSemaphoreCreateInfo imageAcquiredSemaphoreCreateInfo;
     imageAcquiredSemaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -118,6 +124,7 @@ namespace GfxWrap {
     imageAcquiredSemaphoreCreateInfo.flags = 0;
     VK_CHECK(vkCreateSemaphore(device, &imageAcquiredSemaphoreCreateInfo, nullptr, &semaphore));
   }
+
   inline void createFence(VkDevice device, VkFence& fence) {
     VkFenceCreateInfo fenceInfo;
     fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
@@ -125,6 +132,7 @@ namespace GfxWrap {
     fenceInfo.flags = 0;
     VK_CHECK(vkCreateFence(device, &fenceInfo, nullptr, &fence));
   }
+
   inline void createDevice(VkPhysicalDevice physicalDevice,
                            uint32_t graphicsQueueFamilyIndex,
                            uint32_t presentQueueFamilyIndex,
@@ -166,6 +174,7 @@ namespace GfxWrap {
       vkGetDeviceQueue(device, presentQueueFamilyIndex, 0, &presentQueue);
     }
   }
+
   inline void printDeviceStats(const VkPhysicalDevice& physicalDevice) {
     VkPhysicalDeviceProperties physicalDeviceProperties;
     vkGetPhysicalDeviceProperties(physicalDevice, &physicalDeviceProperties);
@@ -176,6 +185,7 @@ namespace GfxWrap {
                                                   VK_VER_MINOR(physicalDeviceProperties.apiVersion),
                                                   VK_VER_PATCH(physicalDeviceProperties.apiVersion));
   }
+
   inline void createCommandPool(VkDevice device, uint32_t graphicsQueueFamilyIndex, VkCommandPool& commandPool) {
     VkCommandPoolCreateInfo info = {};
     info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
@@ -184,6 +194,7 @@ namespace GfxWrap {
     info.flags = 0;
     VK_CHECK(vkCreateCommandPool(device, &info, nullptr, &commandPool));
   }
+
   inline void createCommandBuffers(VkDevice device,
                                    VkCommandPool commandPool,
                                    uint32_t bufferCount,
@@ -196,6 +207,7 @@ namespace GfxWrap {
     info.commandBufferCount = bufferCount;
     VK_CHECK(vkAllocateCommandBuffers(device, &info, commandBuffers));
   }
+
   inline void createSurface(VkInstance instance, 
                             VkPhysicalDevice physicalDevice, 
                             HWND hwnd,
@@ -238,6 +250,7 @@ namespace GfxWrap {
     std::vector<VkPresentModeKHR> presentModes(presentModeCount);
     VK_CHECK(vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &presentModeCount, presentModes.data()));
   }
+
   inline void beginCommandBuffer(VkCommandBuffer commandBuffer,
                                  VkCommandBufferUsageFlags flags = 0) {
     VkCommandBufferBeginInfo beginInfo = {};
@@ -247,6 +260,7 @@ namespace GfxWrap {
     beginInfo.flags            = flags;
     VK_CHECK(vkBeginCommandBuffer(commandBuffer, &beginInfo));
   }
+
   inline void createSwapchain(VkDevice device,
                               VkSurfaceKHR surface,
                               VkSurfaceCapabilitiesKHR surfaceCapabilities,
@@ -297,33 +311,33 @@ namespace GfxWrap {
     }
 
     VkSwapchainCreateInfoKHR swapchainInfo = {};
-    swapchainInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-    swapchainInfo.pNext = nullptr;
-    swapchainInfo.surface = surface;
-    swapchainInfo.minImageCount = desiredNumberOfSwapChainImages;
-    swapchainInfo.imageFormat = format;
-    swapchainInfo.imageExtent.width = swapchainExtent.width;
-    swapchainInfo.imageExtent.height = swapchainExtent.height;
-    swapchainInfo.preTransform = preTransform;
-    swapchainInfo.compositeAlpha = compositeAlpha;
-    swapchainInfo.imageArrayLayers = 1;
-    swapchainInfo.presentMode = swapchainPresentMode;
-    swapchainInfo.oldSwapchain = VK_NULL_HANDLE;
-    swapchainInfo.clipped = true;
-    swapchainInfo.imageColorSpace = VK_COLORSPACE_SRGB_NONLINEAR_KHR;
-    swapchainInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
-                               VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
-    swapchainInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    swapchainInfo.sType                 = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+    swapchainInfo.pNext                 = nullptr;
+    swapchainInfo.surface               = surface;
+    swapchainInfo.minImageCount         = desiredNumberOfSwapChainImages;
+    swapchainInfo.imageFormat           = format;
+    swapchainInfo.imageExtent.width     = swapchainExtent.width;
+    swapchainInfo.imageExtent.height    = swapchainExtent.height;
+    swapchainInfo.preTransform          = preTransform;
+    swapchainInfo.compositeAlpha        = compositeAlpha;
+    swapchainInfo.imageArrayLayers      = 1;
+    swapchainInfo.presentMode           = swapchainPresentMode;
+    swapchainInfo.oldSwapchain          = VK_NULL_HANDLE;
+    swapchainInfo.clipped               = true;
+    swapchainInfo.imageColorSpace       = VK_COLORSPACE_SRGB_NONLINEAR_KHR;
+    swapchainInfo.imageUsage            = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
+                                          VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+    swapchainInfo.imageSharingMode      = VK_SHARING_MODE_EXCLUSIVE;
     swapchainInfo.queueFamilyIndexCount = 0;
-    swapchainInfo.pQueueFamilyIndices = nullptr;
+    swapchainInfo.pQueueFamilyIndices   = nullptr;
     uint32_t queueFamilyIndices[2] = {
       graphicsQueueFamilyIndex,
       presentQueueFamilyIndex
     };
     if (graphicsQueueFamilyIndex != presentQueueFamilyIndex) {
-      swapchainInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
+      swapchainInfo.imageSharingMode      = VK_SHARING_MODE_CONCURRENT;
       swapchainInfo.queueFamilyIndexCount = 2;
-      swapchainInfo.pQueueFamilyIndices = queueFamilyIndices;
+      swapchainInfo.pQueueFamilyIndices   = queueFamilyIndices;
     }
 
     uint32_t swapchainImageCount;
@@ -338,25 +352,26 @@ namespace GfxWrap {
 
     for (uint32_t i = 0; i < swapchainImageCount; i++) {
       VkImageViewCreateInfo colorImageView = {};
-      colorImageView.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-      colorImageView.pNext = nullptr;
-      colorImageView.format = format;
-      colorImageView.components.r = VK_COMPONENT_SWIZZLE_R;
-      colorImageView.components.g = VK_COMPONENT_SWIZZLE_G;
-      colorImageView.components.b = VK_COMPONENT_SWIZZLE_B;
-      colorImageView.components.a = VK_COMPONENT_SWIZZLE_A;
-      colorImageView.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-      colorImageView.subresourceRange.baseMipLevel = 0;
-      colorImageView.subresourceRange.levelCount = 1;
+      colorImageView.sType                           = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+      colorImageView.pNext                           = nullptr;
+      colorImageView.format                          = format;
+      colorImageView.components.r                    = VK_COMPONENT_SWIZZLE_R;
+      colorImageView.components.g                    = VK_COMPONENT_SWIZZLE_G;
+      colorImageView.components.b                    = VK_COMPONENT_SWIZZLE_B;
+      colorImageView.components.a                    = VK_COMPONENT_SWIZZLE_A;
+      colorImageView.subresourceRange.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
+      colorImageView.subresourceRange.baseMipLevel   = 0;
+      colorImageView.subresourceRange.levelCount     = 1;
       colorImageView.subresourceRange.baseArrayLayer = 0;
-      colorImageView.subresourceRange.layerCount = 1;
-      colorImageView.viewType = VK_IMAGE_VIEW_TYPE_2D;
-      colorImageView.flags = 0;
-      colorImageView.image = swapchainImages[i];
+      colorImageView.subresourceRange.layerCount     = 1;
+      colorImageView.viewType                        = VK_IMAGE_VIEW_TYPE_2D;
+      colorImageView.flags                           = 0;
+      colorImageView.image                           = swapchainImages[i];
 
       VK_CHECK(vkCreateImageView(device, &colorImageView, nullptr, &swapchainImageViews[i]));
     }
   }
+
   inline void getMemTypeIndexFromMemProps(VkPhysicalDevice physicalDevice, uint32_t typeBits,
                                           VkFlags reqMask, uint32_t* memoryTypeIndex) {
     VkPhysicalDeviceMemoryProperties memProps;
@@ -372,6 +387,7 @@ namespace GfxWrap {
     }
     assert(false);
   }
+
   inline void queryImageFormatProps(VkPhysicalDevice physicalDevice,
                                     VkFormat format,
                                     VkImageType imageType,
@@ -388,6 +404,7 @@ namespace GfxWrap {
       createFlags,
       &imageFormatProps));
   }
+
   inline void createDepthBuffer(VkPhysicalDevice physicalDevice, VkDevice device, VkExtent2D renderArea,
                                 VkSampleCountFlagBits numSamples, VkImage& depthImage, 
                                 VkDeviceMemory& deviceMemory, VkImageView& depthImageView,
@@ -460,6 +477,7 @@ namespace GfxWrap {
     samplerInfo.borderColor      = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
     VK_CHECK(vkCreateSampler(device, &samplerInfo, nullptr, &depthImageSampler));
   }
+
   inline void allocateDeviceMemory(VkPhysicalDevice physicalDevice,
                                    VkDevice device,
                                    VkBuffer buffer,
@@ -484,6 +502,7 @@ namespace GfxWrap {
     VK_CHECK(vkAllocateMemory(device, &allocateInfo, nullptr, &deviceMemory));
     *allocSize = memReqs.size;
   }
+
   inline void updateBuffer(VkDevice device,
                            size_t size,
                            const void* data,
@@ -494,6 +513,7 @@ namespace GfxWrap {
     memcpy(*mappedMemory, data, size);
     vkUnmapMemory(device, deviceMemory);
   }
+
   inline void createBuffer(VkPhysicalDevice physicalDevice,
                            VkDevice device,
                            VkBufferUsageFlags usage,
@@ -530,6 +550,7 @@ namespace GfxWrap {
     bufferDesc->bufferInfo.offset = 0;
     bufferDesc->bufferInfo.range = size;
   }
+
   inline void submitCmdBuffer(VkDevice device,
                               VkQueue queue,
                               VkCommandBuffer cmdBuffer) {
@@ -541,6 +562,7 @@ namespace GfxWrap {
     VK_CHECK(vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE));
     VK_CHECK(vkQueueWaitIdle(queue));
   }
+
   inline void registerCopyCmd(VkCommandBuffer cmdBuffer,
                               VkDeviceSize size,
                               VkQueue queue,
@@ -551,6 +573,7 @@ namespace GfxWrap {
     vkCmdCopyBuffer(cmdBuffer, src, dst, 1, &copyRegion);
     VK_CHECK(vkEndCommandBuffer(cmdBuffer));
   }
+
   inline void createStagingBuffer(VkPhysicalDevice physicalDevice,
                                   VkDevice device,
                                   VkBufferUsageFlags usage,
@@ -610,6 +633,7 @@ namespace GfxWrap {
     deviceBuffer->bufferInfo.offset = 0;
     deviceBuffer->bufferInfo.range = size;
   }
+
   inline void createDescriptorSetLayout(VkDevice device,
                                         const std::vector<VkDescriptorSetLayoutBinding>& bindings,
                                         VkDescriptorSetLayout& descriptorSetLayout) {
@@ -620,6 +644,7 @@ namespace GfxWrap {
     createInfo.pBindings    = bindings.data();
     VK_CHECK(vkCreateDescriptorSetLayout(device, &createInfo, nullptr, &descriptorSetLayout));
   }
+
   inline void createPipelineLayout(const VkDevice& device,
                                    uint32_t descriptorSetLayoutCount,
                                    VkDescriptorSetLayout* descriptorSetLayouts,
@@ -633,6 +658,7 @@ namespace GfxWrap {
     pPipelineLayoutCreateInfo.pSetLayouts                = descriptorSetLayouts;
     VK_CHECK(vkCreatePipelineLayout(device, &pPipelineLayoutCreateInfo, nullptr, &pipelineLayout));
   }
+
   inline void createDescriptorPool(const VkDevice& device, VkDescriptorPoolSize descriptorPoolSize,
                                    VkDescriptorPool& descriptorPool) {
     VkDescriptorPoolCreateInfo descriptorPoolInfo = {};
@@ -643,6 +669,7 @@ namespace GfxWrap {
     descriptorPoolInfo.pPoolSizes    = &descriptorPoolSize;
     VK_CHECK(vkCreateDescriptorPool(device, &descriptorPoolInfo, nullptr, &descriptorPool));
   }
+
   inline void createDescriptorSet(const VkDevice& device, VkDescriptorPool descriptorPool,
                                   VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet& descriptorSet) {
     VkDescriptorSetAllocateInfo allocateInfo = {};
@@ -653,6 +680,7 @@ namespace GfxWrap {
     allocateInfo.pSetLayouts        = &descriptorSetLayout;
     VK_CHECK(vkAllocateDescriptorSets(device, &allocateInfo, &descriptorSet));
   }
+
   inline void updateBufferDescriptorSet(const VkDevice& device,
                                         VkDescriptorSet descriptorSet,
                                         VkDescriptorType descriptorType,
@@ -670,6 +698,7 @@ namespace GfxWrap {
     writes.dstBinding      = binding;
     vkUpdateDescriptorSets(device, 1, &writes, 0, nullptr);
   }
+
   inline void updateImageDescriptorSet(const VkDevice& device,
                                        VkDescriptorSet descriptorSet,
                                        VkDescriptorType descriptorType,
@@ -687,6 +716,7 @@ namespace GfxWrap {
     writes.dstBinding = binding;
     vkUpdateDescriptorSets(device, 1, &writes, 0, nullptr);
   }
+
   inline void setImageLayout(const VkCommandBuffer& commandBuffer,
                              const VkImage& image,
                              VkImageAspectFlags aspectMask,
@@ -747,6 +777,7 @@ namespace GfxWrap {
     }
     vkCmdPipelineBarrier(commandBuffer, srcStages, destStages, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
   }
+
   inline void createSubpassDescription(bool bAddDepthAttachment, VkSubpassDescription& description) {
     VkAttachmentReference color_reference = {};
     color_reference.attachment = 0;
@@ -766,6 +797,7 @@ namespace GfxWrap {
     description.preserveAttachmentCount = 0;
     description.pPreserveAttachments = nullptr;
   }
+
   inline void createRenderPass(const VkDevice device,
                                const std::vector<VkAttachmentDescription>& attachments,
                                const std::vector<VkSubpassDescription>& subpasses,
@@ -782,6 +814,7 @@ namespace GfxWrap {
     renderPassInfo.pDependencies   = dependencies.data();
     VK_CHECK(vkCreateRenderPass(device, &renderPassInfo, nullptr, &renderPass));
   }
+
   inline void createShaderModule(VkDevice device, const std::vector<uint32_t>& spirV, VkShaderModule& shaderModule) {
     VkShaderModuleCreateInfo moduleCreateInfo;
     moduleCreateInfo.sType    = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -791,6 +824,7 @@ namespace GfxWrap {
     moduleCreateInfo.pCode    = spirV.data();
     VK_CHECK(vkCreateShaderModule(device, &moduleCreateInfo, nullptr, &shaderModule));
   }
+
   inline void shaderStage(const VkShaderModule& module, VkShaderStageFlagBits stage, VkPipelineShaderStageCreateInfo& shaderStage) {
     shaderStage = {};
     shaderStage.sType               = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -801,6 +835,7 @@ namespace GfxWrap {
     shaderStage.pName               = "main";
     shaderStage.module              = module;
   }
+
   inline void createFramebuffers(VkDevice device,
                                 const VkRenderPass& renderPass,
                                 const std::vector<VkImageView>& colorAttachments,
@@ -831,6 +866,7 @@ namespace GfxWrap {
       VK_CHECK(vkCreateFramebuffer(device, &framebufferInfo, NULL, &framebuffers[i]));
     }
   }
+
   inline void createGraphicsPipeline(VkDevice device,
                                      const VkPipelineLayout& pipelineLayout, 
                                      const VkPipelineVertexInputStateCreateInfo& vertexInputState,
@@ -874,7 +910,8 @@ namespace GfxWrap {
       nullptr,
       &pipeline));
   }
-  inline std::array<VkClearValue, 2> clearValues(const VkClearColorValue& clearColor               = {0, 0, 0, 1},
+
+  inline std::array<VkClearValue, 2> clearValues(const VkClearColorValue& clearColor               = { 0, 0, 0, 1 },
                                                  const VkClearDepthStencilValue& clearDepthStencil = { 1.f, 0 }) {
     std::array<VkClearValue, 2> clearValues;
     clearValues[0].color.float32[0]     = clearColor.float32[0];
@@ -885,6 +922,7 @@ namespace GfxWrap {
     clearValues[1].depthStencil.stencil = clearDepthStencil.stencil;
     return clearValues;
   }
+
   inline void beginRenderPass(const VkCommandBuffer& commandBuffer,
                               const VkRenderPass& renderPass,
                               const VkFramebuffer& framebuffer,
@@ -903,6 +941,7 @@ namespace GfxWrap {
     renderPassBegin.pClearValues             = clearValues;
     vkCmdBeginRenderPass(commandBuffer, &renderPassBegin, VK_SUBPASS_CONTENTS_INLINE);
   }
+
   inline void submitCommandBuffer(VkQueue queue,
                                   uint32_t commandBufferCount,
                                   const VkCommandBuffer* commandBuffers,
@@ -935,6 +974,7 @@ namespace GfxWrap {
     present.pResults           = nullptr;
     VK_CHECK_PRESENT_TOLERANT(vkQueuePresentKHR(queue, &present));
   }
+
   inline void prepareFrame(const VkDevice& device,
                            VkSwapchainKHR swapchain,
                            VkSemaphore semaphore,

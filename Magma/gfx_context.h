@@ -33,9 +33,9 @@ public:
     return &context;
   }
 
-  void            postInit();
-  void            setPipeline(Pipeline* pipeline);
-  void            setScene(Scene* scene);
+  void postInit();
+  void setPipeline(Pipeline* pipeline);
+  void setScene(Scene* scene);
 
   Pipeline*                    getPipeline()           const;
   VkRenderPass                 getRenderPass()         const;

@@ -182,14 +182,14 @@ const NvFlexParams defaultFluidParams = {
   0.025f,                 // collisionDistance
   0.01f,                  // particleCollisionMargin
   0.01f,                  // shapeCollisionMargin
-  { {  0,  1,  0,  2 },
+  { {  0,  1,  0,  2 },   // planes
     {  0,  0,  0,  0 },
     {  0,  0,  0,  0 },
     {  0,  0,  0,  0 },
     {  0,  0,  0,  0 },
     {  0,  0,  0,  0 },
     {  0,  0,  0,  0 },
-    {  0,  0,  0,  0 } }, // planes
+    {  0,  0,  0,  0 } },
   1,                      // numPlanes
   eNvFlexRelaxationLocal, // relaxationMode
   1                       // relaxationFactor
