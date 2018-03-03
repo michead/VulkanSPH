@@ -1,2 +1,2 @@
-# Magma :fire:
-Smoothed-particle hydrodynamics on top of Vulkan API
+# VulkanSPH :fire:
+Smoothed-particle hydrodynamics on top of Vulkan API.
