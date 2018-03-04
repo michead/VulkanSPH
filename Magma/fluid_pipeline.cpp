@@ -1,6 +1,7 @@
 #include "fluid_pipeline.h"
 #include "fluid_subpass_0.h"
 #include "fluid_subpass_1.h"
+#include "fluid_subpass_2.h"
 #include "fluid.h"
 #include "magma_context.h"
 #include "gfx_wrap.h"
@@ -21,6 +22,7 @@ void FluidPipeline::registerSubpasses() {
   subpasses.clear();
   subpasses.push_back(new FluidSubpass0(this, 0, elem));
   subpasses.push_back(new FluidSubpass1(this, 1, elem));
+  subpasses.push_back(new FluidSubpass2(this, 2, elem));
 
   std::for_each(subpasses.begin(), subpasses.end(), [](Subpass* subpass) {
     subpass->init();

@@ -166,6 +166,7 @@
     <ClCompile Include="..\ext\imgui\imgui_demo.cpp" />
     <ClCompile Include="..\ext\imgui\imgui_draw.cpp" />
     <ClCompile Include="camera.cpp" />
+    <ClCompile Include="fluid_subpass_2.cpp" />
     <ClCompile Include="fluid_subpass_0.cpp" />
     <ClCompile Include="fluid.cpp" />
     <ClCompile Include="event_handler.cpp" />
@@ -193,6 +194,7 @@
   <ItemGroup>
     <ClInclude Include="camera.h" />
     <ClInclude Include="config.h" />
+    <ClInclude Include="fluid_subpass_2.h" />
     <ClInclude Include="fluid_subpass_0.h" />
     <ClInclude Include="event_handler.h" />
     <ClInclude Include="fluid_simulation.h" />
@@ -240,6 +242,12 @@
     </None>
     <None Include="shaders\fluid_1.vert">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </None>
+    <None Include="shaders\fluid_2.frag">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </None>
+    <None Include="shaders\fluid_2.vert">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </None>
   </ItemGroup>
   <ItemGroup>

@@ -118,6 +118,9 @@
     <ClCompile Include="gizmo_pipeline.cpp">
       <Filter>Source Files\gfx</Filter>
     </ClCompile>
+    <ClCompile Include="fluid_subpass_2.cpp">
+      <Filter>Source Files\gfx</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="scene_element.h">
@@ -207,6 +210,9 @@
     <ClInclude Include="gizmo_pipeline.h">
       <Filter>Source Files\gfx</Filter>
     </ClInclude>
+    <ClInclude Include="fluid_subpass_2.h">
+      <Filter>Source Files\gfx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="data\scene.json">
@@ -225,6 +231,12 @@
       <Filter>Source Files\shaders</Filter>
     </None>
     <None Include="shaders\fluid_1.vert">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="shaders\fluid_2.frag">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="shaders\fluid_2.vert">
       <Filter>Source Files\shaders</Filter>
     </None>
   </ItemGroup>

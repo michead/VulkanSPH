@@ -38,7 +38,7 @@ void Fluid::createParticleGrid(glm::vec3 bln, glm::vec3 trf, float spacing) {
   for (float x = bln.x; x < trf.x; x += spacing) {
     for (float y = bln.y; y < trf.y; y += spacing) {
       for (float z = bln.z; z < trf.z; z += spacing) {
-        glm::vec3 pos    = glm::vec3(x, y, z) + Math::randUnitVec() *  0.005f;
+        glm::vec3 pos    = glm::vec3(x, y, z) + Math::randUnitVec() * 0.005f;
         positions[i]     = glm::vec4(pos.x, pos.y, pos.z, 1.0f);
         velocities[i]    = glm::vec3(0);
         phases[i]        = phase;

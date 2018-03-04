@@ -145,6 +145,14 @@ struct MVkFrag1 {
   MVkAttachment depthBuffer;
 };
 
+struct MVkVert2 {
+  // None
+};
+
+struct MVkFrag2 {
+  glm::mat4 invProj;
+};
+
 struct MVkQuadVertexAttribute {
   glm::vec4 pos;
   glm::vec2 texCoord;
