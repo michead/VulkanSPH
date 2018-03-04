@@ -35,6 +35,7 @@ VkVertexInputBindingDescription LayoutReflection::vertInputBindingDescFromResour
 VkVertexInputAttributeDescription LayoutReflection::vertInputAttrDescFromResource(spirv_cross::Resource resource, size_t offset) {
   VkFormat format = VK_FORMAT_UNDEFINED;
   switch (resource.type_id) {
+  case 10:
   case 15:
   case 21:
   case 24:
@@ -42,6 +43,7 @@ VkVertexInputAttributeDescription LayoutReflection::vertInputAttrDescFromResourc
     break;
   case 13:
   case 16:
+  case 22:
   case 30:
     format = VK_FORMAT_R32G32B32A32_SFLOAT;
     break;
@@ -66,6 +68,7 @@ void LayoutReflection::descSetLayoutFromBindings(std::vector<VkDescriptorSetLayo
 size_t LayoutReflection::sizeOfType(uint32_t typeId) {
   size_t width = 0;
   switch (typeId) {
+  case 10:
   case 15:
   case 21:
   case 24:
@@ -73,6 +76,7 @@ size_t LayoutReflection::sizeOfType(uint32_t typeId) {
     break;
   case 13:
   case 16:
+  case 22:
   case 30:
     width = sizeof(glm::vec4);
     break;
@@ -84,10 +88,20 @@ size_t LayoutReflection::sizeOfType(uint32_t typeId) {
   return width;
 }
 
+std::function<bool(const spirv_cross::Resource&, const spirv_cross::Resource&)>
+  LayoutReflection::stageInputComparator() {
+  return [&](spirv_cross::Resource a, spirv_cross::Resource b) {
+    uint32_t locA = glsl.get_decoration(a.id, spv::DecorationLocation);
+    uint32_t locB = glsl.get_decoration(b.id, spv::DecorationLocation);
+    return locA <= locB;
+  };
+}
+
 void LayoutReflection::extractUniformBufferDescSetLayout() {
   if (stageFlags & VK_SHADER_STAGE_VERTEX_BIT) {
     size_t offset = 0;
     std::map<uint32_t, std::vector<uint32_t>> bindingToTypesMap;
+    std::sort(resources.stage_inputs.begin(), resources.stage_inputs.end(), stageInputComparator());
     for (auto &resource : resources.stage_inputs) {
       logger->info("Extrapolating input attribute description {0}", resource.name);
       vertInputAttrDescs.push_back(vertInputAttrDescFromResource(resource, offset));

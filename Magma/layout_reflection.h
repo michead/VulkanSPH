@@ -22,6 +22,8 @@ private:
   VkVertexInputBindingDescription   vertInputBindingDescFromResource(uint32_t binding, uint32_t stride);
   VkVertexInputAttributeDescription vertInputAttrDescFromResource(spirv_cross::Resource resource, size_t offset);
   void                              descSetLayoutFromBindings(std::vector<VkDescriptorSetLayoutBinding> bindings);
+  
+  std::function<bool(const spirv_cross::Resource&, const spirv_cross::Resource&)> stageInputComparator();
 
   static size_t sizeOfType(uint32_t typeId);
 
